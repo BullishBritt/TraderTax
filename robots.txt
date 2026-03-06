@@ -1,11 +1,28 @@
 User-agent: *
 Allow: /
 
-# Disallow private pages
-Disallow: /consultation-submitted.html
+# AI Crawlers — welcome
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 5
 
 # Sitemap
 Sitemap: https://www.tradertax.net/sitemap.xml
 
-# Crawl delay for politeness
-Crawl-delay: 10
+# LLMs
+LLMs: https://www.tradertax.net/llms.txt

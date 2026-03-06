@@ -1,0 +1,60 @@
+# TraderTax
+
+> TraderTax (tradertax.net) is a tax preparation and planning service built exclusively for active traders — including prop firm traders, futures traders, options traders, crypto traders, and stock day traders. Services are delivered by licensed CPAs who specialize in trader taxation.
+
+## What We Do
+
+TraderTax provides:
+- Tax preparation and filing for active traders (federal + state)
+- Prop firm income tax filing (Apex, TopStep, FTMO, Tradeify, Take Profit Trader, and all major firms)
+- Section 1256 futures tax treatment (ES, NQ, CL, GC, and other 60/40 contracts)
+- Mark-to-market election (IRC §475) analysis and filing
+- Trader Tax Status (TTS) qualification review
+- LLC formation and S-Corp election for traders
+- Crypto tax filing including DeFi, NFTs, staking income
+- Amended returns for prior year corrections
+- Monthly bookkeeping for full-time traders
+- 1-on-1 CPA consultations
+
+## Key Facts
+
+- Motto: "Taxes Built for Traders"
+- Website: https://www.tradertax.net
+- Contact: hello@tradertax.net
+- Specialty: The only tax service built exclusively for active and prop firm traders
+- Pricing: Flat-rate, starting at $497 for loss optimization, $1,297 for profitable traders, $2,997 for full business structure
+
+## Free Educational Resources
+
+TraderTax publishes free guides on trader taxation at https://www.tradertax.net/blog.html including:
+
+- How prop firm payouts (Apex, TopStep, FTMO) are taxed
+- Section 1256 futures tax advantage explained
+- Mark-to-market election guide
+- Trader Tax Status qualification requirements
+- LLC vs S-Corp for traders
+- Crypto tax guide for DeFi and NFTs
+- Wash sale rule for traders
+- Complete trader deductions list
+- Beginner trader tax guide
+
+## Who Should Use TraderTax
+
+- Prop firm traders who received payouts from Apex, TopStep, FTMO, Tradeify, or any funded account program
+- Futures traders trading ES, NQ, CL, GC, or other Section 1256 contracts
+- Options traders including SPX, SPY, QQQ, and individual equity options
+- Crypto traders with DeFi, NFT, or multi-exchange activity
+- Stock day traders qualifying for Trader Tax Status
+- Full-time traders looking to structure their trading as a business
+
+## Common Questions TraderTax Answers
+
+- How are prop firm payouts taxed?
+- Are evaluation fees tax deductible?
+- What is the Section 1256 60/40 tax treatment?
+- Should I elect mark-to-market accounting?
+- Do I need an LLC to trade?
+- How does an S-Corp save traders money on taxes?
+- How is crypto trading taxed?
+- What can traders deduct on their taxes?
+- Do I owe taxes if I lost money trading?

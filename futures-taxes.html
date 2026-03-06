@@ -97,6 +97,72 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:36px 5
 footer p{font-size:0.72rem;color:var(--muted);font-family:var(--mono);}
 @media(max-width:768px){.nav-links{display:none;}.stats{grid-template-columns:1fr 1fr;}.rel-grid{grid-template-columns:1fr;}}
 </style>
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=MEASUREMENT_ID_HERE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'MEASUREMENT_ID_HERE');
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the Section 1256 tax advantage for futures traders?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Section 1256 contracts including ES, NQ, CL, and GC futures are automatically taxed at a 60/40 blended rate — 60% long-term capital gains and 40% short-term — regardless of how long you held the trade. This results in a maximum federal rate of approximately 26.8% instead of 37%."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are futures traders subject to wash sale rules?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. Section 1256 contracts are exempt from wash sale rules, which is a significant advantage over stock and options traders."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can futures traders carry back losses?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. Section 1256 losses can be carried back three years to offset prior gains, potentially generating tax refunds on taxes already paid."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Futures Trading Taxes and the Section 1256 Advantage",
+  "description": "How the 60/40 blended rate, wash sale exemption, and 3-year loss carryback save futures traders thousands every year.",
+  "author": {
+    "@type": "Organization",
+    "name": "TraderTax",
+    "url": "https://www.tradertax.net"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TraderTax",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.tradertax.net/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.tradertax.net/futures-taxes.html"
+  },
+  "dateModified": "2026-03-06"
+}
+</script>
 </head>
 <body>
 <nav>

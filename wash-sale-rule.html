@@ -97,6 +97,72 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:36px 5
 footer p{font-size:0.72rem;color:var(--muted);font-family:var(--mono);}
 @media(max-width:768px){.nav-links{display:none;}.stats{grid-template-columns:1fr 1fr;}.rel-grid{grid-template-columns:1fr;}}
 </style>
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=MEASUREMENT_ID_HERE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'MEASUREMENT_ID_HERE');
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the wash sale rule?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The wash sale rule disallows a tax deduction when you sell a security at a loss and repurchase the same or substantially identical security within 30 days before or after the sale."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the wash sale rule apply to crypto?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Currently crypto is not subject to wash sale rules under existing IRS guidance, though proposed legislation may change this. Stocks, ETFs, and options are subject to wash sale rules."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the wash sale rule apply across accounts?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. The wash sale rule applies across all your accounts including IRAs, spouse accounts, and brokerage accounts. Triggering a wash sale in an IRA is particularly harmful as the loss is permanently disallowed."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Wash Sale Rule for Traders",
+  "description": "How the wash sale rule silently eliminates deductions, cross-account traps, IRA disasters, and how to avoid costly mistakes.",
+  "author": {
+    "@type": "Organization",
+    "name": "TraderTax",
+    "url": "https://www.tradertax.net"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "TraderTax",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://www.tradertax.net/logo.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://www.tradertax.net/wash-sale-rule.html"
+  },
+  "dateModified": "2026-03-06"
+}
+</script>
 </head>
 <body>
 <nav>

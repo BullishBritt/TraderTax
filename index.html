@@ -423,6 +423,14 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
   .nav-links.mobile-open .nav-cta{margin-top:8px;text-align:center;padding:12px;border-radius:8px;}
 }
 </style>
+<!-- Google Analytics GA4 -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=MEASUREMENT_ID_HERE"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'MEASUREMENT_ID_HERE');
+</script>
 </head>
 <body>
 
@@ -1156,7 +1164,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
         <li><a href="about.html">About Us</a></li>
         <li><a href="pricing.html">Pricing</a></li>
         <li><a href="index.html#blog">Resources</a></li>
-        <li><a href="mailto:hello@tradertax.net">Careers</a></li>
+        <li><a href="/cdn-cgi/l/email-protection#bfd7dad3d3d0ffcbcddedbdacdcbdec791d1dacb">Careers</a></li>
         <li><a href="#">Contact</a></li>
       </ul>
     </div>
@@ -1171,7 +1179,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
   </div>
 </footer>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 document.addEventListener('DOMContentLoaded', function() {
 /* ───────────────────────────────────────
    HERO CHART
@@ -1689,10 +1697,4 @@ label{font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.7);font-family:
 
 @media(max-width:600px){
   .modal-box{border-radius:16px;}
-  .modal-header,.form-steps,.modal-footer{padding-left:22px;padding-right:22px;}
-  .field-row{grid-template-columns:1fr;}
-  .step-heading h3{font-size:1.2rem;}
-}
-</style>
-</body>
-</html>
+  .modal-header,.form-steps,.modal-fo
