@@ -436,20 +436,19 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
 
 <!-- NAV -->
 <nav>
-  <a href="index.html" class="logo">
-    <svg width="170" height="36" viewBox="0 0 170 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <!-- TW mark: T crossbar -->
-      <path d="M2 4 L26 4 L26 9 L17 9 L17 26 L11 26 L11 9 L2 9 Z" fill="#3dba7e"/>
-      <!-- W shape built into mark -->
-      <path d="M11 10 L14 22 L18 14 L22 22 L26 10" stroke="#3dba7e" stroke-width="4.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
-      <!-- Arrow cutting diagonally through TW mark -->
-      <line x1="10" y1="26" x2="27" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M23 3 L27 3 L27 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-      <!-- Wordmark: "Trader" white, "Tax" green -->
-      <text x="36" y="23" font-family="'Syne', sans-serif" font-weight="800" font-size="17" fill="#ffffff" letter-spacing="-0.3">Trader</text>
-      <text x="103" y="23" font-family="'Syne', sans-serif" font-weight="800" font-size="17" fill="#3dba7e" letter-spacing="-0.3">Tax</text>
+  <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- T crossbar -->
+      <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+      <!-- W legs -->
+      <path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" fill="none"/>
+      <!-- Arrow diagonal white -->
+      <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
+    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:-0.5px;line-height:1;"><span style="color:#ffffff;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
   </a>
+
   <ul class="nav-links">
     <li><a href="services.html">Services</a></li>
     <li><a href="pricing.html">Pricing</a></li>
