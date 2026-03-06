@@ -364,7 +364,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
     <li><a href="#blog">Blog</a></li>
     <li><a href="#why">Resources</a></li>
     <li><a href="#cta">Contact</a></li>
-    <li><a href="#cta" class="nav-cta">Get Started →</a></li>
+    <li><a href="#" class="nav-cta cta-trigger">Get Started →</a></li>
   </ul>
   <button class="hamburger" aria-label="Menu">
     <span></span><span></span><span></span>
@@ -407,8 +407,8 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
       <h1>The <span class="accent">#1 Trusted</span><br>Tax Experts for Traders</h1>
       <p class="hero-sub">Taxes, bookkeeping, and financial strategy for futures, forex, stocks, options, and prop firm traders. We speak trader — fluently.</p>
       <div class="hero-btns">
-        <a href="#cta" class="btn-primary">Get Started →</a>
-        <a href="#cta" class="btn-secondary">Free Tax Consultation</a>
+        <a href="#" class="btn-primary cta-trigger">Get Started →</a>
+        <a href="#" class="btn-secondary cta-trigger">Free Tax Consultation</a>
       </div>
       <div class="hero-stats">
         <div class="hero-stat">
@@ -483,7 +483,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
       <div class="service-card reveal" data-fx="pop" data-delay="4"><div class="service-num">04 — BOOKS</div><div class="service-icon">📚</div><div class="service-name">Bookkeeping for Traders</div><div class="service-desc">Month-to-month P&L tracking, brokerage reconciliation, and financial reporting tailored to active trading operations.</div><a href="#" class="service-link">Learn more →</a></div>
       <div class="service-card reveal" data-fx="pop" data-delay="5"><div class="service-num">05 — PLANNING</div><div class="service-icon">🗺️</div><div class="service-name">Tax Strategy & Planning</div><div class="service-desc">Proactive year-round tax planning — harvesting losses, timing income, and structuring trades to legally minimize your burden.</div><a href="#" class="service-link">Learn more →</a></div>
       <div class="service-card reveal" data-fx="pop" data-delay="6"><div class="service-num">06 — STRUCTURE</div><div class="service-icon">🏛️</div><div class="service-name">LLC & S-Corp Setup</div><div class="service-desc">We form and optimize your trading entity — LLC, S-Corp, or trading company — to maximize deductions and protect assets.</div><a href="#" class="service-link">Learn more →</a></div>
-      <div class="service-card reveal" data-fx="up" data-delay="1" style="grid-column:span 3;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;"><div><div class="service-num">07 — ADVISORY</div><div class="service-icon">🎓</div><div class="service-name">1-on-1 CPA Consultation</div><div class="service-desc" style="max-width:600px;">Direct access to a licensed CPA who trades. Get specific answers to your specific situation — not generic advice from someone who's never seen a brokerage statement.</div></div><a href="#cta" class="btn-primary" style="white-space:nowrap;">Book a CPA →</a></div></div>
+      <div class="service-card reveal" data-fx="up" data-delay="1" style="grid-column:span 3;"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:24px;"><div><div class="service-num">07 — ADVISORY</div><div class="service-icon">🎓</div><div class="service-name">1-on-1 CPA Consultation</div><div class="service-desc" style="max-width:600px;">Direct access to a licensed CPA who trades. Get specific answers to your specific situation — not generic advice from someone who's never seen a brokerage statement.</div></div><a href="#" class="btn-primary cta-trigger" style="white-space:nowrap;">Book a CPA →</a></div></div>
     </div>
   </div>
 </section>
@@ -596,7 +596,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
     <h2 class="reveal" data-fx="up" data-delay="1">Stop Guessing on Taxes.<br>Work With Experts Who <span style="color:var(--green)">Understand Traders.</span></h2>
     <p class="reveal" data-fx="up" data-delay="2">Every day without a tax strategy is money left on the table. Let's change that — starting with a free consultation.</p>
     <div class="cta-btns reveal" data-fx="up" data-delay="3">
-      <a href="#" class="btn-primary" style="font-size:1rem;padding:16px 36px;">Book a Free Consultation →</a>
+      <a href="#" class="btn-primary cta-trigger" style="font-size:1rem;padding:16px 36px;">Book a Free Consultation →</a>
       <a href="#" class="btn-secondary" style="font-size:1rem;padding:16px 36px;">View All Services</a>
     </div>
     <div class="trust-badges reveal" data-fx="up" data-delay="4">
@@ -694,7 +694,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
             </li>
           </ul>
         </div>
-        <a href="#" class="read-article-btn">Read Full Guide <span>→</span></a>
+        <a href="#" class="read-article-btn cta-trigger">Read Full Guide <span>→</span></a>
       </div>
     </div>
   </div>
@@ -808,7 +808,7 @@ footer{background:var(--black);border-top:1px solid var(--border);padding:60px 5
         <p>Browse 80+ in-depth guides, or skip straight to a free 30-minute consultation with a CPA who actually understands your trading setup.</p>
       </div>
       <div style="display:flex;flex-direction:column;gap:12px;flex-shrink:0;">
-        <a href="#" class="btn-primary">Book Free Consultation →</a>
+        <a href="#" class="btn-primary cta-trigger">Book Free Consultation →</a>
         <a href="#" class="btn-secondary" style="text-align:center;">Browse All Articles</a>
       </div>
     </div>
@@ -996,6 +996,325 @@ window.addEventListener('scroll', () => {
     nav.style.boxShadow = 'none';
   }
 }, { passive: true });
-</script>
+
+/* ───────────────────────────────────────
+   MODAL FORM
+─────────────────────────────────────── */
+function openModal() {
+  document.getElementById('consultModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  showStep(1);
+}
+function closeModal() {
+  document.getElementById('consultModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.cta-trigger').forEach(btn => {
+  btn.addEventListener('click', e => { e.preventDefault(); openModal(); });
+});
+document.getElementById('consultModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+let currentStep = 1;
+const totalSteps = 4;
+
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+  document.getElementById('step' + n).classList.add('active');
+  // Progress
+  const pct = ((n - 1) / (totalSteps - 1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('stepLabel').textContent = 'Step ' + n + ' of ' + totalSteps;
+  // Buttons
+  document.getElementById('btnBack').style.display = n === 1 ? 'none' : 'flex';
+  document.getElementById('btnNext').textContent = n === totalSteps ? 'Submit →' : 'Continue →';
+}
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (currentStep < totalSteps) {
+    showStep(currentStep + 1);
+  } else {
+    submitForm();
+  }
+});
+document.getElementById('btnBack').addEventListener('click', () => {
+  if (currentStep > 1) showStep(currentStep - 1);
+});
+
+// Toggle chips
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const group = chip.closest('.chip-group');
+    if (group.dataset.multi === 'true') {
+      chip.classList.toggle('selected');
+    } else {
+      group.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+    }
+  });
+});
+
+function submitForm() {
+  const btn = document.getElementById('btnNext');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  setTimeout(() => {
+    document.getElementById('formContent').style.display = 'none';
+    document.getElementById('formSuccess').style.display = 'flex';
+  }, 1200);
+}
+<!-- ═══════════════════════════════════════
+     CONSULTATION MODAL
+═══════════════════════════════════════ -->
+<div id="consultModal" class="modal-overlay">
+  <div class="modal-box">
+
+    <!-- Close -->
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <!-- Form Content -->
+    <div id="formContent">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="modal-logo"><div class="logo-mark" style="width:28px;height:28px;font-size:0.65rem;">TT</div> TraderTax</div>
+        <div class="modal-tagline">Free Consultation Request</div>
+        <div class="modal-progress">
+          <div class="progress-track"><div id="progressFill" class="modal-progress-fill"></div></div>
+          <span id="stepLabel" class="step-label">Step 1 of 4</span>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="form-steps">
+
+        <!-- STEP 1: Who are you -->
+        <div class="form-step active" id="step1">
+          <div class="step-heading">
+            <div class="step-eyebrow">01 — About You</div>
+            <h3>Let's start with the basics.</h3>
+          </div>
+          <div class="field-group">
+            <div class="field">
+              <label>Full Name</label>
+              <input type="text" placeholder="John Smith" class="form-input" />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label>Email Address</label>
+                <input type="email" placeholder="john@email.com" class="form-input" />
+              </div>
+              <div class="field">
+                <label>Phone Number</label>
+                <input type="tel" placeholder="(555) 000-0000" class="form-input" />
+              </div>
+            </div>
+            <div class="field">
+              <label>How did you hear about TraderTax?</label>
+              <div class="chip-group" data-multi="false">
+                <div class="chip">Oasis Trading Group</div>
+                <div class="chip">Google Search</div>
+                <div class="chip">Social Media</div>
+                <div class="chip">YouTube</div>
+                <div class="chip">Referred by a friend</div>
+                <div class="chip">Other</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: Trading profile -->
+        <div class="form-step" id="step2">
+          <div class="step-heading">
+            <div class="step-eyebrow">02 — Your Trading</div>
+            <h3>Tell us about how you trade.</h3>
+          </div>
+          <div class="field-group">
+            <div class="field">
+              <label>What type of trader are you? <span class="label-note">Select all that apply</span></label>
+              <div class="chip-group" data-multi="true">
+                <div class="chip">Futures</div>
+                <div class="chip">Forex</div>
+                <div class="chip">Stocks</div>
+                <div class="chip">Options</div>
+                <div class="chip">Prop Firm</div>
+                <div class="chip">Crypto</div>
+                <div class="chip">Day Trader</div>
+                <div class="chip">Long-Term Investor</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Which prop firm(s) do you trade with? <span class="label-note">Leave blank if none</span></label>
+              <input type="text" placeholder="e.g. Apex, TopStep, FTMO..." class="form-input" />
+            </div>
+            <div class="field">
+              <label>Are you currently profitable?</label>
+              <div class="chip-group" data-multi="false">
+                <div class="chip">Yes — consistently</div>
+                <div class="chip">Yes — inconsistently</div>
+                <div class="chip">Breakeven</div>
+                <div class="chip">Currently at a loss</div>
+                <div class="chip">Just getting started</div>
+              </div>
+            </div>
+            <div class="field">
+              <label>Approximate annual trading profit</label>
+              <div class="chip-group" data-multi="false">
+                <div class="chip">Under $25K</div>
+                <div class="chip">$25K – $50K</div>
+                <div class="chip">$50K – $100K</div>
+                <div class="chip">$100K – $250K</div>
+                <div class="chip">$250K – $500K</div>
+                <div class="chip">$500K+</div>
+                <div class="chip">Prefer not to say</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: Services -->
+        <div class="form-step" id="step3">
+          <div class="step-heading">
+            <div class="step-eyebrow">03 — Services</div>
+            <h3>What do you need help with?</h3>
+          </div>
+          <div class="field-group">
+            <div class="field">
+              <label>Select all services you're interested in</label>
+              <div class="chip-group" data-multi="true">
+                <div class="chip">Tax Preparation & Filing</div>
+                <div class="chip">Tax Strategy & Planning</div>
+                <div class="chip">Mark-to-Market Election</div>
+                <div class="chip">Prop Firm Tax Structuring</div>
+                <div class="chip">Bookkeeping</div>
+                <div class="chip">LLC Formation</div>
+                <div class="chip">S-Corp Setup & Election</div>
+                <div class="chip">Just a consultation</div>
+                <div class="chip">Not sure — need guidance</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 4: Final -->
+        <div class="form-step" id="step4">
+          <div class="step-heading">
+            <div class="step-eyebrow">04 — Final Details</div>
+            <h3>Almost done. One last thing.</h3>
+          </div>
+          <div class="field-group">
+            <div class="field">
+              <label>What is your biggest tax concern right now?</label>
+              <textarea class="form-input form-textarea" placeholder="e.g. I have no idea how to file my Apex payouts and I owe a lot this year..."></textarea>
+            </div>
+            <div class="field">
+              <label>Preferred contact method</label>
+              <div class="chip-group" data-multi="false">
+                <div class="chip">Email</div>
+                <div class="chip">Phone Call</div>
+                <div class="chip">Text Message</div>
+                <div class="chip">Any</div>
+              </div>
+            </div>
+            <div class="confirm-box">
+              <div class="confirm-icon">🔒</div>
+              <div class="confirm-text">Your information is 100% private and never shared. A TraderTax specialist will reach out within 24 hours.</div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /form-steps -->
+
+      <!-- Footer Nav -->
+      <div class="modal-footer">
+        <button id="btnBack" class="btn-back" style="display:none;">← Back</button>
+        <button id="btnNext" class="btn-next">Continue →</button>
+      </div>
+
+    </div><!-- /formContent -->
+
+    <!-- Success State -->
+    <div id="formSuccess" class="form-success" style="display:none;">
+      <div class="success-icon">✓</div>
+      <h3>You're on the list.</h3>
+      <p>A TraderTax specialist will reach out within 24 hours to schedule your free consultation.</p>
+      <div class="success-detail">Check your email for a confirmation.</div>
+      <button class="btn-next" onclick="closeModal()" style="margin-top:32px;">Close</button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(12px);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s ease;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-overlay.open .modal-box{transform:translateY(0) scale(1);opacity:1;}
+.modal-box{background:#0a1628;border:1px solid rgba(59,130,246,0.2);border-radius:24px;width:100%;max-width:640px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(40px) scale(0.97);opacity:0;transition:transform 0.4s cubic-bezier(0.23,1,0.32,1),opacity 0.4s ease;box-shadow:0 40px 120px rgba(0,0,0,0.7),0 0 0 1px rgba(59,130,246,0.08);}
+.modal-close{position:absolute;top:20px;right:20px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;z-index:10;}
+.modal-close:hover{background:rgba(255,255,255,0.12);color:white;}
+
+/* MODAL HEADER */
+.modal-header{padding:32px 36px 24px;border-bottom:1px solid rgba(255,255,255,0.06);}
+.modal-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:white;display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.modal-tagline{font-size:0.78rem;color:rgba(255,255,255,0.4);font-family:'JetBrains Mono',monospace;margin-bottom:20px;}
+.modal-progress{display:flex;align-items:center;gap:14px;}
+.progress-track{flex:1;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden;}
+.modal-progress-fill{height:100%;background:linear-gradient(90deg,#3b82f6,#60a5fa);border-radius:2px;width:0;transition:width 0.5s cubic-bezier(0.23,1,0.32,1);}
+.step-label{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:rgba(255,255,255,0.35);white-space:nowrap;}
+
+/* STEPS */
+.form-steps{padding:32px 36px;}
+.form-step{display:none;}
+.form-step.active{display:block;animation:stepIn 0.4s cubic-bezier(0.23,1,0.32,1) both;}
+@keyframes stepIn{from{opacity:0;transform:translateX(24px);}to{opacity:1;transform:none;}}
+.step-eyebrow{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:#3b82f6;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;}
+.step-heading h3{font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800;color:white;margin-bottom:28px;letter-spacing:-0.5px;}
+.field-group{display:flex;flex-direction:column;gap:22px;}
+.field{display:flex;flex-direction:column;gap:10px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+label{font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.7);font-family:'DM Sans',sans-serif;}
+.label-note{font-weight:400;color:rgba(255,255,255,0.35);font-size:0.75rem;margin-left:6px;}
+.form-input{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px 16px;color:white;font-size:0.88rem;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s,background 0.2s;width:100%;}
+.form-input:focus{border-color:rgba(59,130,246,0.5);background:rgba(59,130,246,0.06);}
+.form-input::placeholder{color:rgba(255,255,255,0.25);}
+.form-textarea{min-height:100px;resize:vertical;}
+
+/* CHIPS */
+.chip-group{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:100px;padding:8px 16px;font-size:0.8rem;color:rgba(255,255,255,0.6);cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif;font-weight:500;user-select:none;}
+.chip:hover{border-color:rgba(59,130,246,0.4);color:white;background:rgba(59,130,246,0.08);}
+.chip.selected{background:rgba(59,130,246,0.15);border-color:rgba(59,130,246,0.5);color:white;}
+
+/* CONFIRM BOX */
+.confirm-box{display:flex;align-items:flex-start;gap:12px;background:rgba(59,130,246,0.06);border:1px solid rgba(59,130,246,0.15);border-radius:12px;padding:16px;}
+.confirm-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+.confirm-text{font-size:0.82rem;color:rgba(255,255,255,0.5);line-height:1.6;}
+
+/* MODAL FOOTER */
+.modal-footer{padding:20px 36px 32px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid rgba(255,255,255,0.06);}
+.btn-next{background:#3b82f6;color:white;border:none;padding:14px 32px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.9rem;cursor:pointer;transition:transform 0.2s,box-shadow 0.2s;box-shadow:0 0 30px rgba(59,130,246,0.3);}
+.btn-next:hover{transform:translateY(-2px);box-shadow:0 0 50px rgba(59,130,246,0.5);}
+.btn-next:disabled{opacity:0.6;cursor:not-allowed;transform:none;}
+.btn-back{background:transparent;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.1);padding:14px 24px;border-radius:10px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:0.88rem;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px;}
+.btn-back:hover{color:white;border-color:rgba(255,255,255,0.25);}
+
+/* SUCCESS */
+.form-success{flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:64px 48px;}
+.success-icon{width:72px;height:72px;background:rgba(59,130,246,0.12);border:2px solid rgba(59,130,246,0.3);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 24px;color:#3b82f6;}
+.form-success h3{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:white;margin-bottom:12px;}
+.form-success p{font-size:0.95rem;color:rgba(255,255,255,0.55);line-height:1.7;max-width:380px;}
+.success-detail{font-family:'JetBrains Mono',monospace;font-size:0.72rem;color:rgba(59,130,246,0.7);margin-top:16px;}
+
+@media(max-width:600px){
+  .modal-box{border-radius:16px;}
+  .modal-header,.form-steps,.modal-footer{padding-left:22px;padding-right:22px;}
+  .field-row{grid-template-columns:1fr;}
+  .step-heading h3{font-size:1.2rem;}
+}
+</style>
 </body>
 </html>
