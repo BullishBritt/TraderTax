@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+
+# Disallow private pages
+Disallow: /consultation-submitted.html
+
+# Sitemap
+Sitemap: https://www.tradertax.net/sitemap.xml
+
+# Crawl delay for politeness
+Crawl-delay: 10

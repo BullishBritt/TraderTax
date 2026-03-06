@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mark-to-Market Accounting (IRC §475) Explained for Active Traders | TraderTax</title>
+<!-- SEO inserted -->
+
+<meta name="description" content="The mark-to-market election for active traders. Eliminate the $3,000 loss cap, avoid wash sales, and convert losses to ordinary deductions.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.tradertax.net/mark-to-market.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.tradertax.net/mark-to-market.html">
+<meta property="og:title" content="Mark-to-Market Election (IRC §475) Explained | TraderTax">
+<meta property="og:description" content="The mark-to-market election for active traders. Eliminate the $3,000 loss cap, avoid wash sales, and convert losses to ordinary deductions.">
+<meta property="og:site_name" content="TraderTax">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Mark-to-Market Election (IRC §475) Explained | TraderTax">
+<meta name="twitter:description" content="The mark-to-market election for active traders. Eliminate the $3,000 loss cap, avoid wash sales, and convert losses to ordinary deductions.">
+<!-- end SEO -->
+<meta name="description" content="What is the mark-to-market election? Who qualifies, how to file, deadlines, and how MTM can eliminate the $3,000 capital loss limit for active traders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#050508;--navy:#080d1a;--surface:#0d1526;--surface2:#111d33;--border:rgba(255,255,255,0.07);--blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);--blue-glow:rgba(59,130,246,0.3);--green:#00e87a;--gold:#f59e0b;--white:#fff;--muted:rgba(255,255,255,0.45);--text:rgba(255,255,255,0.85);--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
+h1,h2,h3,h4{font-family:'Syne',sans-serif;color:var(--white);line-height:1.15;}
+a{color:var(--blue);text-decoration:none;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 5%;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,5,8,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-family:var(--mono);font-weight:500;color:#fff;}
+.nav-links{display:flex;align-items:center;gap:24px;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{background:var(--blue)!important;color:#fff!important;padding:8px 18px;border-radius:8px;font-weight:600!important;}
+.article-page{padding-top:68px;}
+.article-hero{background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(59,130,246,0.1) 0%,transparent 60%),var(--navy);padding:72px 5% 60px;border-bottom:1px solid var(--border);}
+.article-hero-inner{max-width:820px;margin:0 auto;}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:20px;}
+.breadcrumb a{color:var(--muted);transition:color 0.2s;}
+.breadcrumb a:hover{color:var(--white);}
+.article-tag{display:inline-flex;align-items:center;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);padding:5px 14px;border-radius:100px;font-size:0.72rem;font-family:var(--mono);color:var(--blue);margin-bottom:20px;}
+.article-hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:20px;}
+.article-meta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.meta-item{font-family:var(--mono);font-size:0.72rem;color:var(--muted);}
+.meta-hl{color:var(--blue);}
+.article-body{max-width:820px;margin:0 auto;padding:60px 5% 100px;}
+.article-body h2{font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;margin:52px 0 16px;padding-top:16px;border-top:1px solid var(--border);}
+.article-body h3{font-size:1.1rem;font-weight:700;margin:32px 0 12px;}
+.article-body p{font-size:0.95rem;color:var(--text);line-height:1.85;margin-bottom:18px;}
+.article-body ul,.article-body ol{margin:16px 0 24px;padding-left:0;list-style:none;}
+.article-body li{font-size:0.92rem;color:var(--text);line-height:1.75;padding:9px 0 9px 28px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04);}
+.article-body ul li::before{content:'→';position:absolute;left:0;color:var(--blue);font-size:0.8rem;}
+.article-body ol{counter-reset:ol;}
+.article-body ol li{counter-increment:ol;}
+.article-body ol li::before{content:counter(ol,decimal-leading-zero);position:absolute;left:0;color:var(--blue);font-family:var(--mono);font-size:0.7rem;top:11px;}
+.callout{border-radius:14px;padding:22px 26px;margin:28px 0;}
+.callout-blue{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);}
+.callout-green{background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.15);}
+.callout-gold{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);}
+.callout-red{background:rgba(255,68,68,0.07);border:1px solid rgba(255,68,68,0.18);}
+.clabel{font-family:var(--mono);font-size:0.67rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-weight:500;}
+.callout-blue .clabel{color:var(--blue);}
+.callout-green .clabel{color:var(--green);}
+.callout-gold .clabel{color:var(--gold);}
+.callout-red .clabel{color:#ff4444;}
+.callout p{margin-bottom:0;font-size:0.88rem;line-height:1.75;}
+.tbl{width:100%;border-collapse:collapse;margin:24px 0;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.tbl th{background:var(--surface2);font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;color:var(--white);padding:14px 18px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{background:var(--surface);font-size:0.85rem;color:var(--text);padding:13px 18px;border-bottom:1px solid var(--border);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl td.g{color:var(--green);}
+.tbl td.r{color:#ff4444;}
+.tbl td.b{color:var(--blue);}
+.tbl td.lbl{font-weight:600;color:var(--white);font-family:'Syne',sans-serif;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;}
+.stat-n{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--blue);}
+.stat-l{font-size:0.75rem;color:var(--muted);margin-top:4px;font-family:var(--mono);}
+.acta{background:linear-gradient(135deg,var(--surface) 0%,#0a0e1a 100%);border:1px solid rgba(59,130,246,0.2);border-radius:20px;padding:48px;text-align:center;margin:60px 0 0;}
+.acta h3{font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:12px;}
+.acta p{font-size:0.92rem;color:var(--muted);max-width:480px;margin:0 auto 32px;line-height:1.7;}
+.btn{background:var(--blue);color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:0.95rem;text-decoration:none;display:inline-block;box-shadow:0 0 30px var(--blue-glow);transition:transform 0.2s;}
+.btn:hover{transform:translateY(-2px);color:#fff;}
+.related{margin-top:64px;padding-top:40px;border-top:1px solid var(--border);}
+.related h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px;}
+.rel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.rel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-decoration:none;transition:border-color 0.2s,transform 0.2s;display:block;}
+.rel-card:hover{border-color:rgba(59,130,246,0.3);transform:translateY(-3px);}
+.rel-tag{font-family:var(--mono);font-size:0.62rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;}
+.rel-card h4{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;color:var(--white);line-height:1.4;}
+footer{background:var(--black);border-top:1px solid var(--border);padding:36px 5%;text-align:center;}
+.flogo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--white);display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;text-decoration:none;}
+footer p{font-size:0.72rem;color:var(--muted);font-family:var(--mono);}
+@media(max-width:768px){.nav-links{display:none;}.stats{grid-template-columns:1fr 1fr;}.rel-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo"><div class="logo-mark">TT</div>TraderTax</a>
+  <ul class="nav-links">
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#blog">Blog</a></li>
+    <li><a href="index.html#cta">Contact</a></li>
+    <li><a href="index.html#cta" class="nav-cta">Get Started →</a></li>
+  </ul>
+</nav>
+<div class="article-page">
+  <div class="article-hero">
+    <div class="article-hero-inner">
+      <div class="breadcrumb"><a href="index.html">Home</a> › <a href="index.html#blog">Blog</a> › <span style="color:var(--blue)">Tax Strategy</span></div>
+      <div class="article-tag">⚖️ TAX STRATEGY</div>
+      <h1>Mark-to-Market Accounting (IRC §475) Explained for Active Traders</h1>
+      <div class="article-meta">
+        <span class="meta-item">TraderTax Editorial</span>
+        <span class="meta-item meta-hl">13 min read</span>
+        <span class="meta-item">Updated 2026</span>
+      </div>
+    </div>
+  </div>
+  <div class="article-body">
+
+<p>Mark-to-market (MTM) is the single most powerful tax election available to active traders. Most traders have never heard of it. Those who use it — and qualify correctly — can eliminate the $3,000 capital loss limit, avoid wash sale rules, and convert trading losses into full ordinary deductions.</p>
+<p>This is not a loophole. It's a legitimate IRS-sanctioned election under Internal Revenue Code Section 475(f), and it's been available to qualifying traders for decades.</p>
+
+<div class="callout callout-blue">
+<div class="clabel">What MTM Does</div>
+<p>Under MTM, you treat all open trading positions as if they were sold on December 31 at fair market value. All gains and losses become ordinary income/loss — not capital. This eliminates the $3,000 annual cap on capital loss deductions and removes the wash sale rule entirely.</p>
+</div>
+
+<h2>How Mark-to-Market Works</h2>
+<p>Under standard capital gains rules, you recognize a gain or loss when you close a position. Under MTM, you recognize gains and losses on December 31 of each year — whether you've closed the position or not.</p>
+<p>The practical effect:</p>
+<ul>
+<li>All gains are ordinary income (taxed at your marginal rate — can be higher than long-term capital gains rate)</li>
+<li>All losses are ordinary losses — fully deductible with no $3,000 cap</li>
+<li>Wash sale rules no longer apply — you can trade the same securities without worrying about disallowed losses</li>
+<li>Open positions are "marked" to their December 31 value as if sold</li>
+</ul>
+
+<h2>Who Benefits from the MTM Election?</h2>
+<table class="tbl">
+<thead><tr><th>Trader Type</th><th>MTM Benefit</th><th>Worth Electing?</th></tr></thead>
+<tbody>
+<tr><td class="lbl">Trader with large losses</td><td>Full deduction vs $3K cap</td><td class="g">Almost always yes</td></tr>
+<tr><td class="lbl">Trader with wash sale issues</td><td>Wash sales eliminated</td><td class="g">Yes</td></tr>
+<tr><td class="lbl">Consistently profitable trader</td><td>Loses long-term cap gains rate</td><td class="r">Usually no — short-term only anyway</td></tr>
+<tr><td class="lbl">Mixed long/short term portfolio</td><td>Loses LTCG rate on longs</td><td class="r">Likely not — analyze carefully</td></tr>
+<tr><td class="lbl">High-frequency day trader</td><td>Simplifies — all short-term anyway</td><td class="g">Often yes</td></tr>
+<tr><td class="lbl">Futures trader (§1256)</td><td>§1256 is already advantaged</td><td class="g">Can still help with losses</td></tr>
+</tbody>
+</table>
+
+<div class="callout callout-gold">
+<div class="clabel">⚠️ Important Consideration</div>
+<p>MTM converts all gains to ordinary income. If you hold any long-term positions that would otherwise qualify for the 0%, 15%, or 20% long-term capital gains rate, electing MTM means those gains are taxed at ordinary income rates instead. Analyze your full trading portfolio before electing.</p>
+</div>
+
+<h2>Who Qualifies for the MTM Election?</h2>
+<p>You must qualify for Trader Tax Status (TTS) before you can make the MTM election. The IRS requires you to trade as a business — with regularity, frequency, and continuity throughout the year.</p>
+<p>Generally, this means:</p>
+<ul>
+<li>Substantial trading volume — courts have generally looked for 720+ trades per year</li>
+<li>Holding periods of days, hours, or minutes — not months or years</li>
+<li>Consistent trading throughout the year, not just in a few weeks</li>
+<li>Trading as your primary activity or a significant business activity</li>
+<li>Profit motive from short-term price movements, not dividends</li>
+</ul>
+
+<h2>The MTM Election Deadline — The Most Critical Rule</h2>
+<p>This is where most traders miss out: the MTM election must be filed by the due date (including extensions) of the prior year's tax return.</p>
+<p>To have MTM in effect for the 2026 tax year, you must file the election by:</p>
+<ul>
+<li>April 15, 2026 (regular deadline) — attached to your 2025 tax return</li>
+<li>October 15, 2026 — if you file a 2025 extension</li>
+</ul>
+<p>If you miss this window, you cannot elect MTM for 2026. You must wait until 2027. This is one of the most expensive missed deadlines in trader taxation.</p>
+
+<div class="callout callout-red">
+<div class="clabel">⚠️ Don't Miss This</div>
+<p>The MTM election is not made on your current year return. It's made on your prior year return (or extension). Many traders discover MTM in December after a bad year — and learn they've already missed the deadline for that tax year. Contact a CPA now, not in April.</p>
+</div>
+
+<h2>How to File the MTM Election</h2>
+<ol>
+<li>Confirm you qualify for Trader Tax Status — document your trading frequency and volume</li>
+<li>Prepare a written statement that includes: your name, TIN, the tax year the election is effective for, and that you're making the §475(f) election</li>
+<li>Attach the statement to your prior year tax return (or amended return if within the extension deadline)</li>
+<li>Keep a copy for your records — the IRS may challenge TTS status in an audit</li>
+</ol>
+
+<h2>What Happens After You Elect MTM?</h2>
+<p>Once elected, MTM is in effect for all future years unless you request IRS permission to revoke it (which requires a private letter ruling — expensive and time-consuming). You're committing to this accounting method going forward, so the election should be made thoughtfully.</p>
+
+<h3>Accounting Under MTM</h3>
+<p>Each December 31, you "mark" all open positions to their fair market value. Any unrealized gain or loss is recognized as if the position was sold. When you close the position in the following year, only the difference from the December 31 value (not the original cost basis) is recognized.</p>
+<p>This adds complexity to your bookkeeping. You'll need detailed records of all open positions at year-end and their market values. This is another reason a specialized CPA is essential for MTM traders.</p>
+
+<h2>MTM and Net Operating Losses (NOL)</h2>
+<p>One of the most powerful benefits of MTM: if your trading losses exceed your total income in a year, you have a Net Operating Loss (NOL). NOLs can be carried forward to offset income in future profitable years — potentially deferring taxes for years or even decades.</p>
+<p>Example: MTM trader loses $80,000 in 2026. Total income from all sources is $60,000. The trader has a $20,000 NOL that carries forward. In 2027, the trader earns $100,000 in trading profit — but the $20,000 NOL reduces taxable income to $80,000.</p>
+
+    <div class="acta">
+      <h3>Stop Guessing on Trader Taxes</h3>
+      <p>TraderTax connects active traders with specialized CPAs who understand exactly how your trading income is taxed — and how to legally minimize what you owe.</p>
+      <a href="index.html#cta" class="btn">Book a Free Consultation →</a>
+    </div>
+    
+    <div class="related">
+      <h3>Related Articles</h3>
+      <div class="rel-grid">
+        <a href="losing-trader-taxes.html" class="rel-card"><div class="rel-tag">Losing Traders</div><h4>Trading Taxes — Win or Lose: The Complete Guide</h4></a>
+        <a href="wash-sale-rule.html" class="rel-card"><div class="rel-tag">Tax Mistakes</div><h4>The Wash Sale Mistake That Costs Traders Thousands</h4></a>
+        <a href="llc-vs-scorp.html" class="rel-card"><div class="rel-tag">Structure</div><h4>LLC vs S-Corp for Traders: Which Saves More?</h4></a>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <a href="index.html" class="flogo"><div class="logo-mark">TT</div>TraderTax</a>
+  <p>© 2026 TraderTax LLC · The #1 trusted tax resource for active traders · tradertax.net</p>
+</footer>
+</body>
+</html>

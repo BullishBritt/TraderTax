@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Wash Sale Mistake That Costs Traders Thousands | TraderTax</title>
+<!-- SEO inserted -->
+
+<meta name="description" content="The wash sale rule explained for active traders. How it works, cross-account traps, and how to legally avoid losing your deductions.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.tradertax.net/wash-sale-rule.html">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.tradertax.net/wash-sale-rule.html">
+<meta property="og:title" content="The Wash Sale Rule: What Traders Must Know | TraderTax">
+<meta property="og:description" content="The wash sale rule explained for active traders. How it works, cross-account traps, and how to legally avoid losing your deductions.">
+<meta property="og:site_name" content="TraderTax">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="The Wash Sale Rule: What Traders Must Know | TraderTax">
+<meta name="twitter:description" content="The wash sale rule explained for active traders. How it works, cross-account traps, and how to legally avoid losing your deductions.">
+<!-- end SEO -->
+<meta name="description" content="The wash sale rule explained for active traders. How it works, what triggers it, how it silently eliminates loss deductions, and how to avoid it legally.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--black:#050508;--navy:#080d1a;--surface:#0d1526;--surface2:#111d33;--border:rgba(255,255,255,0.07);--blue:#3b82f6;--blue-dim:rgba(59,130,246,0.12);--blue-glow:rgba(59,130,246,0.3);--green:#00e87a;--gold:#f59e0b;--white:#fff;--muted:rgba(255,255,255,0.45);--text:rgba(255,255,255,0.85);--mono:'JetBrains Mono',monospace;}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--black);color:var(--text);font-family:'DM Sans',sans-serif;font-size:16px;line-height:1.6;overflow-x:hidden;}
+h1,h2,h3,h4{font-family:'Syne',sans-serif;color:var(--white);line-height:1.15;}
+a{color:var(--blue);text-decoration:none;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:0 5%;height:68px;display:flex;align-items:center;justify-content:space-between;background:rgba(5,5,8,0.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--white);display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-mark{width:30px;height:30px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-family:var(--mono);font-weight:500;color:#fff;}
+.nav-links{display:flex;align-items:center;gap:24px;list-style:none;}
+.nav-links a{color:var(--muted);text-decoration:none;font-size:0.875rem;font-weight:500;transition:color 0.2s;}
+.nav-links a:hover{color:var(--white);}
+.nav-cta{background:var(--blue)!important;color:#fff!important;padding:8px 18px;border-radius:8px;font-weight:600!important;}
+.article-page{padding-top:68px;}
+.article-hero{background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(59,130,246,0.1) 0%,transparent 60%),var(--navy);padding:72px 5% 60px;border-bottom:1px solid var(--border);}
+.article-hero-inner{max-width:820px;margin:0 auto;}
+.breadcrumb{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:20px;}
+.breadcrumb a{color:var(--muted);transition:color 0.2s;}
+.breadcrumb a:hover{color:var(--white);}
+.article-tag{display:inline-flex;align-items:center;background:var(--blue-dim);border:1px solid rgba(59,130,246,0.2);padding:5px 14px;border-radius:100px;font-size:0.72rem;font-family:var(--mono);color:var(--blue);margin-bottom:20px;}
+.article-hero h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:800;letter-spacing:-1px;margin-bottom:20px;}
+.article-meta{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.meta-item{font-family:var(--mono);font-size:0.72rem;color:var(--muted);}
+.meta-hl{color:var(--blue);}
+.article-body{max-width:820px;margin:0 auto;padding:60px 5% 100px;}
+.article-body h2{font-size:1.5rem;font-weight:800;letter-spacing:-0.5px;margin:52px 0 16px;padding-top:16px;border-top:1px solid var(--border);}
+.article-body h3{font-size:1.1rem;font-weight:700;margin:32px 0 12px;}
+.article-body p{font-size:0.95rem;color:var(--text);line-height:1.85;margin-bottom:18px;}
+.article-body ul,.article-body ol{margin:16px 0 24px;padding-left:0;list-style:none;}
+.article-body li{font-size:0.92rem;color:var(--text);line-height:1.75;padding:9px 0 9px 28px;position:relative;border-bottom:1px solid rgba(255,255,255,0.04);}
+.article-body ul li::before{content:'→';position:absolute;left:0;color:var(--blue);font-size:0.8rem;}
+.article-body ol{counter-reset:ol;}
+.article-body ol li{counter-increment:ol;}
+.article-body ol li::before{content:counter(ol,decimal-leading-zero);position:absolute;left:0;color:var(--blue);font-family:var(--mono);font-size:0.7rem;top:11px;}
+.callout{border-radius:14px;padding:22px 26px;margin:28px 0;}
+.callout-blue{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);}
+.callout-green{background:rgba(0,232,122,0.06);border:1px solid rgba(0,232,122,0.15);}
+.callout-gold{background:rgba(245,158,11,0.07);border:1px solid rgba(245,158,11,0.2);}
+.callout-red{background:rgba(255,68,68,0.07);border:1px solid rgba(255,68,68,0.18);}
+.clabel{font-family:var(--mono);font-size:0.67rem;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-weight:500;}
+.callout-blue .clabel{color:var(--blue);}
+.callout-green .clabel{color:var(--green);}
+.callout-gold .clabel{color:var(--gold);}
+.callout-red .clabel{color:#ff4444;}
+.callout p{margin-bottom:0;font-size:0.88rem;line-height:1.75;}
+.tbl{width:100%;border-collapse:collapse;margin:24px 0;border-radius:14px;overflow:hidden;border:1px solid var(--border);}
+.tbl th{background:var(--surface2);font-family:'Syne',sans-serif;font-size:0.8rem;font-weight:700;color:var(--white);padding:14px 18px;text-align:left;border-bottom:1px solid var(--border);}
+.tbl td{background:var(--surface);font-size:0.85rem;color:var(--text);padding:13px 18px;border-bottom:1px solid var(--border);}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl td.g{color:var(--green);}
+.tbl td.r{color:#ff4444;}
+.tbl td.b{color:var(--blue);}
+.tbl td.lbl{font-weight:600;color:var(--white);font-family:'Syne',sans-serif;}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:28px 0;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;text-align:center;}
+.stat-n{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;color:var(--blue);}
+.stat-l{font-size:0.75rem;color:var(--muted);margin-top:4px;font-family:var(--mono);}
+.acta{background:linear-gradient(135deg,var(--surface) 0%,#0a0e1a 100%);border:1px solid rgba(59,130,246,0.2);border-radius:20px;padding:48px;text-align:center;margin:60px 0 0;}
+.acta h3{font-size:1.6rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:12px;}
+.acta p{font-size:0.92rem;color:var(--muted);max-width:480px;margin:0 auto 32px;line-height:1.7;}
+.btn{background:var(--blue);color:#fff;padding:14px 28px;border-radius:10px;font-weight:700;font-size:0.95rem;text-decoration:none;display:inline-block;box-shadow:0 0 30px var(--blue-glow);transition:transform 0.2s;}
+.btn:hover{transform:translateY(-2px);color:#fff;}
+.related{margin-top:64px;padding-top:40px;border-top:1px solid var(--border);}
+.related h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px;}
+.rel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.rel-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;text-decoration:none;transition:border-color 0.2s,transform 0.2s;display:block;}
+.rel-card:hover{border-color:rgba(59,130,246,0.3);transform:translateY(-3px);}
+.rel-tag{font-family:var(--mono);font-size:0.62rem;color:var(--blue);letter-spacing:1px;text-transform:uppercase;margin-bottom:7px;}
+.rel-card h4{font-family:'Syne',sans-serif;font-size:0.85rem;font-weight:700;color:var(--white);line-height:1.4;}
+footer{background:var(--black);border-top:1px solid var(--border);padding:36px 5%;text-align:center;}
+.flogo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--white);display:inline-flex;align-items:center;gap:8px;margin-bottom:10px;text-decoration:none;}
+footer p{font-size:0.72rem;color:var(--muted);font-family:var(--mono);}
+@media(max-width:768px){.nav-links{display:none;}.stats{grid-template-columns:1fr 1fr;}.rel-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="logo"><div class="logo-mark">TT</div>TraderTax</a>
+  <ul class="nav-links">
+    <li><a href="index.html#services">Services</a></li>
+    <li><a href="index.html#blog">Blog</a></li>
+    <li><a href="index.html#cta">Contact</a></li>
+    <li><a href="index.html#cta" class="nav-cta">Get Started →</a></li>
+  </ul>
+</nav>
+<div class="article-page">
+  <div class="article-hero">
+    <div class="article-hero-inner">
+      <div class="breadcrumb"><a href="index.html">Home</a> › <a href="index.html#blog">Blog</a> › <span style="color:var(--blue)">Tax Mistakes</span></div>
+      <div class="article-tag">⚠️ TAX MISTAKES</div>
+      <h1>The Wash Sale Mistake That Costs Traders Thousands</h1>
+      <div class="article-meta">
+        <span class="meta-item">TraderTax Editorial</span>
+        <span class="meta-item meta-hl">7 min read</span>
+        <span class="meta-item">Updated 2026</span>
+      </div>
+    </div>
+  </div>
+  <div class="article-body">
+
+<p>The wash sale rule is one of the most misunderstood, most violated, and most expensive rules in trader taxation. It operates silently — disallowing loss deductions without any obvious warning — and by the time most traders discover it, they've already lost thousands in deductions they can never recover.</p>
+
+<h2>What Is the Wash Sale Rule?</h2>
+<p>The wash sale rule (IRC §1091) disallows a loss deduction when you sell a security at a loss and then purchase the same or "substantially identical" security within the 30-day window before or after the sale.</p>
+<p>The 30-day window is a 61-day total window: 30 days before the sale, the day of the sale, and 30 days after.</p>
+
+<div class="callout callout-red">
+<div class="clabel">Example</div>
+<p>You buy 100 shares of SPY on January 1. SPY drops and you sell at a $2,000 loss on February 15. On March 1, you buy SPY again. The February 15 loss is disallowed — it's a wash sale. You cannot deduct that $2,000 loss.</p>
+</div>
+
+<h2>What Triggers the Wash Sale Rule?</h2>
+<ul>
+<li>Selling at a loss and rebuying the same stock within 30 days</li>
+<li>Selling at a loss and buying an option on the same stock within 30 days</li>
+<li>Selling at a loss and having a spouse's account buy the same stock</li>
+<li>Selling at a loss in a taxable account and buying the same security in an IRA</li>
+<li>Selling at a loss in a taxable account and buying a substantially identical ETF</li>
+</ul>
+
+<h2>The Cross-Account Trap</h2>
+<p>This is where active traders get destroyed. Wash sale rules apply across ALL your accounts — including IRAs, 401(k)s, and your spouse's accounts.</p>
+<p>Example: You sell QQQ at a loss in your regular brokerage account. Two weeks later, you buy QQQ in your Roth IRA. That's a wash sale — but the loss is permanently disallowed because it occurred in a retirement account that doesn't recognize gains and losses the same way.</p>
+
+<div class="callout callout-gold">
+<div class="clabel">⚠️ The Permanent Loss Trap</div>
+<p>When a wash sale occurs because of a purchase in an IRA, the disallowed loss is permanent — it doesn't get added to your cost basis and can never be recovered. This is the most expensive wash sale scenario for active traders.</p>
+</div>
+
+<h2>The "Substantially Identical" Problem</h2>
+<p>You can't just sell one ETF and buy a "similar" one to avoid wash sales. The IRS hasn't fully defined "substantially identical" for ETFs, but selling SPY and buying VOO (both S&P 500 ETFs) is risky — they track the same index. However, selling SPY and buying VTI (total market) is generally considered safe.</p>
+
+<h2>How the Wash Sale Cost Basis Adjustment Works</h2>
+<p>When a wash sale occurs, the disallowed loss isn't gone forever in most cases — it gets added to the cost basis of the repurchased security. This means you'll eventually be able to use the loss when you sell the replacement security — as long as you don't trigger another wash sale.</p>
+<p>Example: Buy stock at $100. Sell at $70 (loss = $30). Repurchase within 30 days at $72. Your new cost basis is $72 + $30 = $102. When you later sell at $80: your loss is $102 - $80 = $22 (not a gain).</p>
+
+<h2>Year-End Wash Sales — The Most Dangerous Scenario</h2>
+<p>The most damaging wash sales happen in December. If you sell at a loss in December and repurchase the same security in January (within 30 days), the loss is disallowed for the current year — but the cost basis adjustment won't help you until you eventually sell again. In practice, many December wash sales effectively defer losses by an entire year.</p>
+
+<h2>Who Is Exempt from Wash Sale Rules?</h2>
+<ul>
+<li>Futures traders — Section 1256 contracts are explicitly exempt</li>
+<li>Forex traders under Section 988</li>
+<li>Traders who have elected Mark-to-Market under IRC §475</li>
+<li>Short sellers (different rules apply)</li>
+<li>Crypto — currently exempt, though legislation to change this is pending</li>
+</ul>
+
+<h2>How to Avoid Wash Sales Legally</h2>
+<ul>
+<li>Wait 31 days before repurchasing the same security after a loss sale</li>
+<li>Switch to substantially different but economically similar securities during the 31-day period</li>
+<li>Elect mark-to-market (MTM) accounting — eliminates wash sales entirely for eligible traders</li>
+<li>Use futures instead of ETFs for index exposure — Section 1256 contracts are exempt</li>
+<li>Track wash sales carefully using professional tax software or a specialized CPA</li>
+</ul>
+
+<h2>Does Your Broker Track Wash Sales for You?</h2>
+<p>Brokers are required to track wash sales within a single account and report them on your 1099-B. However, brokers are NOT required to track wash sales across multiple accounts. If you trade the same securities across multiple brokerage accounts, IRAs, or spouse accounts — the cross-account wash sale tracking is entirely your responsibility.</p>
+<p>This is one of the most dangerous gaps in trader tax compliance — and one of the most common audit triggers the IRS uses against active traders.</p>
+
+    <div class="acta">
+      <h3>Stop Guessing on Trader Taxes</h3>
+      <p>TraderTax connects active traders with specialized CPAs who understand exactly how your trading income is taxed — and how to legally minimize what you owe.</p>
+      <a href="index.html#cta" class="btn">Book a Free Consultation →</a>
+    </div>
+    
+    <div class="related">
+      <h3>Related Articles</h3>
+      <div class="rel-grid">
+        <a href="losing-trader-taxes.html" class="rel-card"><div class="rel-tag">Losing Traders</div><h4>Trading Taxes — Win or Lose: The Complete Guide</h4></a>
+        <a href="mark-to-market.html" class="rel-card"><div class="rel-tag">Strategy</div><h4>Mark-to-Market Election: Eliminate Wash Sales</h4></a>
+        <a href="ultimate-guide.html" class="rel-card"><div class="rel-tag">Foundation</div><h4>The Ultimate Guide to Trader Taxes (2026)</h4></a>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <a href="index.html" class="flogo"><div class="logo-mark">TT</div>TraderTax</a>
+  <p>© 2026 TraderTax LLC · The #1 trusted tax resource for active traders · tradertax.net</p>
+</footer>
+</body>
+</html>
