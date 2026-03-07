@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="shortcut icon" href="/favicon.svg"/>
+<meta name="theme-color" content="#0a1628"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Get Your Tax Snapshot | TraderTax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7RF9PP8BRN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7RF9PP8BRN');</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --navy:#0a1628;--bg:#f7f8fb;--surface:#fff;
+  --navy-mid:#0f2040;
+  --navy-card:#111e35;
+  --navy-border:#1a2e50;
+  --green:#3dba7e;
+  --green-light:#4fd492;
+  --green-dim:rgba(61,186,126,0.1);
+  --white:#ffffff;
+  --gray:#8899aa;
+}
+html,body{background:#f7f8fb;color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid #e5e8ef;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-0.5px;}
+.logo-text .w{color:#fff;}.logo-text .g{color:var(--green);}
+.nav-back{color:var(--gray);text-decoration:none;font-size:.875rem;display:flex;align-items:center;gap:5px;transition:color .2s;}
+.nav-back:hover{color:#fff;}
+
+.page{padding-top:64px;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
+
+/* PROGRESS */
+.progress-wrap{width:100%;max-width:620px;padding:2rem 1.5rem .5rem;}
+.progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
+.progress-label{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;}
+.progress-pct{font-size:.8rem;color:var(--gray);}
+.progress-track{height:3px;background:var(--navy-border);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-light));border-radius:99px;transition:width .45s cubic-bezier(.4,0,.2,1);}
+
+/* STEP */
+.step-card{width:100%;max-width:620px;padding:1.25rem 1.5rem 2rem;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+.step-eyebrow{font-size:.72rem;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
+.step-q{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;line-height:1.2;margin-bottom:.35rem;}
+.step-sub{font-size:.875rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.5;}
+
+.options{display:flex;flex-direction:column;gap:.55rem;}
+.opt{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid var(--navy-border);border-radius:11px;cursor:pointer;transition:all .18s;background:var(--navy-card);user-select:none;-webkit-tap-highlight-color:transparent;}
+.opt:hover{border-color:rgba(61,186,126,.45);background:rgba(61,186,126,.05);}
+.opt.selected{border-color:var(--green);background:var(--green-dim);}
+.opt-icon{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0;}
+.opt-label{font-size:.92rem;font-weight:500;flex:1;}
+.opt-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--navy-border);display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+.opt.selected .opt-check{background:var(--green);border-color:var(--green);}
+.check-svg{display:none;}
+.opt.selected .check-svg{display:block;}
+.multi-hint{font-size:.75rem;color:var(--gray);margin-bottom:.6rem;display:flex;align-items:center;gap:4px;}
+
+.input-group{display:flex;flex-direction:column;gap:.7rem;}
+.input-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
+@media(max-width:480px){.input-row{grid-template-columns:1fr;}}
+.field{display:flex;flex-direction:column;gap:.35rem;}
+.field label{font-size:.75rem;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;}
+.field input,.field select,.field textarea{background:var(--navy-card);border:1.5px solid var(--navy-border);border-radius:9px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:.8rem 1rem;outline:none;transition:border-color .18s;width:100%;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);}
+.field input::placeholder,.field textarea::placeholder{color:var(--gray);}
+.field select option{background:#0f2040;}
+.field textarea{resize:vertical;min-height:72px;}
+
+.btn-row{display:flex;gap:.65rem;margin-top:1.5rem;}
+.btn-back{flex:1;padding:.85rem;border:1.5px solid var(--navy-border);border-radius:9px;background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .18s;}
+.btn-back:hover{border-color:var(--gray);color:#fff;}
+.btn-next{flex:2;padding:.85rem;border:none;border-radius:9px;background:var(--green);color:var(--navy);font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .18s;letter-spacing:.2px;}
+.btn-next:hover:not(:disabled){background:var(--green-light);transform:translateY(-1px);}
+.btn-next:disabled{opacity:.35;cursor:not-allowed;}
+
+/* LOADING */
+.loading-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;gap:1.25rem;width:100%;max-width:480px;}
+.loading-screen.active{display:flex;}
+.spinner{width:44px;height:44px;border:3px solid var(--navy-border);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-title{font-family:'Syne',sans-serif;font-size:1.3rem;font-weight:800;}
+.loading-steps{display:flex;flex-direction:column;gap:.45rem;margin-top:.25rem;width:100%;}
+.load-step{font-size:.85rem;color:var(--gray);display:flex;align-items:center;gap:.5rem;padding:.4rem .75rem;border-radius:7px;transition:all .3s;}
+.load-step.active{color:#fff;background:rgba(255,255,255,.04);}
+.load-step.done{color:var(--green);}
+.ai-disclaimer-loading{font-size:.78rem;color:var(--gray);border-top:1px solid var(--navy-border);padding-top:1rem;margin-top:.5rem;line-height:1.5;max-width:340px;}
+.ai-disclaimer-loading strong{color:var(--white);}
+
+/* RESULTS */
+.results-wrap{width:100%;max-width:700px;padding:1.5rem;animation:fadeUp .4s ease;}
+.results-header{text-align:center;margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--navy-border);}
+.results-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--green-dim);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:.35rem .9rem;font-size:.75rem;color:var(--green);font-weight:700;margin-bottom:.9rem;letter-spacing:.5px;text-transform:uppercase;}
+.results-name{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:.4rem;}
+.results-sub{color:var(--gray);font-size:.9rem;line-height:1.55;}
+
+.ai-note{display:flex;align-items:flex-start;gap:.75rem;background:rgba(255,255,255,.03);border:1px solid var(--navy-border);border-radius:11px;padding:1rem 1.1rem;margin-bottom:1.25rem;}
+.ai-note-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.ai-note-text{font-size:.8rem;color:var(--gray);line-height:1.6;}
+.ai-note-text strong{color:var(--light, #c8d8e8);font-weight:500;}
+
+.snap-section{margin-bottom:1rem;}
+.snap-section-label{font-size:.7rem;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.6rem;}
+.snap-card{background:var(--navy-card);border:1.5px solid var(--navy-border);border-radius:13px;padding:1.25rem 1.3rem;margin-bottom:.65rem;}
+.snap-card.highlight{border-color:rgba(61,186,126,.4);}
+.snap-card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
+.snap-card-body{font-size:.875rem;color:#aabbd0;line-height:1.65;}
+.snap-card-body p{margin-bottom:.4rem;}
+.snap-card-body p:last-child{margin-bottom:0;}
+.snap-card-body ul{padding-left:1.1rem;}
+.snap-card-body li{margin-bottom:.3rem;}
+.price-range{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green);margin:.4rem 0 .2rem;}
+.price-note{font-size:.78rem;color:var(--gray);}
+
+.cta-block{background:linear-gradient(135deg,rgba(61,186,126,.12),rgba(61,186,126,.04));border:1.5px solid rgba(61,186,126,.35);border-radius:16px;padding:1.75rem;text-align:center;margin-top:1.5rem;}
+.cta-block h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:.4rem;}
+.cta-block p{font-size:.85rem;color:var(--gray);margin-bottom:1.25rem;line-height:1.5;}
+.cta-disclaimer{font-size:.75rem;color:var(--gray);margin-top:.9rem;line-height:1.5;}
+.cta-disclaimer strong{color:var(--white);}
+.btn-cta{display:inline-block;background:var(--green);color:var(--navy);font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;padding:1rem 2.5rem;border-radius:10px;text-decoration:none;border:none;cursor:pointer;transition:all .2s;width:100%;letter-spacing:.3px;}
+.btn-cta:hover{background:var(--green-light);transform:translateY(-1px);}
+.btn-restart{display:inline-block;margin-top:.75rem;font-size:.8rem;color:var(--gray);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;}
+.btn-restart:hover{color:#fff;}
+
+/* CPA PROFILE (hidden, for email/sheet) */
+#cpa-profile{display:none;}
+
+@media(max-width:600px){
+  .step-q{font-size:1.25rem;}
+  .results-name{font-size:1.5rem;}
+  nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid #e5e8ef;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+  .progress-wrap,.step-card,.results-wrap{padding-left:1rem;padding-right:1rem;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+      <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+      <path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" fill="none"/>
+      <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.4px;"><span style="color:#0a1628;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
+  </a>
+  <ul style="display:flex;align-items:center;gap:28px;list-style:none;margin:0;padding:0;" class="nav-links-inner">
+    <li><a href="services.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;transition:color .2s;">Services</a></li>
+    <li><a href="pricing.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;">Pricing</a></li>
+    <li><a href="faq.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;">FAQ</a></li>
+    <li><a href="blog.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;">Blog</a></li>
+    <li><a href="contact.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;">Contact</a></li>
+    <li><a href="snapshot.html" style="background:#3dba7e;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;padding:8px 16px;border-radius:8px;text-decoration:none;">Get My Snapshot &rarr;</a></li>
+  </ul>
+</nav>
+
+<div class="page" id="app">
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-header">
+      <span class="progress-label" id="step-label">Step 1 of 8</span>
+      <span class="progress-pct" id="step-pct">12%</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:12%;"></div></div>
+  </div>
+
+  <!-- STEP CONTAINER -->
+  <div class="step-card" id="step-container"></div>
+
+  <!-- LOADING SCREEN -->
+  <div class="loading-screen" id="loading-screen">
+    <div class="spinner"></div>
+    <div class="loading-title">Building your snapshot…</div>
+    <div class="loading-steps">
+      <div class="load-step active" id="ls1">⏳ Analyzing your trading profile</div>
+      <div class="load-step" id="ls2">📊 Estimating tax exposure</div>
+      <div class="load-step" id="ls3">🔍 Identifying deductions & savings</div>
+      <div class="load-step" id="ls4">💡 Matching you to the right service</div>
+      <div class="load-step" id="ls5">✅ Preparing your summary</div>
+    </div>
+    <div class="ai-disclaimer-loading">
+      <strong>Heads up:</strong> This summary is AI-generated based on your answers. It's meant to give you a starting point — <strong>a real licensed CPA</strong> will review everything and handle your actual filing.
+    </div>
+  </div>
+
+  <!-- RESULTS CONTAINER -->
+  <div class="results-wrap" id="results-container" style="display:none;"></div>
+
+</div>
+
+<div id="cpa-profile"></div>
+
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec';
+
+const steps = [
+  {
+    id: 'who',
+    q: 'First, who are you?',
+    sub: "We'll tailor everything to your situation.",
+    multi: false,
+    opts: [
+      {icon:'📈', label:'Active trader — trading is my main thing'},
+      {icon:'💼', label:'Trader with a W2 job on the side'},
+      {icon:'🏢', label:'Business owner who also trades'},
+      {icon:'👤', label:'Non-trader — referred by someone'},
+    ]
+  },
+  {
+    id: 'instruments',
+    q: 'What do you trade?',
+    sub: 'Select all that apply.',
+    multi: true,
+    opts: [
+      {icon:'🏦', label:'Prop firm (Apex, TopStep, FTMO, etc.)'},
+      {icon:'📉', label:'Futures (ES, NQ, CL, MES)'},
+      {icon:'⚙️', label:'Options'},
+      {icon:'📊', label:'Stocks / Day trading'},
+      {icon:'₿', label:'Crypto / DeFi'},
+      {icon:'💱', label:'Forex'},
+    ]
+  },
+  {
+    id: 'profitable',
+    q: 'Were you profitable last year?',
+    sub: "No judgment — this helps us figure out your tax situation.",
+    multi: false,
+    opts: [
+      {icon:'🟢', label:'Yes, I made money'},
+      {icon:'🔴', label:'No, I lost money'},
+      {icon:'⚪', label:'Roughly breakeven'},
+      {icon:'🤷', label:"Not sure / still calculating"},
+    ]
+  },
+  {
+    id: 'income',
+    q: 'Roughly how much did you make or lose?',
+    sub: 'Ballpark is fine. This helps estimate your tax exposure.',
+    multi: false,
+    opts: [
+      {icon:'💵', label:'Under $25,000'},
+      {icon:'💵', label:'$25,000 – $75,000'},
+      {icon:'💰', label:'$75,000 – $150,000'},
+      {icon:'💰', label:'$150,000 – $500,000'},
+      {icon:'🏆', label:'$500,000+'},
+      {icon:'🔒', label:'Prefer not to say'},
+    ]
+  },
+  {
+    id: 'situation',
+    q: 'What else describes your situation?',
+    sub: 'Select all that apply.',
+    multi: true,
+    opts: [
+      {icon:'💼', label:'I have a W2 or regular job'},
+      {icon:'🔄', label:'Trading is my only income'},
+      {icon:'🏢', label:'I own a business outside of trading'},
+      {icon:'💍', label:'Married / spouse has income'},
+      {icon:'🌎', label:'I have crypto transactions'},
+      {icon:'📋', label:'I need to fix a prior year return'},
+    ]
+  },
+  {
+    id: 'structure',
+    q: 'Do you have a business structure set up?',
+    sub: "This affects how we file and what you can deduct.",
+    multi: false,
+    opts: [
+      {icon:'👤', label:'No — just filing as myself'},
+      {icon:'🏛️', label:'I have an LLC'},
+      {icon:'📑', label:'I have an LLC + S-Corp election'},
+      {icon:'❓', label:"Not sure what I have"},
+    ]
+  },
+  {
+    id: 'needs',
+    q: 'What do you need help with?',
+    sub: 'Select everything on your list.',
+    multi: true,
+    opts: [
+      {icon:'📄', label:"File this year's taxes"},
+      {icon:'🔙', label:'Fix / amend a prior year return'},
+      {icon:'📉', label:'Lower my tax bill — strategy & planning'},
+      {icon:'🏗️', label:'Set up an LLC or S-Corp'},
+      {icon:'📒', label:'Bookkeeping / monthly accounting'},
+      {icon:'🤝', label:'Everything — just handle it all'},
+    ]
+  },
+  {
+    id: 'contact',
+    q: 'Almost done — where do we send your snapshot?',
+    sub: "Your info goes straight to a real CPA who'll review before your call.",
+    type: 'contact'
+  }
+];
+
+let current = 0;
+let answers = {};
+
+function pct(step) {
+  return Math.round(((step + 1) / steps.length) * 100);
+}
+
+function updateProgress() {
+  const p = pct(current);
+  document.getElementById('progress-fill').style.width = p + '%';
+  document.getElementById('step-pct').textContent = p + '%';
+  document.getElementById('step-label').textContent = `Step ${current + 1} of ${steps.length}`;
+}
+
+function renderStep() {
+  const s = steps[current];
+  updateProgress();
+  const container = document.getElementById('step-container');
+
+  if (s.type === 'contact') {
+    container.innerHTML = `
+      <div class="step-eyebrow">Step ${current + 1} of ${steps.length}</div>
+      <div class="step-q">${s.q}</div>
+      <div class="step-sub">${s.sub}</div>
+      <div class="input-group">
+        <div class="input-row">
+          <div class="field"><label>First Name</label><input id="f-first" type="text" placeholder="Alex"/></div>
+          <div class="field"><label>Last Name</label><input id="f-last" type="text" placeholder="Johnson"/></div>
+        </div>
+        <div class="field"><label>Email</label><input id="f-email" type="email" placeholder="alex@email.com"/></div>
+        <div class="field"><label>Phone (optional)</label><input id="f-phone" type="tel" placeholder="(555) 000-0000"/></div>
+        <div class="field">
+          <label>Best time to reach you</label>
+          <select id="f-time">
+            <option value="">Select a time…</option>
+            <option>Morning (8am – 12pm)</option>
+            <option>Afternoon (12pm – 4pm)</option>
+            <option>Evening (4pm – 7pm)</option>
+            <option>Anytime</option>
+          </select>
+        </div>
+        <div class="field"><label>Anything specific on your mind? (optional)</label><textarea id="f-note" placeholder="e.g. I got hit with a huge tax bill last year and need help..."></textarea></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn-back" onclick="prevStep()">← Back</button>
+        <button class="btn-next" id="btn-submit" onclick="submitForm()">Get My Snapshot →</button>
+      </div>
+    `;
+    return;
+  }
+
+  const selected = answers[s.id] || [];
+  const optsHtml = s.opts.map((o, i) => `
+    <div class="opt ${selected.includes(i) ? 'selected' : ''}" onclick="toggleOpt(${i})">
+      <span class="opt-icon">${o.icon}</span>
+      <span class="opt-label">${o.label}</span>
+      <div class="opt-check">
+        <svg class="check-svg" width="10" height="8" viewBox="0 0 10 8" fill="none">
+          <path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  `).join('');
+
+  container.innerHTML = `
+    <div class="step-eyebrow">Step ${current + 1} of ${steps.length}</div>
+    <div class="step-q">${s.q}</div>
+    <div class="step-sub">${s.sub}</div>
+    ${s.multi ? '<div class="multi-hint">☑ Select all that apply</div>' : ''}
+    <div class="options" id="opts">${optsHtml}</div>
+    <div class="btn-row">
+      ${current > 0 ? '<button class="btn-back" onclick="prevStep()">← Back</button>' : '<div></div>'}
+      <button class="btn-next" id="btn-next" onclick="nextStep()" ${selected.length === 0 ? 'disabled' : ''}>${current === steps.length - 2 ? 'Almost done →' : 'Continue →'}</button>
+    </div>
+  `;
+}
+
+function toggleOpt(i) {
+  const s = steps[current];
+  if (!answers[s.id]) answers[s.id] = [];
+  const arr = answers[s.id];
+  if (s.multi) {
+    const idx = arr.indexOf(i);
+    if (idx > -1) arr.splice(idx, 1); else arr.push(i);
+  } else {
+    answers[s.id] = [i];
+  }
+  renderStep();
+  if (!s.multi) setTimeout(nextStep, 280);
+}
+
+function nextStep() {
+  const s = steps[current];
+  if (s.type !== 'contact' && (!answers[s.id] || answers[s.id].length === 0)) return;
+  if (current < steps.length - 1) { current++; renderStep(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function prevStep() {
+  if (current > 0) { current--; renderStep(); window.scrollTo({top:0,behavior:'smooth'}); }
+}
+
+function getLabel(stepId, indices) {
+  const s = steps.find(x => x.id === stepId);
+  if (!s || !s.opts) return 'N/A';
+  return (indices || []).map(i => s.opts[i]?.label || '').filter(Boolean).join(', ') || 'N/A';
+}
+
+async function submitForm() {
+  const first = document.getElementById('f-first').value.trim();
+  const last = document.getElementById('f-last').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  if (!first || !email) { alert('Please enter your name and email.'); return; }
+
+  const name = `${first} ${last}`.trim();
+
+  // Collect all answers
+  const profile = {
+    name,
+    email,
+    phone: document.getElementById('f-phone').value.trim() || 'Not provided',
+    bestTime: document.getElementById('f-time').value || 'Anytime',
+    notes: document.getElementById('f-note').value.trim() || 'None',
+    who: getLabel('who', answers['who']),
+    instruments: getLabel('instruments', answers['instruments']),
+    profitable: getLabel('profitable', answers['profitable']),
+    income: getLabel('income', answers['income']),
+    situation: getLabel('situation', answers['situation']),
+    structure: getLabel('structure', answers['structure']),
+    needs: getLabel('needs', answers['needs']),
+  };
+
+  // Show loading
+  document.getElementById('progress-wrap').style.display = 'none';
+  document.getElementById('step-container').style.display = 'none';
+  document.getElementById('loading-screen').classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Animate loading steps
+  const lSteps = ['ls1','ls2','ls3','ls4','ls5'];
+  for (let i = 0; i < lSteps.length; i++) {
+    await new Promise(r => setTimeout(r, 900));
+    if (i > 0) document.getElementById(lSteps[i-1]).className = 'load-step done';
+    document.getElementById(lSteps[i]).className = 'load-step active';
+  }
+
+  // Call Claude API
+  let aiSummary = '';
+  try {
+    const prompt = `You are a tax advisor for traders at TraderTax. Based on this client profile, generate a concise, personalized tax snapshot.
+
+CLIENT PROFILE:
+- Name: ${profile.name}
+- Who they are: ${profile.who}
+- What they trade: ${profile.instruments}
+- Profitable: ${profile.profitable}
+- Income/Loss range: ${profile.income}
+- Situation: ${profile.situation}
+- Business structure: ${profile.structure}
+- Needs: ${profile.needs}
+- Notes: ${profile.notes}
+
+Generate a JSON response with exactly these fields:
+{
+  "situation_summary": "2-3 sentences summarizing their tax situation in plain English, specific to traders",
+  "key_issues": ["issue 1", "issue 2", "issue 3"],
+  "top_deductions": ["deduction 1", "deduction 2", "deduction 3"],
+  "tax_exposure": "A plain English 1-2 sentence estimate of their likely tax situation or liability range",
+  "recommended_service": "Which TraderTax service tier fits them best and why (1-2 sentences)",
+  "price_low": "dollar amount like $497",
+  "price_high": "dollar amount like $1,297",
+  "cpa_brief": "A 3-4 sentence briefing for the CPA — what this client needs, their situation, key risks, and recommended approach. Professional tone.",
+  "urgency_flag": "low | medium | high — how urgent is their tax situation"
+}
+
+Return ONLY valid JSON, no markdown, no extra text.`;
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        messages:[{role:'user',content:prompt}]
+      })
+    });
+    const data = await resp.json();
+    const raw = data.content?.[0]?.text || '{}';
+    aiSummary = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  } catch(e) {
+    aiSummary = {
+      situation_summary: `Based on your profile as a ${profile.who} trading ${profile.instruments}, you have a unique tax situation that requires specialized knowledge.`,
+      key_issues: ['Proper classification of trading gains/losses', 'Deduction optimization for traders', 'Business structure review'],
+      top_deductions: ['Trading platform and data subscriptions', 'Home office deduction', 'Education and training expenses'],
+      tax_exposure: 'Your exact tax liability depends on your complete records — our CPA will calculate this precisely on your call.',
+      recommended_service: 'Based on your profile, our Profitable Trader package is likely the right fit.',
+      price_low: '$497', price_high: '$1,297',
+      cpa_brief: `Client is a ${profile.who} trading ${profile.instruments}. They are ${profile.profitable} with ${profile.income} in gains/losses. Primary needs: ${profile.needs}.`,
+      urgency_flag: 'medium'
+    };
+  }
+
+  // Submit to Google Sheet
+  try {
+    const formData = new FormData();
+    formData.append('name', profile.name);
+    formData.append('email', profile.email);
+    formData.append('phone', profile.phone);
+    formData.append('message', `[TAX SNAPSHOT LEAD]
+Who: ${profile.who}
+Trades: ${profile.instruments}
+Profitable: ${profile.profitable}
+Income range: ${profile.income}
+Situation: ${profile.situation}
+Structure: ${profile.structure}
+Needs: ${profile.needs}
+Best time: ${profile.bestTime}
+Notes: ${profile.notes}
+
+--- CPA BRIEF ---
+${aiSummary.cpa_brief}
+Urgency: ${aiSummary.urgency_flag?.toUpperCase()}
+Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
+    formData.append('source', 'Tax Snapshot Tool');
+    await fetch(APPS_SCRIPT_URL, {method:'POST', body:formData, mode:'no-cors'});
+  } catch(e) { /* silent fail */ }
+
+  // Final loading step done
+  await new Promise(r => setTimeout(r, 600));
+  document.getElementById(lSteps[lSteps.length-1]).className = 'load-step done';
+  await new Promise(r => setTimeout(r, 400));
+
+  // Show results
+  document.getElementById('loading-screen').classList.remove('active');
+  showResults(profile, aiSummary);
+}
+
+function urgencyColor(flag) {
+  if (flag === 'high') return '#ff6b6b';
+  if (flag === 'medium') return '#ffc84d';
+  return '#3dba7e';
+}
+
+function showResults(profile, ai) {
+  const res = document.getElementById('results-container');
+  res.style.display = 'block';
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  const issuesHtml = (ai.key_issues || []).map(i => `<li>${i}</li>`).join('');
+  const deductHtml = (ai.top_deductions || []).map(d => `<li>${d}</li>`).join('');
+
+  res.innerHTML = `
+    <div class="results-header">
+      <div class="results-badge">✅ Snapshot Complete</div>
+      <div class="results-name">Here's your tax snapshot, ${profile.name.split(' ')[0]}.</div>
+      <div class="results-sub">Built from your answers in about 2 minutes.</div>
+    </div>
+
+    <div class="ai-note">
+      <div class="ai-note-icon">🤖</div>
+      <div class="ai-note-text">
+        <strong>This summary was generated by AI</strong> based on what you shared. It's designed to give you a useful starting point — not a final tax determination. <strong>A real, licensed CPA</strong> at TraderTax will review your full situation before and during your call. Nothing here is legal or financial advice.
+      </div>
+    </div>
+
+    <div class="snap-section">
+      <div class="snap-section-label">Your Situation</div>
+      <div class="snap-card highlight">
+        <div class="snap-card-title">📋 What we understand</div>
+        <div class="snap-card-body"><p>${ai.situation_summary}</p></div>
+      </div>
+    </div>
+
+    <div class="snap-section">
+      <div class="snap-section-label">Key Issues to Address</div>
+      <div class="snap-card">
+        <div class="snap-card-body"><ul>${issuesHtml}</ul></div>
+      </div>
+    </div>
+
+    <div class="snap-section">
+      <div class="snap-section-label">Deductions You May Be Missing</div>
+      <div class="snap-card">
+        <div class="snap-card-body"><ul>${deductHtml}</ul></div>
+      </div>
+    </div>
+
+    <div class="snap-section">
+      <div class="snap-section-label">Tax Exposure Estimate</div>
+      <div class="snap-card">
+        <div class="snap-card-title">📊 What you're probably looking at</div>
+        <div class="snap-card-body"><p>${ai.tax_exposure}</p></div>
+      </div>
+    </div>
+
+    <div class="snap-section">
+      <div class="snap-section-label">Recommended Service & Pricing</div>
+      <div class="snap-card highlight">
+        <div class="snap-card-title">💡 Our recommendation</div>
+        <div class="snap-card-body"><p>${ai.recommended_service}</p></div>
+        <div class="price-range">${ai.price_low} – ${ai.price_high}</div>
+        <div class="price-note">Starting range based on your profile. Your CPA will confirm on your call.</div>
+      </div>
+    </div>
+
+    <div class="cta-block">
+      <h3>Your CPA is already briefed.</h3>
+      <p>We've sent your profile ahead. When you book, they'll already know your situation — no explaining from scratch, no wasted time.</p>
+      <a href="contact.html" class="btn-cta">Book My CPA Call →</a>
+      <div class="cta-disclaimer">
+        <strong>Real people. Real CPAs.</strong> This snapshot was AI-assisted, but your taxes will be handled by a licensed CPA who specializes in traders. No bots filing your return.
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:1rem;">
+      <button class="btn-restart" onclick="location.reload()">Start over with different answers</button>
+    </div>
+  `;
+}
+
+// Init
+renderStep();
+</script>
+</body>
+</html>

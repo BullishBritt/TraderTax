@@ -1,17 +1,17 @@
 User-agent: *
 Allow: /
 
-# AI Crawlers — welcome
+# AI crawlers — explicitly welcome
 User-agent: GPTBot
 Allow: /
 
 User-agent: ChatGPT-User
 Allow: /
 
-User-agent: anthropic-ai
+User-agent: ClaudeBot
 Allow: /
 
-User-agent: Claude-Web
+User-agent: anthropic-ai
 Allow: /
 
 User-agent: PerplexityBot
@@ -19,10 +19,9 @@ Allow: /
 
 User-agent: Googlebot
 Allow: /
-Crawl-delay: 5
 
-# Sitemap
-Sitemap: https://www.tradertax.net/sitemap.xml
+User-agent: Bingbot
+Allow: /
 
-# LLMs
-LLMs: https://www.tradertax.net/llms.txt
+Sitemap: https://tradertax.net/sitemap.xml
+LLMs: https://tradertax.net/llms.txt
