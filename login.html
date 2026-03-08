@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Log In | TraderTax</title>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;--error:#ef4444;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;display:flex;flex-direction:column;}
+a{color:inherit;text-decoration:none;}
+
+nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;flex-shrink:0;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);display:flex;align-items:center;gap:8px;}
+.logo span{color:var(--green);}
+.nav-right{font-size:.85rem;color:var(--muted);}
+.nav-right a{color:var(--navy);font-weight:600;}
+
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:40px;width:100%;max-width:420px;box-shadow:0 4px 24px rgba(10,22,40,.07);}
+
+.card-top{text-align:center;margin-bottom:28px;}
+.card-icon{width:48px;height:48px;background:linear-gradient(135deg,var(--navy),#1a2e5a);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+.card-icon svg{width:22px;height:22px;}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--navy);margin-bottom:6px;}
+.subtitle{font-size:.88rem;color:var(--muted);}
+
+.ff{display:flex;flex-direction:column;gap:.35rem;margin-bottom:14px;}
+.ff label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.ff input{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--navy);font-family:'DM Sans',sans-serif;font-size:.95rem;padding:.8rem 1rem;outline:none;transition:border-color .2s;width:100%;}
+.ff input:focus{border-color:var(--navy);}
+.ff input.err{border-color:var(--error);}
+
+.forgot-link{text-align:right;margin-bottom:20px;}
+.forgot-link a{font-size:.8rem;color:var(--green);font-weight:600;}
+
+.btn{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .2s;letter-spacing:.2px;margin-bottom:4px;}
+.btn:hover{background:var(--green-dk);transform:translateY(-1px);}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.divider span{font-size:.75rem;color:var(--muted);}
+
+.bottom{text-align:center;font-size:.85rem;color:var(--muted);margin-top:20px;}
+.bottom a{color:var(--green);font-weight:600;}
+
+.msg{padding:12px 14px;border-radius:8px;font-size:.83rem;margin-bottom:16px;display:none;}
+.msg.error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
+.msg.success{background:#f0fdf4;border:1px solid #bbf7d0;color:#16a34a;}
+.msg.show{display:block;}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+footer{text-align:center;padding:20px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Trader<span>Tax</span></a>
+  <div class="nav-right">No account? <a href="signup.html">Sign up free</a></div>
+</nav>
+
+<div class="main">
+  <div class="card">
+    <div class="card-top">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#3dba7e" stroke-width="2.5" stroke-linecap="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+        </svg>
+      </div>
+      <h1>Welcome back</h1>
+      <p class="subtitle">Log in to your TraderTax account</p>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <div class="ff">
+      <label>Email Address</label>
+      <input type="email" id="email" placeholder="you@email.com" autocomplete="email"/>
+    </div>
+    <div class="ff">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Your password" autocomplete="current-password"/>
+    </div>
+    <div class="forgot-link"><a href="forgot-password.html">Forgot password?</a></div>
+
+    <button class="btn" id="login-btn" onclick="handleLogin()">Log In</button>
+
+    <div class="bottom">Don't have an account? <a href="signup.html">Create one free →</a></div>
+  </div>
+</div>
+
+<footer>© 2026 TraderTax LLC · 256-bit encrypted · Your data is never sold</footer>
+
+<!-- FIREBASE -->
+<script type="module">
+  // ⚠️  PASTE YOUR FIREBASE CONFIG HERE
+  // Get it from: Firebase Console → Project Settings → Your Apps → Web App
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "PASTE_YOUR_API_KEY",
+    authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+    projectId: "PASTE_YOUR_PROJECT_ID",
+    storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "PASTE_YOUR_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  // Redirect if already logged in
+  onAuthStateChanged(auth, user => {
+    if (user) window.location.href = 'dashboard.html';
+  });
+
+  window.handleLogin = async function() {
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn = document.getElementById('login-btn');
+    const msg = document.getElementById('msg');
+
+    msg.className = 'msg'; msg.textContent = '';
+
+    if (!email || !password) {
+      showMsg('Please enter your email and password.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Logging in...';
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      showMsg('Success! Redirecting...', 'success');
+      setTimeout(() => window.location.href = 'dashboard.html', 800);
+    } catch (e) {
+      btn.disabled = false;
+      btn.textContent = 'Log In';
+      const msgs = {
+        'auth/user-not-found': 'No account found with that email.',
+        'auth/wrong-password': 'Incorrect password. Try again or reset it.',
+        'auth/invalid-credential': 'Incorrect email or password.',
+        'auth/too-many-requests': 'Too many attempts. Please wait a few minutes.',
+      };
+      showMsg(msgs[e.code] || 'Something went wrong. Please try again.', 'error');
+    }
+  };
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = 'msg ' + type + ' show';
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+</script>
+</body>
+</html>

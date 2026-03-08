@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Dashboard | TraderTax</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#1a2e5a;--green:#3dba7e;--green-dk:#2ea86c;
+  --bg:#f0f2f7;--surface:#fff;--border:#e2e6ef;--body:#374151;--muted:#6b7280;
+  --mono:'JetBrains Mono',monospace;
+  --red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--navy);}
+a{color:inherit;text-decoration:none;}
+
+/* LOADING / AUTH GATE */
+#gate{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;z-index:999;}
+.gate-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:#fff;}
+.gate-logo span{color:var(--green);}
+.gate-sub{font-size:.83rem;color:rgba(255,255,255,.4);font-family:var(--mono);}
+.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,.15);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* NAV */
+nav{height:60px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;display:flex;align-items:center;gap:8px;}
+.nav-logo span{color:var(--green);}
+.admin-badge{font-family:var(--mono);font-size:.65rem;background:rgba(61,186,126,.15);border:1px solid rgba(61,186,126,.3);color:var(--green);padding:3px 10px;border-radius:99px;letter-spacing:.5px;}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.nav-user{font-size:.78rem;color:rgba(255,255,255,.5);font-family:var(--mono);}
+.nav-btn{font-size:.78rem;color:rgba(255,255,255,.5);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .2s;}
+.nav-btn:hover{color:#fff;}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 60px);}
+aside{background:var(--surface);border-right:1px solid var(--border);padding:20px 0;}
+.sb-section{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:16px 18px 6px;}
+.sb-link{display:flex;align-items:center;gap:9px;padding:9px 18px;font-size:.83rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.sb-link:hover{color:var(--navy);background:var(--bg);}
+.sb-link.active{color:var(--navy);background:var(--bg);border-left-color:var(--green);font-weight:600;}
+.sb-icon{font-size:.95rem;width:18px;text-align:center;}
+.sb-count{margin-left:auto;font-family:var(--mono);font-size:.65rem;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:2px 7px;color:var(--muted);}
+
+main{padding:28px 32px;overflow-y:auto;}
+
+/* STAT CARDS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;position:relative;overflow:hidden;}
+.stat::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--green);}
+.stat.red::after{background:var(--red);}
+.stat.amber::after{background:var(--amber);}
+.stat.blue::after{background:var(--blue);}
+.stat-lbl{font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--navy);}
+.stat-note{font-size:.72rem;color:var(--muted);margin-top:3px;}
+.stat-delta{font-size:.72rem;font-weight:600;color:var(--green);}
+.stat-delta.down{color:var(--red);}
+
+/* TOOLBAR */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.search-wrap{position:relative;flex:1;min-width:200px;}
+.search-wrap input{width:100%;padding:.65rem 1rem .65rem 2.4rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.87rem;background:var(--surface);color:var(--navy);outline:none;transition:border-color .2s;}
+.search-wrap input:focus{border-color:var(--navy);}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;}
+.filter-select{padding:.65rem 1rem;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;background:var(--surface);color:var(--navy);outline:none;cursor:pointer;}
+.export-btn{padding:.65rem 16px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.export-btn:hover{background:var(--navy2);}
+.refresh-btn{padding:.65rem 14px;background:var(--surface);color:var(--navy);border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.83rem;cursor:pointer;transition:all .2s;}
+.refresh-btn:hover{background:var(--bg);}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;}
+.tbl{width:100%;border-collapse:collapse;}
+.tbl th{background:var(--bg);font-size:.68rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);padding:11px 16px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+.tbl th.sort{cursor:pointer;user-select:none;}
+.tbl th.sort:hover{color:var(--navy);}
+.tbl td{font-size:.82rem;color:var(--body);padding:12px 16px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tbl tr:last-child td{border-bottom:none;}
+.tbl tr:hover td{background:#fafbfd;}
+.user-cell{display:flex;align-items:center;gap:10px;}
+.user-av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--navy),var(--navy2));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.65rem;color:#fff;flex-shrink:0;}
+.user-name{font-weight:600;color:var(--navy);font-size:.83rem;}
+.user-email{font-size:.72rem;color:var(--muted);font-family:var(--mono);}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:99px;font-size:.65rem;font-weight:700;white-space:nowrap;}
+.badge.prop{background:rgba(59,130,246,.1);color:#2563eb;}
+.badge.futures{background:rgba(245,158,11,.1);color:#d97706;}
+.badge.options{background:rgba(139,92,246,.1);color:#7c3aed;}
+.badge.crypto{background:rgba(249,115,22,.1);color:#ea580c;}
+.badge.stocks{background:rgba(16,185,129,.1);color:#059669;}
+.badge.multi{background:rgba(107,114,128,.1);color:#4b5563;}
+.badge.new{background:rgba(61,186,126,.1);color:var(--green-dk);}
+.snap-count{font-family:var(--mono);font-size:.75rem;font-weight:600;color:var(--navy);}
+.action-btn{padding:4px 11px;border:1.5px solid var(--border);border-radius:7px;font-size:.72rem;font-weight:600;cursor:pointer;background:none;font-family:'DM Sans',sans-serif;color:var(--navy);transition:all .15s;}
+.action-btn:hover{background:var(--bg);}
+.action-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3);}
+.action-btn.danger:hover{background:rgba(239,68,68,.05);}
+
+/* SECTION TITLE */
+.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+.section-sub{font-size:.82rem;color:var(--muted);margin-top:2px;}
+.page-count{font-size:.78rem;color:var(--muted);font-family:var(--mono);}
+
+/* TABS */
+.content-section{display:none;}
+.content-section.active{display:block;}
+
+/* CHART */
+.chart-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:20px;}
+.chart-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:16px;}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.bar{background:var(--green);border-radius:4px 4px 0 0;width:100%;min-height:2px;transition:height .4s;}
+.bar-label{font-size:.62rem;color:var(--muted);font-family:var(--mono);}
+.bar-val{font-size:.65rem;font-weight:700;color:var(--navy);}
+
+/* USER DETAIL MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,22,40,.5);backdrop-filter:blur(4px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:16px;padding:28px;width:100%;max-width:520px;max-height:80vh;overflow-y:auto;box-shadow:0 24px 60px rgba(10,22,40,.2);}
+.modal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.modal-hd h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+.modal-close{background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--muted);padding:4px;}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+.modal-field label{font-size:.65rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:3px;}
+.modal-field .val{font-size:.85rem;color:var(--navy);font-weight:500;}
+.modal-field .val.mono{font-family:var(--mono);font-size:.78rem;}
+.modal-snap{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;}
+.modal-snap-year{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);}
+.modal-snap-type{font-size:.72rem;color:var(--green);font-weight:600;margin-bottom:3px;}
+.modal-snap-sum{font-size:.78rem;color:var(--body);line-height:1.5;}
+
+/* EMPTY */
+.empty-row td{text-align:center;padding:48px;color:var(--muted);font-size:.85rem;}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-top:1px solid var(--border);font-size:.8rem;color:var(--muted);}
+.pg-btns{display:flex;gap:6px;}
+.pg-btn{padding:5px 12px;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.78rem;color:var(--navy);transition:all .15s;}
+.pg-btn:hover{background:var(--bg);}
+.pg-btn:disabled{opacity:.4;cursor:default;}
+.pg-btn.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+
+/* RESPONSIVE */
+@media(max-width:1000px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:760px){.layout{grid-template-columns:1fr;}aside{display:none;}main{padding:20px 16px;}.stats-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:480px){.stats-row{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- AUTH GATE -->
+<div id="gate">
+  <div class="nav-logo">Trader<span>Tax</span></div>
+  <div class="spinner"></div>
+  <div class="gate-sub">Verifying admin access...</div>
+</div>
+
+<!-- MAIN APP (hidden until auth confirmed) -->
+<div id="app" style="display:none;">
+
+<nav>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="nav-logo">Trader<span>Tax</span></div>
+    <span class="admin-badge">ADMIN</span>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-email"></span>
+    <a href="dashboard.html" class="nav-btn">My Dashboard</a>
+    <button class="nav-btn" onclick="handleLogout()">Log out</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside>
+    <div class="sb-section">Overview</div>
+    <div class="sb-link active" onclick="showTab('users')" id="sb-users">
+      <span class="sb-icon">👥</span> All Users <span class="sb-count" id="sb-user-count">—</span>
+    </div>
+    <div class="sb-link" onclick="showTab('snapshots')" id="sb-snapshots">
+      <span class="sb-icon">📋</span> Snapshots <span class="sb-count" id="sb-snap-count">—</span>
+    </div>
+    <div class="sb-link" onclick="showTab('growth')" id="sb-growth">
+      <span class="sb-icon">📈</span> Growth
+    </div>
+    <div class="sb-section">Tools</div>
+    <div class="sb-link" onclick="exportCSV()">
+      <span class="sb-icon">⬇️</span> Export CSV
+    </div>
+    <div class="sb-link" onclick="loadData()">
+      <span class="sb-icon">🔄</span> Refresh Data
+    </div>
+    <div class="sb-link" onclick="window.location.href='index.html'">
+      <span class="sb-icon">🌐</span> View Site
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- STATS ROW -->
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-lbl">Total Users</div>
+        <div class="stat-val" id="stat-total">—</div>
+        <div class="stat-note stat-delta" id="stat-total-note">Loading...</div>
+      </div>
+      <div class="stat blue">
+        <div class="stat-lbl">This Month</div>
+        <div class="stat-val" id="stat-month">—</div>
+        <div class="stat-note">New signups</div>
+      </div>
+      <div class="stat amber">
+        <div class="stat-lbl">This Week</div>
+        <div class="stat-val" id="stat-week">—</div>
+        <div class="stat-note">New signups</div>
+      </div>
+      <div class="stat">
+        <div class="stat-lbl">Total Snapshots</div>
+        <div class="stat-val" id="stat-snaps">—</div>
+        <div class="stat-note">Across all users</div>
+      </div>
+    </div>
+
+    <!-- USERS TAB -->
+    <div class="content-section active" id="section-users">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">All Users</div>
+          <div class="section-sub">Every account registered on TraderTax</div>
+        </div>
+        <div class="page-count" id="user-page-count"></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="search-input" placeholder="Search by name or email..." oninput="filterUsers()"/>
+        </div>
+        <select class="filter-select" id="trader-filter" onchange="filterUsers()">
+          <option value="">All Trader Types</option>
+          <option value="prop">Prop Firm</option>
+          <option value="futures">Futures</option>
+          <option value="options">Options</option>
+          <option value="crypto">Crypto</option>
+          <option value="stocks">Stocks</option>
+        </select>
+        <select class="filter-select" id="sort-filter" onchange="filterUsers()">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="name">By Name</option>
+          <option value="snaps">Most Snapshots</option>
+        </select>
+        <button class="refresh-btn" onclick="loadData()">↻ Refresh</button>
+        <button class="export-btn" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Trader Type</th>
+              <th>Snapshots</th>
+              <th>State</th>
+              <th>Member Since</th>
+              <th>Last Active</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">
+              <div class="spinner" style="margin:0 auto 10px;width:24px;height:24px;border-width:2px;"></div>
+              Loading users...
+            </td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span id="pg-info">Showing 0 users</span>
+          <div class="pg-btns">
+            <button class="pg-btn" id="pg-prev" onclick="changePage(-1)" disabled>← Prev</button>
+            <button class="pg-btn" id="pg-next" onclick="changePage(1)" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SNAPSHOTS TAB -->
+    <div class="content-section" id="section-snapshots">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">All Snapshots</div>
+          <div class="section-sub">Every Tax Snapshot taken across all accounts</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Year</th>
+              <th>Trader Type</th>
+              <th>Summary</th>
+              <th>Date Taken</th>
+            </tr>
+          </thead>
+          <tbody id="snaps-tbody">
+            <tr><td colspan="5" style="text-align:center;padding:40px;color:var(--muted);">Loading snapshots...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- GROWTH TAB -->
+    <div class="content-section" id="section-growth">
+      <div class="section-title" style="margin-bottom:16px;">Signup Growth</div>
+      <div class="chart-wrap">
+        <div class="chart-title">Monthly Signups (Last 6 Months)</div>
+        <div class="chart-bars" id="chart-bars"></div>
+      </div>
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat">
+          <div class="stat-lbl">Prop Firm Traders</div>
+          <div class="stat-val" id="g-prop">—</div>
+          <div class="stat-note">of total users</div>
+        </div>
+        <div class="stat blue">
+          <div class="stat-lbl">Futures Traders</div>
+          <div class="stat-val" id="g-futures">—</div>
+          <div class="stat-note">of total users</div>
+        </div>
+        <div class="stat amber">
+          <div class="stat-lbl">Options Traders</div>
+          <div class="stat-val" id="g-options">—</div>
+          <div class="stat-note">of total users</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</div><!-- end #app -->
+
+<!-- USER DETAIL MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 id="modal-name">User Details</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, deleteDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ⚠️  PASTE YOUR FIREBASE CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "PASTE_YOUR_API_KEY",
+    authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+    projectId: "PASTE_YOUR_PROJECT_ID",
+    storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "PASTE_YOUR_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
+  };
+
+  // ⚠️  SET YOUR ADMIN EMAIL HERE
+  const ADMIN_EMAIL = "hello@tradertax.net";
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allUsers = [];
+  let filteredUsers = [];
+  let currentPage = 0;
+  const PER_PAGE = 25;
+
+  // AUTH GATE — only admin gets in
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      window.location.href = 'login.html?next=admin.html';
+      return;
+    }
+    if (user.email !== ADMIN_EMAIL) {
+      document.getElementById('gate').innerHTML = `
+        <div style="text-align:center;">
+          <div style="font-size:2rem;margin-bottom:12px;">🚫</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:8px;">Access Denied</div>
+          <div style="font-size:.83rem;color:rgba(255,255,255,.4);margin-bottom:20px;">This page is restricted to TraderTax administrators.</div>
+          <a href="dashboard.html" style="color:#3dba7e;font-size:.85rem;">← Go to your dashboard</a>
+        </div>`;
+      return;
+    }
+
+    document.getElementById('nav-email').textContent = user.email;
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    await loadData();
+  });
+
+  window.loadData = async function() {
+    try {
+      const q = query(collection(db, 'users'));
+      const snap = await getDocs(q);
+      allUsers = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      
+      computeStats();
+      filterUsers();
+      renderSnapshots();
+      renderGrowth();
+
+      document.getElementById('sb-user-count').textContent = allUsers.length;
+
+      const totalSnaps = allUsers.reduce((sum, u) => sum + (u.snapshots?.length || 0), 0);
+      document.getElementById('sb-snap-count').textContent = totalSnaps;
+    } catch(e) {
+      console.error('Error loading data:', e);
+      document.getElementById('users-tbody').innerHTML =
+        `<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--red);">Error loading data. Check Firestore rules.</td></tr>`;
+    }
+  };
+
+  function computeStats() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const startOfWeek = new Date(now); startOfWeek.setDate(now.getDate() - now.getDay());
+    startOfWeek.setHours(0,0,0,0);
+
+    const total = allUsers.length;
+    const thisMonth = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= startOfMonth).length;
+    const thisWeek = allUsers.filter(u => u.createdAt && new Date(u.createdAt) >= startOfWeek).length;
+    const totalSnaps = allUsers.reduce((s, u) => s + (u.snapshots?.length || 0), 0);
+
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-month').textContent = thisMonth;
+    document.getElementById('stat-week').textContent = thisWeek;
+    document.getElementById('stat-snaps').textContent = totalSnaps;
+    document.getElementById('stat-total-note').textContent = `+${thisMonth} this month`;
+  }
+
+  window.filterUsers = function() {
+    const search = document.getElementById('search-input').value.toLowerCase();
+    const traderType = document.getElementById('trader-filter').value;
+    const sort = document.getElementById('sort-filter').value;
+
+    filteredUsers = allUsers.filter(u => {
+      const name = `${u.firstName||''} ${u.lastName||''}`.toLowerCase();
+      const email = (u.email||'').toLowerCase();
+      const matchSearch = !search || name.includes(search) || email.includes(search);
+      const matchType = !traderType || (u.traderType||'').toLowerCase().includes(traderType);
+      return matchSearch && matchType;
+    });
+
+    // Sort
+    filteredUsers.sort((a, b) => {
+      if (sort === 'newest') return new Date(b.createdAt||0) - new Date(a.createdAt||0);
+      if (sort === 'oldest') return new Date(a.createdAt||0) - new Date(b.createdAt||0);
+      if (sort === 'name') return `${a.firstName} ${a.lastName}`.localeCompare(`${b.firstName} ${b.lastName}`);
+      if (sort === 'snaps') return (b.snapshots?.length||0) - (a.snapshots?.length||0);
+      return 0;
+    });
+
+    currentPage = 0;
+    renderUsersTable();
+  };
+
+  function renderUsersTable() {
+    const start = currentPage * PER_PAGE;
+    const end = start + PER_PAGE;
+    const page = filteredUsers.slice(start, end);
+    const tbody = document.getElementById('users-tbody');
+
+    if (!page.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="7">No users found matching your filters.</td></tr>`;
+      document.getElementById('pg-info').textContent = 'No users found';
+      document.getElementById('pg-prev').disabled = true;
+      document.getElementById('pg-next').disabled = true;
+      return;
+    }
+
+    const TRADER_BADGE = { prop:'prop', futures:'futures', options:'options', crypto:'crypto', stocks:'stocks' };
+
+    tbody.innerHTML = page.map(u => {
+      const initials = `${(u.firstName||'')[0]||''}${(u.lastName||'')[0]||''}`.toUpperCase() || '?';
+      const name = [u.firstName, u.lastName].filter(Boolean).join(' ') || '—';
+      const typeKey = Object.keys(TRADER_BADGE).find(k => (u.traderType||'').toLowerCase().includes(k)) || 'multi';
+      const typeBadge = u.traderType ? `<span class="badge ${typeKey}">${u.traderType}</span>` : '<span style="color:var(--muted);font-size:.75rem;">Not set</span>';
+      const since = u.createdAt ? new Date(u.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+      const lastActive = u.updatedAt ? new Date(u.updatedAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
+      const snaps = u.snapshots?.length || 0;
+      const isNew = u.createdAt && (Date.now() - new Date(u.createdAt)) < 7*24*60*60*1000;
+
+      return `<tr>
+        <td>
+          <div class="user-cell">
+            <div class="user-av">${initials}</div>
+            <div>
+              <div class="user-name">${name} ${isNew ? '<span class="badge new">NEW</span>' : ''}</div>
+              <div class="user-email">${u.email||'—'}</div>
+            </div>
+          </div>
+        </td>
+        <td>${typeBadge}</td>
+        <td><span class="snap-count">${snaps}</span></td>
+        <td><span style="font-size:.78rem;">${u.state||'—'}</span></td>
+        <td><span style="font-size:.78rem;font-family:var(--mono);">${since}</span></td>
+        <td><span style="font-size:.78rem;">${lastActive}</span></td>
+        <td>
+          <div style="display:flex;gap:5px;">
+            <button class="action-btn" onclick="viewUser('${u.id}')">View</button>
+            <button class="action-btn" onclick="emailUser('${u.email||''}')">Email</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+
+    const total = filteredUsers.length;
+    document.getElementById('pg-info').textContent = `Showing ${start+1}–${Math.min(end,total)} of ${total} users`;
+    document.getElementById('pg-prev').disabled = currentPage === 0;
+    document.getElementById('pg-next').disabled = end >= total;
+    document.getElementById('user-page-count').textContent = `${total} users`;
+  }
+
+  function renderSnapshots() {
+    const allSnaps = [];
+    allUsers.forEach(u => {
+      (u.snapshots||[]).forEach(s => {
+        allSnaps.push({ ...s, userName: [u.firstName,u.lastName].filter(Boolean).join(' ')||u.email, userEmail: u.email });
+      });
+    });
+    allSnaps.sort((a,b) => new Date(b.date||0) - new Date(a.date||0));
+
+    const tbody = document.getElementById('snaps-tbody');
+    if (!allSnaps.length) {
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="5">No snapshots yet.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = allSnaps.map(s => `
+      <tr>
+        <td><div class="user-name">${s.userName}</div><div class="user-email">${s.userEmail}</div></td>
+        <td><span style="font-family:var(--mono);font-weight:700;">${s.year||'—'}</span></td>
+        <td><span class="badge prop">${s.traderType||'—'}</span></td>
+        <td style="max-width:300px;font-size:.78rem;color:var(--body);">${(s.summary||'—').substring(0,100)}${s.summary?.length>100?'...':''}</td>
+        <td style="font-size:.75rem;font-family:var(--mono);">${s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
+      </tr>`).join('');
+  }
+
+  function renderGrowth() {
+    // Monthly signups last 6 months
+    const months = [];
+    const now = new Date();
+    for (let i=5; i>=0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      const label = d.toLocaleDateString('en-US',{month:'short'});
+      const count = allUsers.filter(u => {
+        if (!u.createdAt) return false;
+        const cd = new Date(u.createdAt);
+        return cd.getFullYear()===d.getFullYear() && cd.getMonth()===d.getMonth();
+      }).length;
+      months.push({ label, count });
+    }
+    const max = Math.max(...months.map(m=>m.count), 1);
+    document.getElementById('chart-bars').innerHTML = months.map(m => `
+      <div class="bar-col">
+        <div class="bar-val">${m.count}</div>
+        <div class="bar" style="height:${Math.max((m.count/max)*60,2)}px;"></div>
+        <div class="bar-label">${m.label}</div>
+      </div>`).join('');
+
+    // Trader type breakdown
+    const prop = allUsers.filter(u=>(u.traderType||'').toLowerCase().includes('prop')).length;
+    const futures = allUsers.filter(u=>(u.traderType||'').toLowerCase().includes('futures')).length;
+    const options = allUsers.filter(u=>(u.traderType||'').toLowerCase().includes('options')).length;
+    document.getElementById('g-prop').textContent = prop;
+    document.getElementById('g-futures').textContent = futures;
+    document.getElementById('g-options').textContent = options;
+  }
+
+  window.changePage = function(dir) {
+    currentPage += dir;
+    renderUsersTable();
+    window.scrollTo(0, 0);
+  };
+
+  window.viewUser = async function(uid) {
+    const user = allUsers.find(u => u.id === uid);
+    if (!user) return;
+    const name = [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email;
+    document.getElementById('modal-name').textContent = name;
+    const snaps = (user.snapshots||[]).slice().reverse();
+    document.getElementById('modal-body').innerHTML = `
+      <div class="modal-row">
+        <div class="modal-field"><label>Email</label><div class="val mono">${user.email||'—'}</div></div>
+        <div class="modal-field"><label>Phone</label><div class="val">${user.phone||'—'}</div></div>
+        <div class="modal-field"><label>State</label><div class="val">${user.state||'—'}</div></div>
+        <div class="modal-field"><label>Member Since</label><div class="val">${user.createdAt ? new Date(user.createdAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : '—'}</div></div>
+        <div class="modal-field"><label>Trader Type</label><div class="val">${user.traderType||'Not set'}</div></div>
+        <div class="modal-field"><label>Snapshots</label><div class="val">${snaps.length}</div></div>
+      </div>
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;margin:16px 0 10px;">Tax Snapshots</div>
+      ${snaps.length ? snaps.map(s=>`
+        <div class="modal-snap">
+          <div class="modal-snap-type">${s.year||'—'} · ${s.traderType||'—'}</div>
+          <div class="modal-snap-sum">${s.summary||'No summary saved.'}</div>
+          <div style="font-size:.7rem;color:var(--muted);margin-top:5px;">${s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : ''}</div>
+        </div>`).join('') : '<div style="font-size:.82rem;color:var(--muted);">No snapshots yet.</div>'}
+      <div style="margin-top:18px;display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="action-btn" onclick="emailUser('${user.email||''}');closeModal()">Send Email</button>
+      </div>`;
+    document.getElementById('modal').classList.add('open');
+  };
+
+  window.closeModal = () => document.getElementById('modal').classList.remove('open');
+  document.getElementById('modal').addEventListener('click', e => { if (e.target===document.getElementById('modal')) closeModal(); });
+
+  window.emailUser = function(email) {
+    if (email) window.open(`mailto:${email}?subject=Your TraderTax Account`);
+  };
+
+  window.exportCSV = function() {
+    const rows = [['First Name','Last Name','Email','Phone','State','Trader Type','Snapshots','Member Since','Last Updated']];
+    allUsers.forEach(u => rows.push([
+      u.firstName||'', u.lastName||'', u.email||'', u.phone||'', u.state||'',
+      u.traderType||'', u.snapshots?.length||0,
+      u.createdAt ? new Date(u.createdAt).toLocaleDateString() : '',
+      u.updatedAt ? new Date(u.updatedAt).toLocaleDateString() : '',
+    ]));
+    const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `tradertax-users-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
+  window.handleLogout = async function() {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  };
+
+  window.showTab = function(tab) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('section-'+tab).classList.add('active');
+    document.getElementById('sb-'+tab)?.classList.add('active');
+  };
+</script>
+</body>
+</html>

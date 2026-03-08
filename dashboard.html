@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Dashboard | TraderTax</title>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--navy);}
+a{color:inherit;text-decoration:none;}
+
+/* NAV */
+nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);}
+.logo span{color:var(--green);}
+.nav-right{display:flex;align-items:center;gap:16px;}
+.user-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:6px 14px 6px 8px;font-size:.83rem;font-weight:500;}
+.avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--navy),#1a2e5a);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.7rem;color:#fff;}
+.logout-btn{font-size:.8rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-weight:500;}
+.logout-btn:hover{color:var(--navy);}
+
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 64px);}
+aside{background:var(--surface);border-right:1px solid var(--border);padding:24px 0;}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:.87rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;border-left:3px solid transparent;}
+.sidebar-link:hover{color:var(--navy);background:var(--bg);}
+.sidebar-link.active{color:var(--navy);background:var(--bg);border-left-color:var(--green);font-weight:600;}
+.sidebar-link .icon{font-size:1rem;width:20px;text-align:center;}
+.sidebar-section{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);padding:20px 20px 8px;}
+
+main{padding:32px 40px;overflow-y:auto;}
+
+/* LOADING */
+#loading{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:12px;}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* CARDS */
+.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:4px;}
+.page-sub{font-size:.88rem;color:var(--muted);margin-bottom:28px;}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;}
+.stat-label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.7rem;color:var(--navy);}
+.stat-val.green{color:var(--green);}
+.stat-note{font-size:.75rem;color:var(--muted);margin-top:4px;}
+
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.section-title a{font-size:.8rem;color:var(--green);font-weight:600;font-family:'DM Sans',sans-serif;}
+
+/* SNAPSHOT HISTORY */
+.snapshot-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 22px;margin-bottom:12px;display:flex;align-items:center;gap:16px;}
+.snap-year{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;width:50px;flex-shrink:0;}
+.snap-info{flex:1;}
+.snap-type{font-size:.75rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:3px;}
+.snap-summary{font-size:.85rem;color:var(--body);}
+.snap-date{font-size:.75rem;color:var(--muted);}
+.snap-actions{display:flex;gap:8px;}
+.snap-btn{font-size:.78rem;font-weight:600;padding:6px 14px;border-radius:7px;border:1.5px solid var(--border);background:none;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--navy);transition:all .15s;}
+.snap-btn:hover{background:var(--bg);}
+.snap-btn.primary{background:var(--green);border-color:var(--green);color:#fff;}
+.snap-btn.primary:hover{background:var(--green-dk);}
+
+/* EMPTY STATE */
+.empty{background:var(--surface);border:1.5px dashed var(--border);border-radius:12px;padding:48px;text-align:center;}
+.empty-icon{font-size:2.5rem;margin-bottom:12px;}
+.empty h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:8px;}
+.empty p{font-size:.85rem;color:var(--muted);margin-bottom:20px;max-width:320px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.btn-g{background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;padding:11px 22px;border-radius:9px;border:none;cursor:pointer;transition:all .2s;display:inline-block;}
+.btn-g:hover{background:var(--green-dk);transform:translateY(-1px);}
+
+/* PROFILE TAB */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.pf{display:flex;flex-direction:column;gap:.3rem;}
+.pf label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.pf input{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--navy);font-family:'DM Sans',sans-serif;font-size:.92rem;padding:.75rem 1rem;outline:none;transition:border-color .2s;}
+.pf input:focus{border-color:var(--navy);}
+.pf input:disabled{opacity:.6;cursor:default;}
+.save-btn{margin-top:16px;padding:11px 24px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;cursor:pointer;transition:all .2s;}
+.save-btn:hover{background:var(--green-dk);}
+
+/* QUICK ACTIONS */
+.quick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:28px;}
+.quick-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .15s;}
+.quick-card:hover{box-shadow:0 4px 16px rgba(10,22,40,.08);border-color:#d1d5db;transform:translateY(-1px);}
+.quick-icon{font-size:1.4rem;flex-shrink:0;}
+.quick-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:2px;}
+.quick-sub{font-size:.75rem;color:var(--muted);}
+
+/* TABS */
+.content-section{display:none;}
+.content-section.active{display:block;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;background:rgba(61,186,126,.1);border:1px solid rgba(61,186,126,.25);border-radius:99px;padding:3px 10px;font-size:.7rem;font-weight:700;color:var(--green);margin-left:8px;}
+
+@media(max-width:860px){
+  .layout{grid-template-columns:1fr;}
+  aside{display:none;}
+  main{padding:24px 20px;}
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .quick-grid{grid-template-columns:1fr;}
+  .profile-grid{grid-template-columns:1fr;}
+}
+@media(max-width:500px){.stats-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <div style="font-size:.85rem;color:var(--muted);">Loading your dashboard...</div>
+</div>
+
+<div id="app" style="display:none;">
+<nav>
+  <a href="index.html" class="logo">Trader<span>Tax</span></a>
+  <div class="nav-right">
+    <div class="user-pill">
+      <div class="avatar" id="nav-avatar">?</div>
+      <span id="nav-name">Loading...</span>
+    </div>
+    <button class="logout-btn" onclick="handleLogout()">Log out</button>
+  </div>
+</nav>
+
+<div class="layout">
+  <aside>
+    <div class="sidebar-section">My Account</div>
+    <div class="sidebar-link active" onclick="showTab('overview')" id="tab-overview">
+      <span class="icon">📊</span> Overview
+    </div>
+    <div class="sidebar-link" onclick="showTab('snapshots')" id="tab-snapshots">
+      <span class="icon">📋</span> My Snapshots
+    </div>
+    <div class="sidebar-link" onclick="showTab('profile')" id="tab-profile">
+      <span class="icon">👤</span> Profile
+    </div>
+    <div class="sidebar-section">Resources</div>
+    <div class="sidebar-link" onclick="window.location.href='snapshot.html'">
+      <span class="icon">✨</span> New Snapshot
+    </div>
+    <div class="sidebar-link" onclick="window.location.href='pricing.html'">
+      <span class="icon">💳</span> Pricing
+    </div>
+    <div class="sidebar-link" onclick="window.location.href='blog.html'">
+      <span class="icon">📖</span> Tax Guides
+    </div>
+    <div class="sidebar-link" onclick="window.location.href='contact.html'">
+      <span class="icon">💬</span> Talk to a CPA
+    </div>
+  </aside>
+
+  <main>
+
+    <!-- OVERVIEW TAB -->
+    <div class="content-section active" id="section-overview">
+      <div class="page-title" id="greeting">Good morning 👋</div>
+      <div class="page-sub" id="greeting-sub">Here's your TraderTax account at a glance.</div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Tax Year</div>
+          <div class="stat-val" id="stat-year">2026</div>
+          <div class="stat-note">Current filing year</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Snapshots Taken</div>
+          <div class="stat-val green" id="stat-snaps">0</div>
+          <div class="stat-note">Across all years</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Member Since</div>
+          <div class="stat-val" id="stat-since" style="font-size:1.1rem;padding-top:8px;">—</div>
+          <div class="stat-note">TraderTax account</div>
+        </div>
+      </div>
+
+      <div class="section-title">Quick Actions</div>
+      <div class="quick-grid">
+        <a class="quick-card" href="snapshot.html">
+          <div class="quick-icon">✨</div>
+          <div><div class="quick-title">Take a New Snapshot</div><div class="quick-sub">Get a fresh tax analysis for 2026</div></div>
+        </a>
+        <a class="quick-card" href="contact.html">
+          <div class="quick-icon">📞</div>
+          <div><div class="quick-title">Talk to a CPA</div><div class="quick-sub">Book a free consultation</div></div>
+        </a>
+        <a class="quick-card" href="pricing.html">
+          <div class="quick-icon">💳</div>
+          <div><div class="quick-title">View Plans</div><div class="quick-sub">Find the right package for your situation</div></div>
+        </a>
+        <a class="quick-card" href="ultimate-guide.html">
+          <div class="quick-icon">📖</div>
+          <div><div class="quick-title">Trader Tax Guide</div><div class="quick-sub">The complete 2026 tax guide for traders</div></div>
+        </a>
+      </div>
+
+      <div class="section-title">
+        Recent Snapshots
+        <a href="#" onclick="showTab('snapshots')">View all →</a>
+      </div>
+      <div id="overview-snapshots"></div>
+    </div>
+
+    <!-- SNAPSHOTS TAB -->
+    <div class="content-section" id="section-snapshots">
+      <div class="page-title">My Tax Snapshots</div>
+      <div class="page-sub">Your saved tax analyses — updated every year, one place.</div>
+      <div id="snapshots-list"></div>
+    </div>
+
+    <!-- PROFILE TAB -->
+    <div class="content-section" id="section-profile">
+      <div class="page-title">My Profile</div>
+      <div class="page-sub">Your account details. Kept private and never sold.</div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:560px;">
+        <div class="profile-grid">
+          <div class="pf"><label>First Name</label><input type="text" id="pf-first"/></div>
+          <div class="pf"><label>Last Name</label><input type="text" id="pf-last"/></div>
+          <div class="pf" style="grid-column:1/-1"><label>Email Address</label><input type="email" id="pf-email" disabled/></div>
+          <div class="pf"><label>Phone (optional)</label><input type="tel" id="pf-phone" placeholder="(555) 000-0000"/></div>
+          <div class="pf"><label>State</label><input type="text" id="pf-state" placeholder="e.g. Texas"/></div>
+        </div>
+        <button class="save-btn" onclick="saveProfile()">Save Changes</button>
+        <div id="profile-msg" style="font-size:.8rem;margin-top:10px;"></div>
+      </div>
+      <div style="margin-top:24px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:24px;max-width:560px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:8px;">Password & Security</div>
+        <p style="font-size:.83rem;color:var(--muted);margin-bottom:14px;">To change your password, we'll send a reset link to your email.</p>
+        <button onclick="sendPasswordReset()" style="padding:9px 20px;border:1.5px solid var(--border);border-radius:8px;background:none;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.83rem;cursor:pointer;">Send Password Reset Email</button>
+        <div id="pw-reset-msg" style="font-size:.8rem;margin-top:8px;color:var(--green);"></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, query, where, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ⚠️  PASTE YOUR FIREBASE CONFIG HERE
+  const firebaseConfig = {
+    apiKey: "PASTE_YOUR_API_KEY",
+    authDomain: "PASTE_YOUR_AUTH_DOMAIN",
+    projectId: "PASTE_YOUR_PROJECT_ID",
+    storageBucket: "PASTE_YOUR_STORAGE_BUCKET",
+    messagingSenderId: "PASTE_YOUR_SENDER_ID",
+    appId: "PASTE_YOUR_APP_ID"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let userData = null;
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    currentUser = user;
+    await loadUser(user);
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  });
+
+  async function loadUser(user) {
+    // Nav
+    const name = user.displayName || user.email;
+    const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('nav-avatar').textContent = initials;
+    document.getElementById('nav-name').textContent = user.displayName || user.email;
+
+    // Greeting
+    const hour = new Date().getHours();
+    const greet = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const firstName = (user.displayName || '').split(' ')[0] || '';
+    document.getElementById('greeting').textContent = `${greet}, ${firstName} 👋`;
+    document.getElementById('greeting-sub').textContent = "Here's your TraderTax account at a glance.";
+
+    // Load Firestore profile
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        userData = snap.data();
+        document.getElementById('pf-first').value = userData.firstName || '';
+        document.getElementById('pf-last').value = userData.lastName || '';
+        document.getElementById('pf-phone').value = userData.phone || '';
+        document.getElementById('pf-state').value = userData.state || '';
+
+        // Member since
+        if (userData.createdAt) {
+          const d = new Date(userData.createdAt);
+          document.getElementById('stat-since').textContent = d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
+        }
+
+        // Snapshots
+        const snapshots = userData.snapshots || [];
+        document.getElementById('stat-snaps').textContent = snapshots.length;
+        renderSnapshots(snapshots);
+      }
+    } catch(e) { console.error(e); }
+
+    document.getElementById('pf-email').value = user.email;
+    document.getElementById('stat-year').textContent = new Date().getFullYear();
+  }
+
+  function renderSnapshots(snapshots) {
+    const overviewEl = document.getElementById('overview-snapshots');
+    const listEl = document.getElementById('snapshots-list');
+
+    if (!snapshots.length) {
+      const empty = `<div class="empty">
+        <div class="empty-icon">📋</div>
+        <h3>No snapshots yet</h3>
+        <p>Take your first Tax Snapshot — it takes 2 minutes and gives you a personalized tax analysis reviewed by a real CPA.</p>
+        <a href="snapshot.html" class="btn-g">Take My Tax Snapshot →</a>
+      </div>`;
+      overviewEl.innerHTML = empty;
+      listEl.innerHTML = empty;
+      return;
+    }
+
+    const cards = snapshots.slice().reverse().map(s => `
+      <div class="snapshot-card">
+        <div class="snap-year">${s.year || '—'}</div>
+        <div class="snap-info">
+          <div class="snap-type">${s.traderType || 'Trader Snapshot'}</div>
+          <div class="snap-summary">${s.summary || 'Tax analysis completed'}</div>
+          <div class="snap-date">${s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : ''}</div>
+        </div>
+        <div class="snap-actions">
+          <button class="snap-btn primary" onclick="window.location.href='snapshot.html'">New Snapshot</button>
+        </div>
+      </div>`).join('');
+
+    overviewEl.innerHTML = cards;
+    listEl.innerHTML = cards;
+  }
+
+  window.saveProfile = async function() {
+    const msg = document.getElementById('profile-msg');
+    try {
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        ...userData,
+        firstName: document.getElementById('pf-first').value.trim(),
+        lastName: document.getElementById('pf-last').value.trim(),
+        phone: document.getElementById('pf-phone').value.trim(),
+        state: document.getElementById('pf-state').value.trim(),
+        updatedAt: new Date().toISOString(),
+      }, { merge: true });
+      msg.textContent = '✓ Profile saved';
+      msg.style.color = 'var(--green)';
+    } catch(e) {
+      msg.textContent = 'Error saving. Try again.';
+      msg.style.color = '#dc2626';
+    }
+    setTimeout(() => msg.textContent = '', 3000);
+  };
+
+  window.sendPasswordReset = async function() {
+    try {
+      await sendPasswordResetEmail(auth, currentUser.email);
+      document.getElementById('pw-reset-msg').textContent = '✓ Reset email sent to ' + currentUser.email;
+    } catch(e) {
+      document.getElementById('pw-reset-msg').textContent = 'Error sending reset email.';
+    }
+  };
+
+  window.handleLogout = async function() {
+    await signOut(auth);
+    window.location.href = 'index.html';
+  };
+
+  window.showTab = function(tab) {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('section-' + tab).classList.add('active');
+    document.getElementById('tab-' + tab)?.classList.add('active');
+  };
+</script>
+</body>
+</html>

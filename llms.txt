@@ -87,6 +87,10 @@ Reviewed by a real CPA. Free. No commitment required.
 - /beginner-trader-taxes.html — Trader tax basics for beginners
 - /tax-software-vs-cpa.html — When to use a CPA vs TurboTax/crypto software
 - /case-study-35k-savings.html — Real client tax savings case study
+- /stock-trading-taxes.html — Stock trading tax guide (day traders, swing traders, Trader Tax Status)
+- /short-selling-taxes.html — Short selling tax rules (always short-term, dividends, constructive sales)
+- /options-strategies-taxes.html — Options strategy taxes (spreads, condors, covered calls, straddles, LEAPS)
+- /capital-gains-tax-traders.html — Capital gains rates, NIIT, tax-loss harvesting, retirement accounts
 - /ultimate-guide.html — The ultimate guide to trader taxes (2026)
 
 ## Contact
