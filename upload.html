@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Upload Documents | TraderTax</title>
+<meta name="robots" content="noindex"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;--red:#ef4444;--amber:#f59e0b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+
+/* NAV */
+nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);}
+.logo span{color:var(--green);}
+.nav-right{display:flex;align-items:center;gap:14px;}
+.nav-user{font-size:.8rem;color:var(--muted);}
+.nav-btn{font-size:.8rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.nav-btn:hover{color:var(--navy);}
+
+/* LAYOUT */
+.page{max-width:860px;margin:0 auto;padding:40px 20px 80px;}
+
+/* HEADER */
+.page-hd{margin-bottom:32px;}
+.page-hd .eyebrow{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
+.page-hd h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.6rem,3vw,2.1rem);margin-bottom:8px;}
+.page-hd p{font-size:.92rem;color:var(--muted);line-height:1.7;max-width:560px;}
+
+/* PROGRESS STEPS */
+.steps{display:flex;align-items:center;gap:0;margin-bottom:32px;overflow-x:auto;padding-bottom:4px;}
+.step{display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.step-num{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0;}
+.step.done .step-num{background:var(--green);color:#fff;}
+.step.active .step-num{background:var(--navy);color:#fff;}
+.step.pending .step-num{background:var(--border);color:var(--muted);}
+.step-label{font-size:.78rem;font-weight:600;color:var(--muted);}
+.step.active .step-label{color:var(--navy);}
+.step.done .step-label{color:var(--green);}
+.step-line{width:32px;height:2px;background:var(--border);flex-shrink:0;margin:0 4px;}
+.step-line.done{background:var(--green);}
+
+/* ALERT BANNER */
+.alert{display:flex;align-items:flex-start;gap:12px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;margin-bottom:24px;font-size:.83rem;color:#92400e;line-height:1.6;}
+.alert-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+/* SECTION */
+.section{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+.section-hd{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;cursor:pointer;user-select:none;transition:background .15s;}
+.section-hd:hover{background:var(--bg);}
+.section-left{display:flex;align-items:center;gap:12px;}
+.section-icon{font-size:1.2rem;width:36px;height:36px;background:var(--bg);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;}
+.section-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
+.section-badge{font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:99px;}
+.badge-req{background:rgba(239,68,68,.1);color:var(--red);}
+.badge-opt{background:rgba(107,114,128,.1);color:var(--muted);}
+.badge-done{background:rgba(61,186,126,.1);color:var(--green-dk);}
+.section-chevron{color:var(--muted);font-size:.8rem;transition:transform .2s;}
+.section-chevron.open{transform:rotate(180deg);}
+.section-body{display:none;padding:0 20px 20px;border-top:1px solid var(--border);}
+.section-body.open{display:block;}
+
+/* UPLOAD ZONE */
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 20px;text-align:center;cursor:pointer;transition:all .2s;margin-top:14px;position:relative;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--green);background:var(--green-lt);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:1.8rem;margin-bottom:8px;}
+.upload-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:4px;}
+.upload-sub{font-size:.75rem;color:var(--muted);}
+.upload-sub span{color:var(--green);font-weight:600;}
+
+/* FILE LIST */
+.file-list{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.file-item{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 14px;}
+.file-icon{font-size:1rem;flex-shrink:0;}
+.file-info{flex:1;min-width:0;}
+.file-name{font-size:.82rem;font-weight:600;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.file-size{font-size:.7rem;color:var(--muted);}
+.file-status{font-size:.7rem;font-weight:700;flex-shrink:0;}
+.file-status.uploading{color:var(--amber);}
+.file-status.done{color:var(--green);}
+.file-status.error{color:var(--red);}
+.file-remove{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem;padding:2px 6px;flex-shrink:0;}
+.file-remove:hover{color:var(--red);}
+.file-progress{height:3px;background:var(--border);border-radius:99px;margin-top:4px;overflow:hidden;}
+.file-progress-bar{height:100%;background:var(--green);border-radius:99px;transition:width .3s;}
+
+/* ACCEPTED FORMATS */
+.formats{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.format-tag{font-size:.65rem;font-weight:700;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:3px 8px;color:var(--muted);}
+
+/* NOTES FIELD */
+.notes-label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;margin-top:14px;display:block;}
+textarea.notes{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;color:var(--navy);font-family:'DM Sans',sans-serif;font-size:.88rem;padding:.75rem 1rem;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;}
+textarea.notes:focus{border-color:var(--navy);}
+
+/* SUMMARY SIDEBAR */
+.layout{display:grid;grid-template-columns:1fr 300px;gap:24px;align-items:start;}
+.sidebar{position:sticky;top:84px;}
+.summary-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.summary-title{font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;margin-bottom:14px;}
+.summary-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:.82rem;}
+.summary-row:last-of-type{border-bottom:none;}
+.summary-key{color:var(--muted);}
+.summary-val{font-weight:600;color:var(--navy);}
+.summary-val.green{color:var(--green);}
+.summary-val.red{color:var(--red);}
+
+.submit-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .2s;margin-top:16px;}
+.submit-btn:hover{background:var(--green-dk);transform:translateY(-1px);}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.submit-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6;}
+
+.secure-badges{display:flex;flex-direction:column;gap:6px;margin-top:14px;}
+.secure-badge{display:flex;align-items:center;gap:8px;font-size:.72rem;color:var(--muted);}
+.secure-badge::before{content:'🔒';font-size:.8rem;}
+
+/* CHECKLIST */
+.checklist{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.check-item{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--body);padding:6px 0;}
+.check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--green);flex-shrink:0;cursor:pointer;}
+.check-item label{cursor:pointer;line-height:1.5;}
+
+/* SUCCESS STATE */
+.success-state{display:none;text-align:center;padding:48px 20px;}
+.success-state.show{display:block;}
+.success-icon{font-size:3rem;margin-bottom:16px;}
+.success-state h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:10px;}
+.success-state p{font-size:.9rem;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto 24px;}
+.next-steps{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;text-align:left;max-width:440px;margin:0 auto;}
+.next-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);font-size:.83rem;}
+.next-step:last-child{border-bottom:none;padding-bottom:0;}
+.next-step-num{width:22px;height:22px;background:var(--navy);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0;margin-top:1px;}
+.next-step-text{color:var(--body);line-height:1.6;}
+.next-step-text strong{color:var(--navy);}
+
+/* MSG */
+.msg{padding:12px 14px;border-radius:8px;font-size:.83rem;margin-bottom:16px;display:none;}
+.msg.error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;}
+.msg.show{display:block;}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:760px){
+  .layout{grid-template-columns:1fr;}
+  .sidebar{position:static;}
+  .steps{gap:0;}
+  .step-line{width:20px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Trader<span>Tax</span></a>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user"></span>
+    <button class="nav-btn" onclick="handleLogout()">Log out</button>
+  </div>
+</nav>
+
+<div class="page" id="main-content" style="display:none;">
+
+  <!-- PROGRESS STEPS -->
+  <div class="steps">
+    <div class="step done"><div class="step-num">✓</div><span class="step-label">Tax Snapshot</span></div>
+    <div class="step-line done"></div>
+    <div class="step active"><div class="step-num">2</div><span class="step-label">Upload Documents</span></div>
+    <div class="step-line"></div>
+    <div class="step pending"><div class="step-num">3</div><span class="step-label">CPA Review</span></div>
+    <div class="step-line"></div>
+    <div class="step pending"><div class="step-num">4</div><span class="step-label">Your Return Filed</span></div>
+  </div>
+
+  <div class="page-hd">
+    <div class="eyebrow">Step 2 of 4</div>
+    <h1>Upload Your Documents</h1>
+    <p>Upload what you have — don't stress if something's missing. Your tax professional will follow up if they need anything else. The more you provide, the faster your return gets filed.</p>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <div class="alert">
+    <span class="alert-icon">💡</span>
+    <div>Don't have a 1099 from your prop firm? No problem — a bank statement showing your payout deposits works just as well. We work with what you have.</div>
+  </div>
+
+  <div class="layout">
+    <div class="sections" id="sections">
+
+      <!-- 1. TRADING INCOME -->
+      <div class="section">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">📊</div>
+            <div>
+              <div class="section-title">Trading Income</div>
+              <div class="section-sub">1099-B, prop firm payouts, bank statements</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-req" id="badge-trading">Required</span>
+            <span class="section-chevron open">▼</span>
+          </div>
+        </div>
+        <div class="section-body open" id="body-trading">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c1"/><label for="c1">1099-B from broker (TD Ameritrade, Schwab, Tastytrade, Webull, etc.)</label></div>
+            <div class="check-item"><input type="checkbox" id="c2"/><label for="c2">Prop firm 1099-NEC or 1099-MISC (Apex, TopStep, FTMO, Tradeify, etc.)</label></div>
+            <div class="check-item"><input type="checkbox" id="c3"/><label for="c3">Bank statement showing prop firm payout deposits</label></div>
+            <div class="check-item"><input type="checkbox" id="c4"/><label for="c4">Crypto transaction CSV (Coinbase, Binance, Kraken export)</label></div>
+            <div class="check-item"><input type="checkbox" id="c5"/><label for="c5">Forex account statement (OANDA, FOREX.com, etc.)</label></div>
+          </div>
+          <div class="upload-zone" id="zone-trading" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'trading')">
+            <input type="file" multiple accept=".pdf,.csv,.jpg,.jpeg,.png,.xlsx,.xls" onchange="handleFiles(this.files,'trading')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Drop files here or click to browse</div>
+            <div class="upload-sub">Accepted: <span>PDF, CSV, JPG, PNG, Excel</span> · Max 25MB per file</div>
+          </div>
+          <div class="formats">
+            <span class="format-tag">PDF</span><span class="format-tag">CSV</span><span class="format-tag">JPG</span><span class="format-tag">PNG</span><span class="format-tag">XLSX</span>
+          </div>
+          <div class="file-list" id="files-trading"></div>
+          <span class="notes-label">Notes for your tax professional (optional)</span>
+          <textarea class="notes" id="notes-trading" placeholder="e.g. I trade on 3 prop firms — Apex, TopStep, and Tradeify. My Apex 1099 shows $38K but I also have $12K in TopStep payouts that only show on my bank statement..."></textarea>
+        </div>
+      </div>
+
+      <!-- 2. W-2 / EMPLOYMENT -->
+      <div class="section" id="section-w2">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">💼</div>
+            <div>
+              <div class="section-title">W-2 / Employment Income</div>
+              <div class="section-sub">If you have a job in addition to trading</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt" id="badge-w2">If applicable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body" id="body-w2">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c6"/><label for="c6">W-2 from employer(s)</label></div>
+            <div class="check-item"><input type="checkbox" id="c7"/><label for="c7">1099-NEC for any freelance or contract work</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'w2')">
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files,'w2')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Drop files here or click to browse</div>
+            <div class="upload-sub">Accepted: <span>PDF, JPG, PNG</span></div>
+          </div>
+          <div class="file-list" id="files-w2"></div>
+          <span class="notes-label">Notes (optional)</span>
+          <textarea class="notes" id="notes-w2" placeholder="e.g. I have 2 W-2s — one from my full time job and one from a part time gig..."></textarea>
+        </div>
+      </div>
+
+      <!-- 3. SUBSCRIPTIONS & PLATFORM FEES -->
+      <div class="section">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">🖥️</div>
+            <div>
+              <div class="section-title">Platform & Subscription Fees</div>
+              <div class="section-sub">Deductible trading expenses — don't leave money on the table</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt">If applicable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c8"/><label for="c8">Trading platform fees (ThinkorSwim, TradeStation, NinjaTrader, Webull Pro)</label></div>
+            <div class="check-item"><input type="checkbox" id="c9"/><label for="c9">Charting software (TradingView, TC2000, Sierra Chart)</label></div>
+            <div class="check-item"><input type="checkbox" id="c10"/><label for="c10">Scanner & order flow tools (Trade Ideas, Bookmap, Volumetrica)</label></div>
+            <div class="check-item"><input type="checkbox" id="c11"/><label for="c11">Prop firm evaluation & reset fees</label></div>
+            <div class="check-item"><input type="checkbox" id="c12"/><label for="c12">News & research subscriptions (Benzinga Pro, Seeking Alpha)</label></div>
+            <div class="check-item"><input type="checkbox" id="c13"/><label for="c13">Journal & tracking tools (TradeZella, Tradervue, Edgewonk)</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'subs')">
+            <input type="file" multiple accept=".pdf,.csv,.jpg,.jpeg,.png,.xlsx" onchange="handleFiles(this.files,'subs')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Upload receipts, invoices, or bank/card statements</div>
+            <div class="upload-sub">A bank or credit card statement showing all charges works great</div>
+          </div>
+          <div class="file-list" id="files-subs"></div>
+          <span class="notes-label">Notes (optional)</span>
+          <textarea class="notes" id="notes-subs" placeholder="e.g. I pay $150/mo for TradingView Pro, $97/mo for Trade Ideas, and $199/mo for Bookmap. I also paid $1,200 in Apex challenge fees..."></textarea>
+        </div>
+      </div>
+
+      <!-- 4. EDUCATION -->
+      <div class="section">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">📚</div>
+            <div>
+              <div class="section-title">Education & Coaching</div>
+              <div class="section-sub">Courses, mentorships, books, communities</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt">If applicable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c14"/><label for="c14">Trading courses (Udemy, mentor programs, boot camps)</label></div>
+            <div class="check-item"><input type="checkbox" id="c15"/><label for="c15">1-on-1 coaching or mentorship fees</label></div>
+            <div class="check-item"><input type="checkbox" id="c16"/><label for="c16">Discord/community memberships with educational content</label></div>
+            <div class="check-item"><input type="checkbox" id="c17"/><label for="c17">Trading books, seminars, webinars</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'edu')">
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files,'edu')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Upload receipts or invoices</div>
+            <div class="upload-sub">Screenshots of payment confirmation emails work too</div>
+          </div>
+          <div class="file-list" id="files-edu"></div>
+          <span class="notes-label">Notes (optional)</span>
+          <textarea class="notes" id="notes-edu" placeholder="e.g. I paid $2,500 for a futures mentorship program and $97/mo for a Discord trading community..."></textarea>
+        </div>
+      </div>
+
+      <!-- 5. HOME OFFICE & EQUIPMENT -->
+      <div class="section">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">🏠</div>
+            <div>
+              <div class="section-title">Home Office & Equipment</div>
+              <div class="section-sub">Only if you trade full-time from a dedicated space</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt">If applicable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c18"/><label for="c18">Computer / laptop purchase receipts</label></div>
+            <div class="check-item"><input type="checkbox" id="c19"/><label for="c19">Monitor purchase receipts</label></div>
+            <div class="check-item"><input type="checkbox" id="c20"/><label for="c20">Internet bill (monthly statements)</label></div>
+            <div class="check-item"><input type="checkbox" id="c21"/><label for="c21">Rent or mortgage statement (for home office deduction)</label></div>
+            <div class="check-item"><input type="checkbox" id="c22"/><label for="c22">Utility bills (electric, internet — proportional to office use)</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'office')">
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files,'office')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Upload receipts & statements</div>
+            <div class="upload-sub">PDF or photo of receipts is fine</div>
+          </div>
+          <div class="file-list" id="files-office"></div>
+          <span class="notes-label">Notes (optional)</span>
+          <textarea class="notes" id="notes-office" placeholder="e.g. I have a dedicated trading room — 200 sq ft out of a 1,200 sq ft apartment. I pay $2,400/mo rent..."></textarea>
+        </div>
+      </div>
+
+      <!-- 6. BUSINESS (LLC/S-Corp) -->
+      <div class="section" id="section-biz">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">🏢</div>
+            <div>
+              <div class="section-title">Business Documents</div>
+              <div class="section-sub">Only if you have an LLC or S-Corp</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt">If applicable</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c23"/><label for="c23">Prior year business return (Form 1120-S or Schedule C)</label></div>
+            <div class="check-item"><input type="checkbox" id="c24"/><label for="c24">Business bank statements</label></div>
+            <div class="check-item"><input type="checkbox" id="c25"/><label for="c25">Payroll records (if S-Corp with salary)</label></div>
+            <div class="check-item"><input type="checkbox" id="c26"/><label for="c26">K-1 from any partnerships or S-Corps</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'biz')">
+            <input type="file" multiple accept=".pdf,.csv,.jpg,.jpeg,.png,.xlsx" onchange="handleFiles(this.files,'biz')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Upload business documents</div>
+            <div class="upload-sub">PDF preferred for tax forms</div>
+          </div>
+          <div class="file-list" id="files-biz"></div>
+          <span class="notes-label">Notes (optional)</span>
+          <textarea class="notes" id="notes-biz" placeholder="e.g. I have a single-member LLC formed in 2024. Haven't elected S-Corp yet but want to discuss it..."></textarea>
+        </div>
+      </div>
+
+      <!-- 7. PRIOR YEAR RETURNS -->
+      <div class="section">
+        <div class="section-hd" onclick="toggleSection(this)">
+          <div class="section-left">
+            <div class="section-icon">📁</div>
+            <div>
+              <div class="section-title">Prior Year Tax Returns</div>
+              <div class="section-sub">Helps your tax professional spot missed deductions</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="section-badge badge-opt">Recommended</span>
+            <span class="section-chevron">▼</span>
+          </div>
+        </div>
+        <div class="section-body">
+          <div class="checklist">
+            <div class="check-item"><input type="checkbox" id="c27"/><label for="c27">Last year's Form 1040 (federal return)</label></div>
+            <div class="check-item"><input type="checkbox" id="c28"/><label for="c28">Last year's state return</label></div>
+            <div class="check-item"><input type="checkbox" id="c29"/><label for="c29">Any IRS notices or letters received</label></div>
+          </div>
+          <div class="upload-zone" ondragover="handleDrag(event,this)" ondragleave="handleDragLeave(this)" ondrop="handleDrop(event,'prior')">
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png" onchange="handleFiles(this.files,'prior')"/>
+            <div class="upload-icon">📎</div>
+            <div class="upload-title">Upload prior returns</div>
+            <div class="upload-sub">PDF only — keep these secure</div>
+          </div>
+          <div class="file-list" id="files-prior"></div>
+        </div>
+      </div>
+
+    </div><!-- end .sections -->
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="summary-card">
+        <div class="summary-title">📋 Upload Summary</div>
+        <div class="summary-row"><span class="summary-key">Files uploaded</span><span class="summary-val green" id="total-files">0</span></div>
+        <div class="summary-row"><span class="summary-key">Total size</span><span class="summary-val" id="total-size">0 MB</span></div>
+        <div class="summary-row"><span class="summary-key">Tax year</span><span class="summary-val" id="tax-year-display">2025</span></div>
+        <div class="summary-row"><span class="summary-key">Status</span><span class="summary-val" id="upload-status">Not submitted</span></div>
+
+        <button class="submit-btn" id="submit-btn" onclick="submitDocuments()">
+          Submit to My Tax Professional →
+        </button>
+        <p class="submit-note">Your documents are encrypted and only visible to your assigned tax professional.</p>
+
+        <div class="secure-badges">
+          <div class="secure-badge">256-bit SSL encryption</div>
+          <div class="secure-badge">Files stored in Firebase (Google)</div>
+          <div class="secure-badge">Never shared with third parties</div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end .layout -->
+</div><!-- end .page -->
+
+<!-- SUCCESS STATE -->
+<div class="page success-state" id="success-state">
+  <div class="success-icon">🎉</div>
+  <h2>Documents Received!</h2>
+  <p>Your documents have been securely uploaded. A licensed tax professional will review everything and reach out within 1–2 business days.</p>
+  <div class="next-steps">
+    <div class="next-step">
+      <div class="next-step-num">1</div>
+      <div class="next-step-text"><strong>Review (1–2 business days)</strong> — Your tax professional reviews your documents and flags anything missing.</div>
+    </div>
+    <div class="next-step">
+      <div class="next-step-num">2</div>
+      <div class="next-step-text"><strong>You'll get an email</strong> at <span id="success-email"></span> with next steps and a flat-rate quote.</div>
+    </div>
+    <div class="next-step">
+      <div class="next-step-num">3</div>
+      <div class="next-step-text"><strong>Approve & file</strong> — Review your return, sign off, and we e-file it.</div>
+    </div>
+  </div>
+  <a href="dashboard.html" style="display:inline-block;margin-top:24px;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:12px 28px;border-radius:10px;">Go to My Dashboard →</a>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+  import { getFirestore, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+    authDomain: "taxtrader.firebaseapp.com",
+    projectId: "taxtrader",
+    storageBucket: "taxtrader.firebasestorage.app",
+    messagingSenderId: "887085050235",
+    appId: "1:887085050235:web:a7b8c6e6b416e413e975de",
+    measurementId: "G-LC1NMDB0EG"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const storage = getStorage(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let uploadedFiles = {}; // { category: [{ file, url, name, size }] }
+
+  onAuthStateChanged(auth, async user => {
+    if (!user) { window.location.href = 'login.html?next=upload.html'; return; }
+    currentUser = user;
+    document.getElementById('nav-user').textContent = user.displayName || user.email;
+    document.getElementById('success-email').textContent = user.email;
+
+    // Load tax year from user profile
+    try {
+      const snap = await getDoc(doc(db, 'users', user.uid));
+      if (snap.exists()) {
+        const data = snap.data();
+        document.getElementById('tax-year-display').textContent = data.taxYear || new Date().getFullYear() - 1;
+      }
+    } catch(e) {}
+
+    document.getElementById('main-content').style.display = 'block';
+  });
+
+  window.handleLogout = async () => { await signOut(auth); window.location.href = 'index.html'; };
+
+  window.toggleSection = function(hd) {
+    const body = hd.nextElementSibling;
+    const chevron = hd.querySelector('.section-chevron');
+    body.classList.toggle('open');
+    chevron.classList.toggle('open');
+  };
+
+  window.handleDrag = (e, zone) => { e.preventDefault(); zone.classList.add('drag'); };
+  window.handleDragLeave = (zone) => zone.classList.remove('drag');
+  window.handleDrop = (e, cat) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag');
+    handleFiles(e.dataTransfer.files, cat);
+  };
+
+  window.handleFiles = function(files, category) {
+    Array.from(files).forEach(file => {
+      if (file.size > 25 * 1024 * 1024) {
+        showMsg(`${file.name} is too large. Max 25MB per file.`); return;
+      }
+      addFileToUI(file, category);
+      uploadFile(file, category);
+    });
+  };
+
+  function addFileToUI(file, category) {
+    const list = document.getElementById(`files-${category}`);
+    if (!list) return;
+    const id = `file-${Date.now()}-${Math.random().toString(36).substr(2,5)}`;
+    const ext = file.name.split('.').pop().toUpperCase();
+    const iconMap = {PDF:'📄',CSV:'📊',JPG:'🖼️',JPEG:'🖼️',PNG:'🖼️',XLSX:'📊',XLS:'📊'};
+    const icon = iconMap[ext] || '📎';
+    const el = document.createElement('div');
+    el.className = 'file-item'; el.id = id;
+    el.innerHTML = `
+      <span class="file-icon">${icon}</span>
+      <div class="file-info">
+        <div class="file-name">${file.name}</div>
+        <div class="file-size">${formatSize(file.size)}</div>
+        <div class="file-progress"><div class="file-progress-bar" id="bar-${id}" style="width:0%"></div></div>
+      </div>
+      <span class="file-status uploading" id="status-${id}">Uploading...</span>
+      <button class="file-remove" onclick="removeFile('${id}','${category}')" title="Remove">✕</button>`;
+    list.appendChild(el);
+  }
+
+  async function uploadFile(file, category) {
+    if (!currentUser) return;
+    const path = `uploads/${currentUser.uid}/${category}/${Date.now()}_${file.name}`;
+    const storageRef = ref(storage, path);
+    const task = uploadBytesResumable(storageRef, file);
+    const id = `file-${document.querySelectorAll(`#files-${category} .file-item`).length - 1}`;
+    const items = document.querySelectorAll(`#files-${category} .file-item`);
+    const el = items[items.length - 1];
+    const elId = el.id;
+
+    task.on('state_changed',
+      snap => {
+        const pct = (snap.bytesTransferred / snap.totalBytes) * 100;
+        const bar = document.getElementById(`bar-${elId}`);
+        if (bar) bar.style.width = pct + '%';
+      },
+      err => {
+        const status = document.getElementById(`status-${elId}`);
+        if (status) { status.textContent = 'Failed'; status.className = 'file-status error'; }
+      },
+      async () => {
+        const url = await getDownloadURL(task.snapshot.ref);
+        const status = document.getElementById(`status-${elId}`);
+        if (status) { status.textContent = '✓ Uploaded'; status.className = 'file-status done'; }
+
+        if (!uploadedFiles[category]) uploadedFiles[category] = [];
+        uploadedFiles[category].push({ name: file.name, size: file.size, url, path, category });
+        updateSummary();
+      }
+    );
+  }
+
+  window.removeFile = function(elId, category) {
+    const el = document.getElementById(elId);
+    if (el) el.remove();
+    // Remove from uploadedFiles by matching (simplified)
+    updateSummary();
+  };
+
+  function updateSummary() {
+    let totalFiles = 0, totalBytes = 0;
+    Object.values(uploadedFiles).forEach(arr => {
+      arr.forEach(f => { totalFiles++; totalBytes += f.size; });
+    });
+    // Also count UI items
+    const uiFiles = document.querySelectorAll('.file-item').length;
+    document.getElementById('total-files').textContent = uiFiles;
+    document.getElementById('total-size').textContent = formatSize(totalBytes);
+  }
+
+  window.submitDocuments = async function() {
+    const btn = document.getElementById('submit-btn');
+    const uiFiles = document.querySelectorAll('.file-item').length;
+
+    if (uiFiles === 0) { showMsg('Please upload at least one document before submitting.'); return; }
+
+    // Check all still uploading
+    const uploading = document.querySelectorAll('.file-status.uploading').length;
+    if (uploading > 0) { showMsg('Please wait for all files to finish uploading.'); return; }
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span>Submitting...';
+
+    try {
+      // Gather notes
+      const notes = {};
+      ['trading','w2','subs','edu','office','biz','prior'].forEach(cat => {
+        const el = document.getElementById(`notes-${cat}`);
+        if (el && el.value.trim()) notes[cat] = el.value.trim();
+      });
+
+      // Save submission to Firestore
+      await setDoc(doc(db, 'submissions', currentUser.uid), {
+        userId: currentUser.uid,
+        userEmail: currentUser.email,
+        userName: currentUser.displayName || '',
+        files: uploadedFiles,
+        notes,
+        submittedAt: serverTimestamp(),
+        status: 'pending_review',
+        taxYear: document.getElementById('tax-year-display').textContent,
+      }, { merge: true });
+
+      // Update user record
+      await setDoc(doc(db, 'users', currentUser.uid), {
+        lastSubmission: new Date().toISOString(),
+        submissionStatus: 'pending_review',
+      }, { merge: true });
+
+      // Show success
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('success-state').classList.add('show');
+      window.scrollTo(0, 0);
+
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Submit to My Tax Professional →';
+      showMsg('Something went wrong. Please try again or email hello@tradertax.net');
+    }
+  };
+
+  function showMsg(text) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = 'msg error show';
+    setTimeout(() => el.className = 'msg', 5000);
+  }
+
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024*1024) return (bytes/1024).toFixed(1) + ' KB';
+    return (bytes/1024/1024).toFixed(1) + ' MB';
+  }
+</script>
+</body>
+</html>

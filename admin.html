@@ -342,6 +342,34 @@ main{padding:28px 32px;overflow-y:auto;}
       </div>
     </div>
 
+      <!-- SUBMISSIONS TAB -->
+    <div class="content-section" id="section-submissions">
+      <div class="section-hd">
+        <div>
+          <div class="section-title">Document Submissions</div>
+          <div class="section-sub">All uploaded document packages awaiting review</div>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Tax Year</th>
+              <th>Files</th>
+              <th>Categories</th>
+              <th>Submitted</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="subs-tbody">
+            <tr><td colspan="7" style="text-align:center;padding:40px;color:var(--muted);">Loading submissions...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </main>
 </div>
 
@@ -419,6 +447,7 @@ main{padding:28px 32px;overflow-y:auto;}
       filterUsers();
       renderSnapshots();
       renderGrowth();
+      await loadSubmissions();
 
       document.getElementById('sb-user-count').textContent = allUsers.length;
 
@@ -647,6 +676,53 @@ main{padding:28px 32px;overflow-y:auto;}
   window.handleLogout = async function() {
     await signOut(auth);
     window.location.href = 'login.html';
+  };
+
+  window.loadSubmissions = async function() {
+    try {
+      const snap = await getDocs(collection(db, 'submissions'));
+      const subs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      subs.sort((a,b) => {
+        const at = a.submittedAt?.seconds || 0;
+        const bt = b.submittedAt?.seconds || 0;
+        return bt - at;
+      });
+      document.getElementById('sb-sub-count').textContent = subs.length;
+      document.getElementById('stat-snaps').textContent = subs.length;
+
+      const tbody = document.getElementById('subs-tbody');
+      if (!subs.length) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="7">No submissions yet.</td></tr>';
+        return;
+      }
+
+      const statusColors = {
+        pending_review: { bg:'rgba(245,158,11,.1)', color:'#d97706', label:'Pending Review' },
+        in_progress: { bg:'rgba(59,130,246,.1)', color:'#2563eb', label:'In Progress' },
+        complete: { bg:'rgba(61,186,126,.1)', color:'var(--green-dk)', label:'Complete' },
+      };
+
+      tbody.innerHTML = subs.map(s => {
+        const totalFiles = Object.values(s.files||{}).reduce((sum,arr) => sum+(arr.length||0), 0);
+        const cats = Object.keys(s.files||{}).join(', ') || '—';
+        const st = statusColors[s.status] || statusColors.pending_review;
+        const date = s.submittedAt?.seconds ? new Date(s.submittedAt.seconds*1000).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '—';
+        return `<tr>
+          <td>
+            <div class="user-name">${s.userName||'—'}</div>
+            <div class="user-email">${s.userEmail||'—'}</div>
+          </td>
+          <td><span style="font-family:var(--mono);font-weight:700;">${s.taxYear||'—'}</span></td>
+          <td><span class="snap-count">${totalFiles}</span></td>
+          <td style="font-size:.75rem;color:var(--muted);max-width:160px;">${cats}</td>
+          <td style="font-size:.75rem;font-family:var(--mono);">${date}</td>
+          <td><span style="background:${st.bg};color:${st.color};font-size:.65rem;font-weight:700;padding:3px 9px;border-radius:99px;">${st.label}</span></td>
+          <td>
+            <button class="action-btn" onclick="emailUser('${s.userEmail||''}')">Email</button>
+          </td>
+        </tr>`;
+      }).join('');
+    } catch(e) { console.error('Submissions error:', e); }
   };
 
   window.showTab = function(tab) {

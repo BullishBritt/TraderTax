@@ -16,15 +16,15 @@
 :root{
   --navy:#0a1628;--bg:#f7f8fb;--surface:#fff;
   --navy-mid:#0f2040;
-  --navy-card:#111e35;
-  --navy-border:#1a2e50;
+  --navy-card:#ffffff;
+  --navy-border:#e5e8ef;
   --green:#3dba7e;
   --green-light:#4fd492;
   --green-dim:rgba(61,186,126,0.1);
   --white:#ffffff;
   --gray:#8899aa;
 }
-html,body{background:#f7f8fb;color:var(--white);font-family:'DM Sans',sans-serif;min-height:100vh;}
+html,body{background:#f7f8fb;color:#0a1628;font-family:'DM Sans',sans-serif;min-height:100vh;}
 
 nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid #e5e8ef;display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
@@ -45,39 +45,37 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-light));border-radius:99px;transition:width .45s cubic-bezier(.4,0,.2,1);}
 
 /* STEP */
-.step-card{width:100%;max-width:620px;padding:1.25rem 1.5rem 2rem;animation:fadeUp .3s ease;}
+.step-card{width:100%;max-width:620px;padding:1.25rem 1.5rem 2rem;animation:fadeUp .3s ease;color:#0a1628;}
+.step-eyebrow{font-size:.72rem;color:#6b7280!important;letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
+.step-sub{font-size:.875rem;color:#6b7280!important;margin-bottom:1.5rem;line-height:1.5;}
+.multi-hint{font-size:.75rem;color:#6b7280!important;margin-bottom:.6rem;display:flex;align-items:center;gap:4px;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
-.step-eyebrow{font-size:.72rem;color:var(--gray);letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
-.step-q{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;line-height:1.2;margin-bottom:.35rem;}
-.step-sub{font-size:.875rem;color:var(--gray);margin-bottom:1.5rem;line-height:1.5;}
-
 .options{display:flex;flex-direction:column;gap:.55rem;}
-.opt{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid var(--navy-border);border-radius:11px;cursor:pointer;transition:all .18s;background:var(--navy-card);user-select:none;-webkit-tap-highlight-color:transparent;}
-.opt:hover{border-color:rgba(61,186,126,.45);background:rgba(61,186,126,.05);}
-.opt.selected{border-color:var(--green);background:#0d2a1a;}
-.opt.selected .opt-label{color:#ffffff;font-weight:600;}
+.opt{display:flex;align-items:center;gap:.9rem;padding:.9rem 1.1rem;border:1.5px solid #e5e8ef;border-radius:11px;cursor:pointer;transition:all .18s;background:#fff;user-select:none;-webkit-tap-highlight-color:transparent;}
+.opt:hover{border-color:rgba(61,186,126,.5);background:rgba(61,186,126,.04);}
+.opt.selected{border-color:#3dba7e;background:#f0fdf7;}
 .opt-icon{font-size:1.2rem;width:28px;text-align:center;flex-shrink:0;}
-.opt-label{font-size:.92rem;font-weight:500;flex:1;color:#ffffff;}
-.opt-check{width:18px;height:18px;border-radius:50%;border:2px solid var(--navy-border);display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
-.opt.selected .opt-check{background:var(--green);border-color:var(--green);}
+.opt-label{font-size:.92rem;font-weight:500;flex:1;color:#0a1628;}
+.opt.selected .opt-label{color:#0a1628;font-weight:700;}
+.opt-check{width:18px;height:18px;border-radius:50%;border:2px solid #e5e8ef;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0;}
+.opt.selected .opt-check{background:#3dba7e;border-color:#3dba7e;}
 .check-svg{display:none;}
 .opt.selected .check-svg{display:block;}
-.multi-hint{font-size:.75rem;color:var(--gray);margin-bottom:.6rem;display:flex;align-items:center;gap:4px;}
 
 .input-group{display:flex;flex-direction:column;gap:.7rem;}
 .input-row{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;}
 @media(max-width:480px){.input-row{grid-template-columns:1fr;}}
 .field{display:flex;flex-direction:column;gap:.35rem;}
 .field label{font-size:.75rem;color:var(--gray);letter-spacing:.5px;text-transform:uppercase;}
-.field input,.field select,.field textarea{background:var(--navy-card);border:1.5px solid var(--navy-border);border-radius:9px;color:#fff;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:.8rem 1rem;outline:none;transition:border-color .18s;width:100%;}
+.field input,.field select,.field textarea{background:#f7f8fb;border:1.5px solid #e5e8ef;border-radius:9px;color:#0a1628;font-family:'DM Sans',sans-serif;font-size:.92rem;padding:.8rem 1rem;outline:none;transition:border-color .18s;width:100%;}
 .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--green);}
 .field input::placeholder,.field textarea::placeholder{color:var(--gray);}
 .field select option{background:#0f2040;}
 .field textarea{resize:vertical;min-height:72px;}
 
 .btn-row{display:flex;gap:.65rem;margin-top:1.5rem;}
-.btn-back{flex:1;padding:.85rem;border:1.5px solid var(--navy-border);border-radius:9px;background:transparent;color:var(--gray);font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .18s;}
-.btn-back:hover{border-color:var(--gray);color:#fff;}
+.btn-back{flex:1;padding:.85rem;border:1.5px solid #e5e8ef;border-radius:9px;background:#fff;color:#6b7280;font-family:'DM Sans',sans-serif;font-size:.9rem;cursor:pointer;transition:all .18s;}
+.btn-back:hover{border-color:#0a1628;color:#0a1628;}
 .btn-next{flex:2;padding:.85rem;border:none;border-radius:9px;background:var(--green);color:var(--navy);font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;cursor:pointer;transition:all .18s;letter-spacing:.2px;}
 .btn-next:hover:not(:disabled){background:var(--green-light);transform:translateY(-1px);}
 .btn-next:disabled{opacity:.35;cursor:not-allowed;}
@@ -498,7 +496,7 @@ Return ONLY valid JSON, no markdown, no extra text.`;
       situation_summary: `Based on your profile as a ${profile.who} trading ${profile.instruments}, you have a unique tax situation that requires specialized knowledge.`,
       key_issues: ['Proper classification of trading gains/losses', 'Deduction optimization for traders', 'Business structure review'],
       top_deductions: ['Trading platform and data subscriptions', 'Home office deduction', 'Education and training expenses'],
-      tax_exposure: 'Your exact tax liability depends on your complete records — our CPA will calculate this precisely on your call.',
+      tax_exposure: 'Your exact tax liability depends on your complete records — a licensed tax professional will calculate this precisely on your call.',
       recommended_service: 'Based on your profile, our Profitable Trader package is likely the right fit.',
       price_low: '$497', price_high: '$1,297',
       cpa_brief: `Client is a ${profile.who} trading ${profile.instruments}. They are ${profile.profitable} with ${profile.income} in gains/losses. Primary needs: ${profile.needs}.`,
@@ -605,12 +603,12 @@ function showResults(profile, ai) {
         <div class="snap-card-title">💡 Our recommendation</div>
         <div class="snap-card-body"><p>${ai.recommended_service}</p></div>
         <div class="price-range">${ai.price_low} – ${ai.price_high}</div>
-        <div class="price-note">Starting range based on your profile. Your CPA will confirm on your call.</div>
+        <div class="price-note">Starting range based on your profile. Ya licensed tax professional will confirm on your call.</div>
       </div>
     </div>
 
     <div class="cta-block">
-      <h3>Your CPA is already briefed.</h3>
+      <h3>Ya licensed tax professional is already briefed.</h3>
       <p>We've sent your profile ahead. When you book, they'll already know your situation — no explaining from scratch, no wasted time.</p>
       <a href="contact.html" class="btn-cta">Book My CPA Call →</a>
       <div style="margin-top:20px;padding-top:20px;border-top:1px solid rgba(255,255,255,.08);">

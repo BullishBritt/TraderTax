@@ -1,24 +1,13 @@
-// =============================================
-// TRADERTAX FIRESTORE SECURITY RULES
-// Deploy at: console.firebase.google.com
-// → Firestore → Rules → paste this → Publish
-// =============================================
-
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // USERS COLLECTION
     match /users/{userId} {
-      // Users can only read/write their own document
       allow read, write: if request.auth != null && request.auth.uid == userId;
-
-      // Admin (hello@tradertax.net) can read ALL user documents
       allow read: if request.auth != null && request.auth.token.email == "hello@tradertax.net";
     }
 
-    // SNAPSHOTS SUBCOLLECTION (if you move to subcollections later)
-    match /users/{userId}/snapshots/{snapId} {
+    match /submissions/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow read: if request.auth != null && request.auth.token.email == "hello@tradertax.net";
     }
