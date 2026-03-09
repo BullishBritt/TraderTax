@@ -198,7 +198,7 @@ footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.07);padding
     <p>If your audience trades — Discord communities, influencers, prop firms, CPAs — we pay real commissions for every client you send. Simple tracking. Fast payouts. No cap.</p>
     <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
       <a href="#apply" class="btn-g" style="font-size:.95rem;padding:14px 30px;">Apply to Partner &rarr;</a>
-      <a href="#types" class="btn-n" style="font-size:.95rem;padding:13px 28px;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8);">See Partner Types</a>
+      <a href="#types" class="btn-n" style="font-size:.95rem;padding:13px 28px;border-color:rgba(255,255,255,.2);color:rgba(255,255,255,.8);" onclick="event.preventDefault();document.getElementById('types').scrollIntoView({behavior:'smooth'});">See Partner Types</a>
     </div>
     <div class="hero-stats">
       <div><div class="hstat-num">$497+</div><div class="hstat-label">Average client value</div></div>
@@ -380,7 +380,7 @@ footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.07);padding
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:4px;">Partner Application</div>
       <div style="font-size:.82rem;color:var(--muted);">We review every application within 48 hours.</div>
     </div>
-    <div class="fr"><div class="ff"><label>First Name</label><input type="text" placeholder="Alex"/></div><div class="ff"><label>Last Name</label><input type="text" placeholder="Johnson"/></div></div>
+    <div class="fr"><div class="ff"><label>First Name</label><input type="text" id="p-first" placeholder="Alex"/></div><div class="ff"><label>Last Name</label><input type="text" id="p-last" placeholder="Johnson"/></div></div>
     <div class="ff"><label>Email</label><input type="email" id="p-email" placeholder="you@email.com"/></div>
     <div class="ff">
       <label>Partner Type</label>
@@ -393,9 +393,9 @@ footer{background:var(--navy);border-top:1px solid rgba(255,255,255,.07);padding
         <option>Other</option>
       </select>
     </div>
-    <div class="ff"><label>Platform / Website / Community Name</label><input type="text" placeholder="e.g. TraderHub Discord, @yourtradertips, FundedTraders.io"/></div>
-    <div class="ff"><label>Approximate Audience / Community Size</label><select><option>Under 1,000</option><option>1,000 &ndash; 5,000</option><option>5,000 &ndash; 25,000</option><option>25,000 &ndash; 100,000</option><option>100,000+</option></select></div>
-    <div class="ff"><label>Tell us about your audience and why you&rsquo;d be a good fit</label><textarea placeholder="e.g. I run a 12K member Discord for NQ futures traders. They constantly ask about Apex taxes and I&rsquo;d love to point them somewhere trustworthy..."></textarea></div>
+    <div class="ff"><label>Platform / Website / Community Name</label><input type="text" id="p-platform" placeholder="e.g. TraderHub Discord, @yourtradertips, FundedTraders.io"/></div>
+    <div class="ff"><label>Approximate Audience / Community Size</label><select id="p-audience"><option>Under 1,000</option><option>1,000 &ndash; 5,000</option><option>5,000 &ndash; 25,000</option><option>25,000 &ndash; 100,000</option><option>100,000+</option></select></div>
+    <div class="ff"><label>Tell us about your audience and why you&rsquo;d be a good fit</label><textarea id="p-notes" placeholder="e.g. I run a 12K member Discord for NQ futures traders. They constantly ask about Apex taxes and I&rsquo;d love to point them somewhere trustworthy..."></textarea></div>
     <button class="fsub" onclick="submitPartner()">Submit Application &rarr;</button>
     <div class="fnote">partnerships@tradertax.net &middot; We reply within 48 hours</div>
   </div>
@@ -435,21 +435,39 @@ const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersect
 document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
 
 function submitPartner(){
+  const firstName=document.getElementById('p-first').value.trim();
+  const lastName=document.getElementById('p-last').value.trim();
   const email=document.getElementById('p-email').value.trim();
   const type=document.getElementById('p-type').value;
+  const platform=document.getElementById('p-platform').value.trim();
+  const audience=document.getElementById('p-audience').value;
+  const notes=document.getElementById('p-notes').value.trim();
+  const btn=document.querySelector('.fsub');
+
+  if(!firstName){alert('Please enter your first name.');return;}
   if(!email){alert('Please enter your email.');return;}
   if(!type){alert('Please select a partner type.');return;}
-  
-  // Send to Google Sheet via Apps Script
+
+  btn.disabled=true;
+  btn.textContent='Submitting...';
+
   const data={
     timestamp:new Date().toISOString(),
-    email,
+    firstName,lastName,email,
     partnerType:type,
+    platform,audience,notes,
     source:'partner-application'
   };
-  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec',{method:'POST',body:JSON.stringify(data)}).catch(()=>{});
-  
-  alert('Application received! We'll be in touch within 48 hours at '+email);
+
+  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec',{
+    method:'POST',
+    mode:'no-cors',
+    body:JSON.stringify(data)
+  }).catch(()=>{});
+
+  setTimeout(()=>{
+    document.querySelector('.apply-form').innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:2.5rem;margin-bottom:12px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;font-size:1.2rem;color:#0a1628;margin-bottom:8px;">Application Received!</div><p style="font-size:.88rem;color:#6b7280;line-height:1.7;max-width:360px;margin:0 auto;">We will be in touch within 48 hours at <strong>'+email+'</strong> with your referral link and everything you need to start earning.</p></div>';
+  }, 800);
 }
 </script>
 </body>

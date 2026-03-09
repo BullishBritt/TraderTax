@@ -395,6 +395,80 @@ main{padding:32px 40px;overflow-y:auto;}
     document.getElementById('section-' + tab).classList.add('active');
     document.getElementById('tab-' + tab)?.classList.add('active');
   };
+
+  async function loadDocuments(user) {
+    try {
+      const snap = await getDoc(doc(db, 'submissions', user.uid));
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const files = data.files || {};
+      if (!Object.keys(files).length) return;
+
+      // Get all years from submissions
+      const years = [];
+      if (data.taxYear) years.push(data.taxYear);
+      if (!years.length) years.push(new Date().getFullYear() - 1 + '');
+
+      // Year filter buttons
+      const yf = document.getElementById('year-filter');
+      if (yf) {
+        yf.innerHTML = ['All', ...years].map((y, i) =>
+          `<button onclick="filterYear('${y}')" id="yr-${y}" style="border:1.5px solid ${i===0?'var(--navy)':'var(--border)'};background:${i===0?'var(--navy)':'var(--surface)'};color:${i===0?'#fff':'var(--muted)'};border-radius:8px;padding:6px 14px;font-size:.78rem;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;">${y}</button>`
+        ).join('');
+      }
+
+      const catLabels = {
+        trading: {icon:'📊', label:'Trading Income'},
+        w2: {icon:'💼', label:'W-2 / Employment'},
+        subs: {icon:'🖥️', label:'Platform & Subscriptions'},
+        edu: {icon:'📚', label:'Education & Coaching'},
+        office: {icon:'🏠', label:'Home Office & Equipment'},
+        biz: {icon:'🏢', label:'Business Documents'},
+        prior: {icon:'📁', label:'Prior Year Returns'},
+      };
+
+      const container = document.getElementById('docs-container');
+      if (!container) return;
+
+      let html = '';
+      for (const [cat, fileArr] of Object.entries(files)) {
+        if (!fileArr || !fileArr.length) continue;
+        const label = catLabels[cat] || {icon:'📎', label:cat};
+        html += `<div class="card" style="margin-bottom:12px;">
+          <div style="display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:10px;">
+            <span style="font-size:1rem;">${label.icon}</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;">${label.label}</span>
+            <span style="background:var(--bg);border:1px solid var(--border);border-radius:99px;font-size:.65rem;font-weight:700;padding:2px 8px;margin-left:auto;">${fileArr.length} file${fileArr.length!==1?'s':''}</span>
+          </div>`;
+        for (const f of fileArr) {
+          const ext = f.name ? f.name.split('.').pop().toUpperCase() : 'FILE';
+          const iconMap = {PDF:'📄',CSV:'📊',JPG:'🖼️',JPEG:'🖼️',PNG:'🖼️',XLSX:'📊',XLS:'📊'};
+          const icon = iconMap[ext] || '📎';
+          const size = f.size ? (f.size < 1024*1024 ? (f.size/1024).toFixed(1)+' KB' : (f.size/1024/1024).toFixed(1)+' MB') : '';
+          html += `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--bg);">
+            <span style="font-size:1rem;">${icon}</span>
+            <div style="flex:1;min-width:0;">
+              <div style="font-size:.82rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${f.name||'Document'}</div>
+              <div style="font-size:.7rem;color:var(--muted);">${size} · ${label.label} · Tax Year ${data.taxYear||'2025'}</div>
+            </div>
+            ${f.url ? `<a href="${f.url}" target="_blank" style="font-size:.72rem;color:var(--green);font-weight:700;flex-shrink:0;text-decoration:none;">View →</a>` : ''}
+          </div>`;
+        }
+        html += '</div>';
+      }
+      if (html) container.innerHTML = html;
+    } catch(e) { console.log('Docs error:', e); }
+  }
+
+  window.filterYear = function(year) {
+    document.querySelectorAll('#year-filter button').forEach(b => {
+      const isActive = b.textContent === year;
+      b.style.background = isActive ? 'var(--navy)' : 'var(--surface)';
+      b.style.color = isActive ? '#fff' : 'var(--muted)';
+      b.style.borderColor = isActive ? 'var(--navy)' : 'var(--border)';
+    });
+  };
+
 </script>
 </body>
 </html>

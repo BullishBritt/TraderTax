@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>File It — Simple Trader Tax Filing | TraderTax</title>
+<meta name="description" content="No calls. No confusion. Answer a few questions, get your personalized tax cheat sheet, upload your docs. We handle everything else."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;--red:#ef4444;--amber:#f59e0b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+
+nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;}
+.logo span{color:var(--green);}
+.nav-right{display:flex;align-items:center;gap:16px;font-size:.85rem;}
+.nav-right a{color:var(--muted);}
+.nav-right a:hover{color:var(--navy);}
+.nav-cta{background:var(--navy);color:#fff!important;padding:8px 18px;border-radius:8px;font-weight:600;}
+
+/* HERO */
+.hero{background:var(--navy);padding:64px 5% 56px;text-align:center;}
+.eyebrow{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.8rem);color:#fff;line-height:1.15;margin-bottom:14px;}
+.hero h1 span{color:var(--green);}
+.hero p{font-size:.95rem;color:rgba(255,255,255,.65);max-width:480px;margin:0 auto 28px;line-height:1.8;}
+.hero-pills{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
+.pill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:99px;padding:5px 14px;font-size:.75rem;color:rgba(255,255,255,.65);}
+.price-strip{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.ps-item{text-align:center;}
+.ps-amt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:#fff;}
+.ps-label{font-size:.7rem;color:rgba(255,255,255,.45);margin-top:2px;}
+
+/* STEPS BAR */
+.steps-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:16px 5%;}
+.steps-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:0;}
+.sb-step{display:flex;align-items:center;gap:8px;flex:1;}
+.sb-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
+.sb-step.done .sb-num{background:var(--green);color:#fff;}
+.sb-step.active .sb-num{background:var(--navy);color:#fff;}
+.sb-step.pending .sb-num{background:var(--border);color:var(--muted);}
+.sb-label{font-size:.75rem;font-weight:600;color:var(--muted);white-space:nowrap;}
+.sb-step.active .sb-label{color:var(--navy);}
+.sb-step.done .sb-label{color:var(--green);}
+.sb-line{flex:1;height:2px;background:var(--border);margin:0 6px;}
+.sb-line.done{background:var(--green);}
+
+/* MAIN */
+.page{max-width:680px;margin:0 auto;padding:40px 20px 80px;}
+
+/* QUESTION CARD */
+.q-wrap{display:none;}
+.q-wrap.active{display:block;}
+.q-num{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.q-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:6px;line-height:1.3;}
+.q-sub{font-size:.85rem;color:var(--muted);margin-bottom:20px;line-height:1.6;}
+.q-hint{display:flex;gap:10px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 14px;font-size:.8rem;color:#92400e;line-height:1.6;margin-bottom:20px;}
+
+.opts{display:flex;flex-direction:column;gap:10px;}
+.opt{border:1.5px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;transition:all .15s;background:var(--surface);display:flex;align-items:center;gap:12px;user-select:none;}
+.opt:hover{border-color:var(--navy);background:var(--bg);}
+.opt.sel{border-color:var(--green);background:var(--green-lt);}
+.opt-icon{font-size:1.2rem;flex-shrink:0;}
+.opt-text{flex:1;}
+.opt-title{font-weight:600;font-size:.9rem;color:var(--navy);}
+.opt-desc{font-size:.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.opt-check{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;}
+.opt.sel .opt-check{background:var(--green);border-color:var(--green);color:#fff;}
+
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.opt-grid{border:1.5px solid var(--border);border-radius:12px;padding:14px;cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;user-select:none;}
+.opt-grid:hover{border-color:var(--navy);}
+.opt-grid.sel{border-color:var(--green);background:var(--green-lt);}
+.opt-grid-icon{font-size:1.5rem;margin-bottom:6px;}
+.opt-grid-title{font-weight:600;font-size:.85rem;}
+.opt-grid-desc{font-size:.72rem;color:var(--muted);margin-top:3px;}
+
+.text-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:.9rem;color:var(--navy);outline:none;transition:border-color .2s;}
+.text-input:focus{border-color:var(--navy);}
+
+/* NAV BUTTONS */
+.q-nav{display:flex;align-items:center;justify-content:space-between;margin-top:24px;}
+.btn-back{background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-back:hover{border-color:var(--navy);color:var(--navy);}
+.btn-next{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:all .15s;margin-left:auto;}
+.btn-next:hover{background:#0d1f3c;transform:translateY(-1px);}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+.progress-bar{height:4px;background:var(--border);border-radius:99px;margin-bottom:28px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:99px;transition:width .4s ease;}
+
+/* CHECKLIST OUTPUT */
+.checklist-output{display:none;}
+.checklist-output.show{display:block;}
+.cl-hero{background:var(--navy);border-radius:16px;padding:28px;color:#fff;margin-bottom:20px;text-align:center;}
+.cl-hero h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:8px;}
+.cl-hero p{font-size:.83rem;color:rgba(255,255,255,.65);line-height:1.7;}
+.cl-email-note{background:var(--green-lt);border:1px solid var(--green);border-radius:10px;padding:12px 16px;font-size:.82rem;color:var(--green-dk);margin-bottom:20px;display:flex;gap:10px;align-items:center;}
+
+.cl-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:12px;overflow:hidden;}
+.cl-section-hd{padding:14px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);background:var(--bg);}
+.cl-section-icon{font-size:1rem;}
+.cl-section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;}
+.cl-items{padding:8px 0;}
+.cl-item{display:flex;align-items:flex-start;gap:12px;padding:10px 18px;}
+.cl-item:not(:last-child){border-bottom:1px solid var(--bg);}
+.cl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.dot-req{background:var(--red);}
+.dot-rec{background:var(--amber);}
+.dot-opt{background:var(--green);}
+.cl-item-body{flex:1;}
+.cl-item-title{font-size:.85rem;font-weight:600;color:var(--navy);}
+.cl-item-desc{font-size:.75rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.cl-badge{font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;vertical-align:middle;}
+.badge-req{background:rgba(239,68,68,.1);color:var(--red);}
+.badge-rec{background:rgba(245,158,11,.1);color:#d97706;}
+.badge-opt{background:rgba(61,186,126,.1);color:var(--green-dk);}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;font-size:.75rem;}
+.legend-item{display:flex;align-items:center;gap:5px;color:var(--muted);}
+.legend-dot{width:8px;height:8px;border-radius:50%;}
+
+/* DEDUCTIONS SECTION */
+.deductions-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:20px;}
+.ded-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:4px;}
+.ded-sub{font-size:.78rem;color:var(--muted);margin-bottom:16px;}
+.ded-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.ded-item{background:var(--bg);border-radius:10px;padding:12px;}
+.ded-item-title{font-size:.8rem;font-weight:700;color:var(--navy);margin-bottom:3px;}
+.ded-item-desc{font-size:.72rem;color:var(--muted);line-height:1.5;}
+.ded-law{font-size:.65rem;color:var(--green-dk);font-weight:700;margin-top:4px;}
+
+/* PRICING */
+.pricing-select{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
+.price-opt{border:2px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .15s;background:var(--surface);}
+.price-opt:hover{border-color:var(--navy);}
+.price-opt.sel{border-color:var(--green);background:var(--green-lt);}
+.po-label{font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.po-price{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--navy);}
+.po-name{font-weight:700;font-size:.88rem;margin-top:4px;}
+.po-desc{font-size:.75rem;color:var(--muted);margin-top:4px;line-height:1.5;}
+.po-features{margin-top:10px;display:flex;flex-direction:column;gap:4px;}
+.po-feat{font-size:.75rem;color:var(--body);display:flex;gap:6px;}
+.po-feat::before{content:'✓';color:var(--green);font-weight:700;flex-shrink:0;}
+
+.submit-btn{width:100%;padding:16px;background:var(--green);color:#fff;border:none;border-radius:12px;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;cursor:pointer;transition:all .2s;}
+.submit-btn:hover{background:var(--green-dk);transform:translateY(-1px);}
+.submit-note{font-size:.72rem;color:var(--muted);text-align:center;margin-top:8px;line-height:1.6;}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:8px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* SUCCESS */
+.success-state{display:none;text-align:center;padding:48px 0;}
+.success-state.show{display:block;}
+.success-icon{font-size:3rem;margin-bottom:16px;}
+.success-state h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;margin-bottom:10px;}
+.success-state p{font-size:.9rem;color:var(--muted);line-height:1.7;max-width:420px;margin:0 auto 24px;}
+
+@media(max-width:540px){
+  .opts-grid{grid-template-columns:1fr;}
+  .pricing-select{grid-template-columns:1fr;}
+  .ded-grid{grid-template-columns:1fr;}
+  .steps-inner{gap:0;}
+  .sb-label{display:none;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Trader<span>Tax</span></a>
+  <div class="nav-right">
+    <a href="pricing.html">Pricing</a>
+    <a href="login.html" class="nav-cta">Log In</a>
+  </div>
+</nav>
+
+<!-- STEPS BAR -->
+<div class="steps-bar">
+  <div class="steps-inner">
+    <div class="sb-step active" id="sb1"><div class="sb-num">1</div><span class="sb-label">Your Situation</span></div>
+    <div class="sb-line" id="sl1"></div>
+    <div class="sb-step pending" id="sb2"><div class="sb-num">2</div><span class="sb-label">Your Checklist</span></div>
+    <div class="sb-line" id="sl2"></div>
+    <div class="sb-step pending" id="sb3"><div class="sb-num">3</div><span class="sb-label">Select Plan</span></div>
+    <div class="sb-line" id="sl3"></div>
+    <div class="sb-step pending" id="sb4"><div class="sb-num">4</div><span class="sb-label">Upload Docs</span></div>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- PROGRESS -->
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:10%"></div></div>
+
+  <!-- ===== QUESTIONS ===== -->
+
+  <!-- Q1: Filing status -->
+  <div class="q-wrap active" id="q1">
+    <div class="q-num">Question 1 of 9</div>
+    <div class="q-title">What is your filing status for 2025?</div>
+    <div class="q-sub">This affects your standard deduction and tax brackets.</div>
+    <div class="opts">
+      <div class="opt" onclick="selectOpt(this,'filing','single')">
+        <div class="opt-icon">👤</div><div class="opt-text"><div class="opt-title">Single</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'filing','married_joint')">
+        <div class="opt-icon">👫</div><div class="opt-text"><div class="opt-title">Married Filing Jointly</div><div class="opt-desc">Usually the best option for married couples</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'filing','married_separate')">
+        <div class="opt-icon">👫</div><div class="opt-text"><div class="opt-title">Married Filing Separately</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'filing','hoh')">
+        <div class="opt-icon">🏠</div><div class="opt-text"><div class="opt-title">Head of Household</div><div class="opt-desc">Single with a qualifying dependent</div></div><div class="opt-check"></div>
+      </div>
+    </div>
+    <div class="q-nav"><div></div><button class="btn-next" onclick="goNext(1)" disabled>Next →</button></div>
+  </div>
+
+  <!-- Q2: Income situation -->
+  <div class="q-wrap" id="q2">
+    <div class="q-num">Question 2 of 9</div>
+    <div class="q-title">How would you describe your income situation in 2025?</div>
+    <div class="q-sub">Select everything that applies to you.</div>
+    <div class="opts">
+      <div class="opt multi" onclick="toggleMulti(this,'income','trader_only')">
+        <div class="opt-icon">📈</div><div class="opt-text"><div class="opt-title">Trading only — no regular job</div><div class="opt-desc">Full-time or part-time trader, no W-2 employer</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'income','has_w2')">
+        <div class="opt-icon">💼</div><div class="opt-text"><div class="opt-title">I have a W-2 job in addition to trading</div><div class="opt-desc">Employed by a company and also trade on the side</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'income','self_employed')">
+        <div class="opt-icon">🧾</div><div class="opt-text"><div class="opt-title">I have other self-employment / freelance income</div><div class="opt-desc">1099 work, consulting, side business</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'income','unemployed')">
+        <div class="opt-icon">🎯</div><div class="opt-text"><div class="opt-title">Trading is my only income — I'm unemployed otherwise</div></div><div class="opt-check">✓</div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(2)">← Back</button>
+      <button class="btn-next" onclick="goNext(2)" id="next2" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q3: What do you trade -->
+  <div class="q-wrap" id="q3">
+    <div class="q-num">Question 3 of 9</div>
+    <div class="q-title">What do you trade? Select all that apply.</div>
+    <div class="q-sub">This determines which tax rules apply to you and what forms you need.</div>
+    <div class="opts-grid">
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','stocks')">
+        <div class="opt-grid-icon">📊</div><div class="opt-grid-title">Stocks / ETFs</div><div class="opt-grid-desc">1099-B, wash sale rules apply</div>
+      </div>
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','options')">
+        <div class="opt-grid-icon">⚡</div><div class="opt-grid-title">Options</div><div class="opt-grid-desc">Complex rules, assigned positions</div>
+      </div>
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','futures')">
+        <div class="opt-grid-icon">🔢</div><div class="opt-grid-title">Futures / NQ / ES</div><div class="opt-grid-desc">Section 1256 — 60/40 tax treatment</div>
+      </div>
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','forex')">
+        <div class="opt-grid-icon">💱</div><div class="opt-grid-title">Forex</div><div class="opt-grid-desc">Section 988 ordinary income rules</div>
+      </div>
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','crypto')">
+        <div class="opt-grid-icon">₿</div><div class="opt-grid-title">Crypto</div><div class="opt-grid-desc">Every trade is a taxable event</div>
+      </div>
+      <div class="opt-grid multi" onclick="toggleMulti(this,'trades','prop')">
+        <div class="opt-grid-icon">🏢</div><div class="opt-grid-title">Prop Firm</div><div class="opt-grid-desc">Apex, FTMO, TopStep, Tradeify</div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(3)">← Back</button>
+      <button class="btn-next" onclick="goNext(3)" id="next3" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q4: Prop firm details -->
+  <div class="q-wrap" id="q4">
+    <div class="q-num">Question 4 of 9</div>
+    <div class="q-title">Tell us about your prop firm activity.</div>
+    <div class="q-sub">Select all that apply. This is one of the most mishandled areas in trader taxes.</div>
+    <div class="q-hint">💡 Prop firm income is treated as self-employment income — not capital gains. Most CPAs get this wrong. We make sure it's filed correctly.</div>
+    <div class="opts">
+      <div class="opt multi" onclick="toggleMulti(this,'prop','received_payouts')">
+        <div class="opt-icon">💰</div><div class="opt-text"><div class="opt-title">I received prop firm payouts in 2025</div><div class="opt-desc">Any withdrawals from Apex, FTMO, TopStep, Tradeify, etc.</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'prop','paid_evals')">
+        <div class="opt-icon">📋</div><div class="opt-text"><div class="opt-title">I paid for evaluations or challenge fees</div><div class="opt-desc">Deductible as a business expense — save every receipt</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'prop','paid_resets')">
+        <div class="opt-icon">🔄</div><div class="opt-text"><div class="opt-title">I paid for resets</div><div class="opt-desc">Also deductible — include with your eval fees</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'prop','no_1099')">
+        <div class="opt-icon">📄</div><div class="opt-text"><div class="opt-title">My prop firm did NOT send me a 1099</div><div class="opt-desc">Common — many firms don't issue one. We can work with bank statements instead.</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'prop','lost_money')">
+        <div class="opt-icon">📉</div><div class="opt-text"><div class="opt-title">I lost money on prop firm evaluations overall</div><div class="opt-desc">You may still owe taxes depending on how the income was structured</div></div><div class="opt-check">✓</div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(4)">← Back</button>
+      <button class="btn-next" onclick="goNext(4)" id="next4" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q5: Trading result -->
+  <div class="q-wrap" id="q5">
+    <div class="q-num">Question 5 of 9</div>
+    <div class="q-title">What was your overall trading result for 2025?</div>
+    <div class="q-sub">This helps us know which deductions and strategies are most important for you.</div>
+    <div class="opts">
+      <div class="opt" onclick="selectOpt(this,'result','profitable')">
+        <div class="opt-icon">📈</div><div class="opt-text"><div class="opt-title">Profitable — I made money overall</div><div class="opt-desc">Focus: minimize tax owed, maximize deductions</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'result','breakeven')">
+        <div class="opt-icon">➡️</div><div class="opt-text"><div class="opt-title">Break even — roughly flat on the year</div><div class="opt-desc">Focus: document everything, carry forward losses</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'result','unprofitable')">
+        <div class="opt-icon">📉</div><div class="opt-text"><div class="opt-title">Unprofitable — I lost money trading</div><div class="opt-desc">Focus: capture losses, deduct expenses, reduce other income</div></div><div class="opt-check"></div>
+      </div>
+    </div>
+    <div class="q-hint">⚠️ Even if you lost money trading, you may still owe taxes — especially if you received prop firm payouts, which are taxed as self-employment income regardless of your net result.</div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(5)">← Back</button>
+      <button class="btn-next" onclick="goNext(5)" id="next5" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q6: Deductible expenses -->
+  <div class="q-wrap" id="q6">
+    <div class="q-num">Question 6 of 9</div>
+    <div class="q-title">Did you pay for any of these trading expenses in 2025?</div>
+    <div class="q-sub">Select all that apply — these are deductible and most traders miss them.</div>
+    <div class="opts">
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','platforms')">
+        <div class="opt-icon">🖥️</div><div class="opt-text"><div class="opt-title">Trading platforms or charting software</div><div class="opt-desc">TradingView, NinjaTrader, TradeStation, TC2000, Sierra Chart, Bookmap</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','education')">
+        <div class="opt-icon">📚</div><div class="opt-text"><div class="opt-title">Trading courses, coaching, or mentorship</div><div class="opt-desc">Udemy, mentor programs, boot camps, 1-on-1 coaching</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','communities')">
+        <div class="opt-icon">💬</div><div class="opt-text"><div class="opt-title">Discord communities or paid newsletters</div><div class="opt-desc">Educational trading communities, Benzinga Pro, Seeking Alpha</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','home_office')">
+        <div class="opt-icon">🏠</div><div class="opt-text"><div class="opt-title">Dedicated home office for trading</div><div class="opt-desc">A space used regularly and exclusively for trading</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','equipment')">
+        <div class="opt-icon">🖥️</div><div class="opt-text"><div class="opt-title">Computers, monitors, or hardware</div><div class="opt-desc">Equipment purchased primarily for trading</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','internet')">
+        <div class="opt-icon">📡</div><div class="opt-text"><div class="opt-title">Internet, VPN, or backup connectivity</div><div class="opt-desc">Proportional to trading use</div></div><div class="opt-check">✓</div>
+      </div>
+      <div class="opt multi" onclick="toggleMulti(this,'expenses','none')">
+        <div class="opt-icon">❌</div><div class="opt-text"><div class="opt-title">None of the above</div></div><div class="opt-check">✓</div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(6)">← Back</button>
+      <button class="btn-next" onclick="goNext(6)" id="next6" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q7: Business structure -->
+  <div class="q-wrap" id="q7">
+    <div class="q-num">Question 7 of 9</div>
+    <div class="q-title">Do you have a business entity for trading?</div>
+    <div class="q-sub">This affects which forms are needed and your filing complexity.</div>
+    <div class="opts">
+      <div class="opt" onclick="selectOpt(this,'entity','none')">
+        <div class="opt-icon">👤</div><div class="opt-text"><div class="opt-title">No — I trade as an individual</div><div class="opt-desc">Most common setup for traders</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'entity','llc')">
+        <div class="opt-icon">🏢</div><div class="opt-text"><div class="opt-title">Yes — I have an LLC</div><div class="opt-desc">Single or multi-member LLC</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'entity','scorp')">
+        <div class="opt-icon">📋</div><div class="opt-text"><div class="opt-title">Yes — I have an S-Corp</div><div class="opt-desc">S-Corp election, payroll involved</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'entity','unsure')">
+        <div class="opt-icon">🤔</div><div class="opt-text"><div class="opt-title">Not sure / I want to discuss this</div><div class="opt-desc">We can advise on whether an entity makes sense for you</div></div><div class="opt-check"></div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(7)">← Back</button>
+      <button class="btn-next" onclick="goNext(7)" id="next7" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q8: Prior returns -->
+  <div class="q-wrap" id="q8">
+    <div class="q-num">Question 8 of 9</div>
+    <div class="q-title">Do you have your prior year tax return?</div>
+    <div class="q-sub">Your 2024 return helps us spot carryforward losses, prior elections, and missed deductions.</div>
+    <div class="opts">
+      <div class="opt" onclick="selectOpt(this,'prior','yes')">
+        <div class="opt-icon">✅</div><div class="opt-text"><div class="opt-title">Yes — I can upload it</div><div class="opt-desc">Highly recommended — helps us catch everything</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'prior','no')">
+        <div class="opt-icon">❌</div><div class="opt-text"><div class="opt-title">No — I don't have it</div><div class="opt-desc">We can still file, but may need to request transcripts from the IRS</div></div><div class="opt-check"></div>
+      </div>
+      <div class="opt" onclick="selectOpt(this,'prior','first')">
+        <div class="opt-icon">🆕</div><div class="opt-text"><div class="opt-title">This is my first time filing</div></div><div class="opt-check"></div>
+      </div>
+    </div>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(8)">← Back</button>
+      <button class="btn-next" onclick="goNext(8)" id="next8" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- Q9: Email -->
+  <div class="q-wrap" id="q9">
+    <div class="q-num">Question 9 of 9</div>
+    <div class="q-title">Where should we send your personalized tax cheat sheet?</div>
+    <div class="q-sub">We'll email you a custom checklist of exactly what to gather based on your answers — plus a breakdown of every deduction you qualify for.</div>
+    <div class="q-hint">📧 Your cheat sheet will be ready instantly. No spam. No sales calls.</div>
+    <input class="text-input" type="email" id="user-email" placeholder="you@email.com" oninput="checkEmail()" style="margin-bottom:10px;"/>
+    <input class="text-input" type="text" id="user-name" placeholder="First name (optional)" style="margin-top:0;"/>
+    <div class="q-nav">
+      <button class="btn-back" onclick="goBack(9)">← Back</button>
+      <button class="btn-next" id="next9" onclick="generateChecklist()" disabled>Generate My Checklist →</button>
+    </div>
+  </div>
+
+  <!-- ===== CHECKLIST OUTPUT ===== -->
+  <div class="checklist-output" id="checklist-output">
+
+    <div class="cl-hero">
+      <div style="font-size:1.8rem;margin-bottom:8px;">📋</div>
+      <h2 id="cl-headline">Your 2025 Trader Tax Checklist</h2>
+      <p id="cl-subline">Based on your answers, here's exactly what you need to file — and what you can deduct.</p>
+    </div>
+
+    <div class="cl-email-note">
+      <span>📧</span>
+      <span>A copy of this checklist has been sent to <strong id="cl-email-display"></strong></span>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot dot-req"></div> Required — cannot file without</div>
+      <div class="legend-item"><div class="legend-dot dot-rec"></div> Important — helps find deductions</div>
+      <div class="legend-item"><div class="legend-dot dot-opt"></div> Recommended — good to have</div>
+    </div>
+
+    <div id="cl-items-container"></div>
+
+    <!-- DEDUCTIONS BREAKDOWN -->
+    <div class="deductions-card" id="deductions-card">
+      <div class="ded-title">💰 Deductions You Likely Qualify For</div>
+      <div class="ded-sub">Based on your situation — these reduce what you owe. Your tax professional will confirm each one.</div>
+      <div class="ded-grid" id="ded-grid"></div>
+    </div>
+
+    <!-- SELECT PLAN -->
+    <div id="pricing-section">
+      <div class="section-title-lg" style="margin-bottom:6px;">Ready to file?</div>
+      <div style="font-size:.88rem;color:var(--muted);margin-bottom:20px;line-height:1.6;">Choose the plan that fits your situation. No calls required for File It.</div>
+
+      <div class="pricing-select">
+        <div class="price-opt sel" onclick="selectPlan(this,'file_it')" id="plan-file">
+          <div class="po-label">Most Popular</div>
+          <div class="po-price" id="file-price">$197</div>
+          <div class="po-name">File It</div>
+          <div class="po-desc">100% async. No calls required. Upload docs, we handle everything.</div>
+          <div class="po-features">
+            <div class="po-feat">No phone call required</div>
+            <div class="po-feat">7–14 business day turnaround</div>
+            <div class="po-feat">Federal + state return</div>
+            <div class="po-feat">E-file included</div>
+          </div>
+        </div>
+        <div class="price-opt" onclick="selectPlan(this,'optimize')" id="plan-opt">
+          <div class="po-label">Best Value</div>
+          <div class="po-price">$497</div>
+          <div class="po-name">Optimize It</div>
+          <div class="po-desc">One 30-min call + async filing. CPA reviews for every possible deduction.</div>
+          <div class="po-features">
+            <div class="po-feat">30-min strategy call</div>
+            <div class="po-feat">3–5 business day turnaround</div>
+            <div class="po-feat">Deduction maximization review</div>
+            <div class="po-feat">Quarterly estimate guidance</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submit-btn" onclick="submitOrder()">
+        Get Started — File It →
+      </button>
+      <p class="submit-note">🔒 Secure checkout · Your documents are encrypted · Money-back guarantee if we can't file</p>
+    </div>
+
+  </div><!-- end checklist-output -->
+
+  <!-- SUCCESS -->
+  <div class="success-state" id="success-state">
+    <div class="success-icon">🎉</div>
+    <h2>You're All Set!</h2>
+    <p>Check your email for your personalized tax cheat sheet. Create your account to upload your documents and get started.</p>
+    <a href="signup.html?from=file-it" style="display:inline-block;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:800;padding:14px 32px;border-radius:12px;font-size:.95rem;">Create Your Account →</a>
+    <p style="margin-top:14px;font-size:.8rem;color:var(--muted);">Already have an account? <a href="login.html" style="color:var(--green);font-weight:600;">Log in →</a></p>
+  </div>
+
+</div><!-- end .page -->
+
+<script>
+const answers = {};
+const multiAnswers = {};
+let currentQ = 1;
+const totalQ = 9;
+let selectedPlan = 'file_it';
+
+function selectOpt(el, key, val) {
+  el.closest('.opts').querySelectorAll('.opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  answers[key] = val;
+  const qNum = el.closest('.q-wrap').id.replace('q','');
+  const nextBtn = document.getElementById('next'+qNum) || el.closest('.q-wrap').querySelector('.btn-next');
+  if(nextBtn) nextBtn.disabled = false;
+}
+
+function toggleMulti(el, key, val) {
+  if(!multiAnswers[key]) multiAnswers[key] = [];
+  if(el.classList.contains('sel')) {
+    el.classList.remove('sel');
+    multiAnswers[key] = multiAnswers[key].filter(v => v !== val);
+  } else {
+    el.classList.add('sel');
+    if(!multiAnswers[key].includes(val)) multiAnswers[key].push(val);
+  }
+  const qNum = el.closest('.q-wrap').id.replace('q','');
+  const nextBtn = document.getElementById('next'+qNum) || el.closest('.q-wrap').querySelector('.btn-next');
+  if(nextBtn) nextBtn.disabled = multiAnswers[key].length === 0;
+}
+
+function checkEmail() {
+  const val = document.getElementById('user-email').value;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+  document.getElementById('next9').disabled = !valid;
+}
+
+function goNext(from) {
+  // Skip Q4 (prop details) if not a prop trader
+  let to = from + 1;
+  if(from === 3 && !multiAnswers['trades']?.includes('prop')) to = 5;
+
+  document.getElementById('q'+from).classList.remove('active');
+  document.getElementById('q'+to).classList.add('active');
+  currentQ = to;
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function goBack(from) {
+  let to = from - 1;
+  if(from === 5 && !multiAnswers['trades']?.includes('prop')) to = 3;
+
+  document.getElementById('q'+from).classList.remove('active');
+  document.getElementById('q'+to).classList.add('active');
+  currentQ = to;
+  updateProgress();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function updateProgress() {
+  const pct = Math.round((currentQ / totalQ) * 85);
+  document.getElementById('progress').style.width = pct + '%';
+  // Update steps bar
+  document.getElementById('sb1').className = 'sb-step ' + (currentQ <= 8 ? 'active' : 'done');
+}
+
+function selectPlan(el, plan) {
+  document.querySelectorAll('.price-opt').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedPlan = plan;
+  const btn = document.getElementById('submit-btn');
+  btn.textContent = plan === 'file_it' ? 'Get Started — File It →' : 'Get Started — Optimize It →';
+}
+
+function generateChecklist() {
+  const email = document.getElementById('user-email').value;
+  const name = document.getElementById('user-name').value || 'Trader';
+
+  // Hide questions, show checklist
+  document.getElementById('q9').classList.remove('active');
+  document.getElementById('progress').style.width = '100%';
+
+  // Update steps bar
+  ['sb1','sb2'].forEach(id => {
+    document.getElementById(id).className = id === 'sb2' ? 'sb-step active' : 'sb-step done';
+  });
+  document.getElementById('sl1').className = 'sb-line done';
+
+  // Set email display
+  document.getElementById('cl-email-display').textContent = email;
+
+  // Personalize headline
+  const result = answers['result'] || 'profitable';
+  const trades = multiAnswers['trades'] || [];
+  const income = multiAnswers['income'] || [];
+  const prop = multiAnswers['prop'] || [];
+  const expenses = multiAnswers['expenses'] || [];
+  const entity = answers['entity'] || 'none';
+
+  let headline = `Your 2025 Trader Tax Checklist`;
+  if(name) headline = `${name}'s 2025 Trader Tax Checklist`;
+  document.getElementById('cl-headline').textContent = headline;
+
+  // Adjust File It price based on complexity
+  let filePrice = 197;
+  if(income.includes('has_w2')) filePrice += 50;
+  if(income.includes('self_employed')) filePrice += 50;
+  if(entity === 'llc' || entity === 'scorp') filePrice += 100;
+  if(trades.includes('crypto')) filePrice += 50;
+  document.getElementById('file-price').textContent = '$' + filePrice;
+
+  // Build checklist sections
+  const sections = [];
+
+  // INCOME DOCUMENTS
+  const incomeDocs = [];
+  incomeDocs.push({req:'req', title:'Government-issued ID', desc:'Driver\'s license or passport — required for all returns'});
+  incomeDocs.push({req:'req', title:'Social Security Number', desc:'Or Individual Taxpayer Identification Number (ITIN)'});
+
+  if(trades.includes('stocks') || trades.includes('options')) {
+    incomeDocs.push({req:'req', title:'1099-B from your broker', desc:'Schwab, TD Ameritrade, Tastytrade, Webull, etc. — shows all stock and options trades', law:'Schedule D / Form 8949'});
+  }
+  if(trades.includes('futures')) {
+    incomeDocs.push({req:'req', title:'1099-B showing Section 1256 contracts', desc:'Futures get 60/40 tax treatment — 60% long-term, 40% short-term regardless of hold time. This is a major tax advantage.', law:'Form 6781 — Section 1256'});
+  }
+  if(trades.includes('forex')) {
+    incomeDocs.push({req:'req', title:'Forex broker account statement', desc:'OANDA, FOREX.com, etc. — full year statement showing P&L', law:'IRC Section 988 — ordinary income'});
+  }
+  if(trades.includes('crypto')) {
+    incomeDocs.push({req:'req', title:'Crypto transaction CSV from all exchanges', desc:'Coinbase, Binance, Kraken, Gemini — export full transaction history. Every trade is a taxable event.', law:'Form 8949 required for every trade'});
+  }
+  if(trades.includes('prop') || prop.includes('received_payouts')) {
+    incomeDocs.push({req:'req', title:'Prop firm 1099-NEC or 1099-MISC (if issued)', desc:'Apex, FTMO, TopStep, Tradeify — check your dashboard. Many firms do not issue a 1099.', law:'Self-employment income — SE tax applies'});
+    if(prop.includes('no_1099')) {
+      incomeDocs.push({req:'req', title:'Bank statements showing all prop firm deposits', desc:'If your prop firm didn\'t send a 1099, bank statements proving payout deposits are required. Highlight each deposit.', law:'Required documentation for SE income'});
+    }
+  }
+  if(income.includes('has_w2')) {
+    incomeDocs.push({req:'req', title:'W-2 from all employers', desc:'One W-2 per employer — check that all boxes are filled in correctly'});
+  }
+  if(income.includes('self_employed')) {
+    incomeDocs.push({req:'req', title:'1099-NEC for all freelance / contract work', desc:'Any client that paid you $600+ should have sent one. Even if they didn\'t, you still must report the income.'});
+  }
+  sections.push({icon:'📊', title:'Income Documents', items:incomeDocs});
+
+  // PROP FIRM DEDUCTIONS
+  if(trades.includes('prop') || prop.length > 0) {
+    const propDocs = [];
+    if(prop.includes('paid_evals')) {
+      propDocs.push({req:'req', title:'Evaluation / challenge fee receipts', desc:'All payments to Apex, FTMO, TopStep, Tradeify for evaluations. Email receipts, credit card statements, or PayPal history.', law:'Deductible as ordinary business expense'});
+    }
+    if(prop.includes('paid_resets')) {
+      propDocs.push({req:'req', title:'Reset fee receipts or statements', desc:'Same as eval fees — fully deductible. Pull from your prop firm dashboard or email history.', law:'Deductible as ordinary business expense'});
+    }
+    propDocs.push({req:'rec', title:'Prop firm monthly platform/data fees', desc:'Ongoing fees for your funded account. Check your dashboard or bank statements.', law:'Deductible as trading expense'});
+    sections.push({icon:'🏢', title:'Prop Firm Expenses', items:propDocs});
+  }
+
+  // TRADING EXPENSES
+  if(expenses.length > 0 && !expenses.includes('none')) {
+    const expDocs = [];
+    if(expenses.includes('platforms')) {
+      expDocs.push({req:'rec', title:'Platform & charting software receipts', desc:'TradingView, NinjaTrader, TC2000, Sierra Chart, Bookmap, Trade Ideas — annual or monthly billing statements', law:'Deductible under IRC Section 162'});
+    }
+    if(expenses.includes('education')) {
+      expDocs.push({req:'rec', title:'Course, coaching & mentorship receipts', desc:'Any trading education paid during 2025 — Udemy, private mentors, boot camps, seminars, webinars', law:'Deductible as professional development'});
+    }
+    if(expenses.includes('communities')) {
+      expDocs.push({req:'rec', title:'Discord, newsletter & research subscriptions', desc:'Paid communities with educational content, Benzinga Pro, Seeking Alpha, newsletters', law:'Deductible as research expense'});
+    }
+    if(expenses.includes('internet')) {
+      expDocs.push({req:'opt', title:'Monthly internet and VPN bills', desc:'12 months of internet bills — deduct proportional to trading use. If you trade full time, 50–100% may be deductible.', law:'Deductible proportional to business use'});
+    }
+    sections.push({icon:'💻', title:'Trading Platform & Education Expenses', items:expDocs});
+  }
+
+  // HOME OFFICE & EQUIPMENT
+  if(expenses.includes('home_office') || expenses.includes('equipment')) {
+    const officeDocs = [];
+    if(expenses.includes('home_office')) {
+      officeDocs.push({req:'rec', title:'Lease or mortgage statement', desc:'To calculate home office deduction — we need total square footage and your rent/mortgage amount', law:'IRC Section 280A — home office'});
+      officeDocs.push({req:'rec', title:'Utility bills (electric, internet)', desc:'Home office deduction is proportional to the % of your home used exclusively for trading', law:'Proportional to dedicated office space'});
+    }
+    if(expenses.includes('equipment')) {
+      officeDocs.push({req:'rec', title:'Computer and monitor purchase receipts', desc:'Any hardware bought in 2025 primarily for trading — may qualify for Section 179 immediate expensing', law:'Section 179 or bonus depreciation'});
+    }
+    sections.push({icon:'🏠', title:'Home Office & Equipment', items:officeDocs});
+  }
+
+  // BUSINESS ENTITY
+  if(entity === 'llc' || entity === 'scorp') {
+    const bizDocs = [];
+    bizDocs.push({req:'req', title:'Prior year business return (Form 1120-S or Schedule C)', desc:'Your 2024 business return — needed to ensure continuity and catch carryforward items'});
+    bizDocs.push({req:'req', title:'Business bank statements (all 12 months)', desc:'Full year statements for your business checking account'});
+    if(entity === 'scorp') {
+      bizDocs.push({req:'req', title:'Payroll records and W-2 (if S-Corp with salary)', desc:'S-Corp owners who take a salary need payroll documentation — this is required'});
+    }
+    sections.push({icon:'🏢', title:'Business Entity Documents', items:bizDocs});
+  }
+
+  // PRIOR RETURNS
+  if(answers['prior'] === 'yes') {
+    sections.push({icon:'📁', title:'Prior Year Returns', items:[
+      {req:'rec', title:'2024 Federal tax return (Form 1040)', desc:'Helps identify carryforward losses, prior year elections, and prior deduction patterns'},
+      {req:'opt', title:'2024 State tax return', desc:'Required if your state has income tax'}
+    ]});
+  }
+
+  // Render sections
+  const container = document.getElementById('cl-items-container');
+  container.innerHTML = sections.map(s => `
+    <div class="cl-section">
+      <div class="cl-section-hd">
+        <span class="cl-section-icon">${s.icon}</span>
+        <span class="cl-section-title">${s.title}</span>
+      </div>
+      <div class="cl-items">
+        ${s.items.map(item => `
+          <div class="cl-item">
+            <div class="cl-dot dot-${item.req}"></div>
+            <div class="cl-item-body">
+              <div class="cl-item-title">${item.title}
+                <span class="cl-badge badge-${item.req}">${item.req==='req'?'Required':item.req==='rec'?'Important':'Recommended'}</span>
+              </div>
+              <div class="cl-item-desc">${item.desc}</div>
+              ${item.law ? `<div style="font-size:.65rem;color:var(--green-dk);font-weight:700;margin-top:4px;">📋 ${item.law}</div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+
+  // Build deductions breakdown
+  const deds = [];
+  if(trades.includes('futures')) deds.push({title:'Section 1256 — 60/40 Rule', desc:'60% of futures gains taxed at long-term rate even on short holds. This is a huge advantage over stocks.', law:'Form 6781'});
+  if(trades.includes('prop') || prop.includes('paid_evals')) deds.push({title:'Prop Firm Eval & Reset Fees', desc:'Every dollar you paid in challenge fees is deductible as a business expense — directly reduces taxable income.', law:'IRC Section 162'});
+  if(expenses.includes('platforms')) deds.push({title:'Trading Platform Subscriptions', desc:'TradingView, NinjaTrader, Bookmap, Trade Ideas — all deductible. Keep receipts for all subscriptions.', law:'IRC Section 162'});
+  if(expenses.includes('education')) deds.push({title:'Trading Education & Coaching', desc:'Courses, mentorships, and coaching fees are deductible as ordinary business expenses when trading is your trade or business.', law:'IRC Section 162'});
+  if(expenses.includes('home_office')) deds.push({title:'Home Office Deduction', desc:'If you trade from a dedicated space, a proportional % of rent, utilities, and internet is deductible.', law:'IRC Section 280A'});
+  if(expenses.includes('equipment')) deds.push({title:'Equipment — Section 179 Expensing', desc:'Computers and monitors bought for trading may qualify for immediate 100% deduction in year of purchase.', law:'Section 179 / Bonus Depreciation'});
+  if(result === 'unprofitable') deds.push({title:'Capital Loss Carryforward', desc:'If your losses exceed gains, up to $3,000 can offset ordinary income — the rest carries forward to future years.', law:'IRC Section 1211'});
+  if(trades.includes('prop') && result === 'profitable') deds.push({title:'Self-Employment Tax Deduction', desc:'You can deduct 50% of your SE tax directly on Form 1040 — this reduces your adjusted gross income.', law:'IRC Section 164(f)'});
+
+  document.getElementById('ded-grid').innerHTML = deds.map(d => `
+    <div class="ded-item">
+      <div class="ded-item-title">${d.title}</div>
+      <div class="ded-item-desc">${d.desc}</div>
+      <div class="ded-law">${d.law}</div>
+    </div>`).join('');
+
+  document.getElementById('checklist-output').classList.add('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+
+  // Send to Google Sheet
+  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec', {
+    method:'POST',
+    mode:'no-cors',
+    body:JSON.stringify({
+      timestamp: new Date().toISOString(),
+      email, name,
+      source: 'file-it-intake',
+      answers: JSON.stringify(answers),
+      multiAnswers: JSON.stringify(multiAnswers)
+    })
+  }).catch(()=>{});
+}
+
+function submitOrder() {
+  const email = document.getElementById('user-email').value;
+  const btn = document.getElementById('submit-btn');
+  btn.innerHTML = '<span class="spinner"></span>Setting up your account...';
+  btn.disabled = true;
+
+  // Save to sheet
+  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec', {
+    method:'POST',
+    mode:'no-cors',
+    body:JSON.stringify({
+      timestamp: new Date().toISOString(),
+      email,
+      source: 'file-it-order',
+      plan: selectedPlan,
+      answers: JSON.stringify(answers),
+      multiAnswers: JSON.stringify(multiAnswers)
+    })
+  }).catch(()=>{});
+
+  setTimeout(() => {
+    document.getElementById('checklist-output').style.display = 'none';
+    document.getElementById('success-state').classList.add('show');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }, 900);
+}
+</script>
+</body>
+</html>
