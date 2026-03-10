@@ -1,0 +1,791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Trader Tax Calculator 2025 — Estimate Your Tax Liability | TraderTax</title>
+<meta name="description" content="Free trader tax calculator for 2025. Estimate federal taxes, self-employment tax, and state taxes on prop firm payouts, futures, stocks, options, and crypto. See your potential savings."/>
+<meta property="og:title" content="Trader Tax Calculator 2025 | TraderTax"/>
+<meta property="og:description" content="Estimate your trader tax liability in 60 seconds. See potential savings from trader tax strategies."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Trader Tax Calculator","description":"Free tax liability estimator for active traders, prop firm traders, futures, options, crypto and forex traders.","url":"https://tradertax.net/calculator.html","applicationCategory":"FinanceApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"provider":{"@type":"Organization","name":"TraderTax","url":"https://tradertax.net"}}
+</script>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;--red:#ef4444;--amber:#f59e0b;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);min-height:100vh;}
+a{text-decoration:none;color:inherit;}
+input,select{font-family:'DM Sans',sans-serif;}
+
+nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:100;}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);}
+.logo span{color:var(--green);}
+.nav-links{display:flex;align-items:center;gap:22px;font-size:.88rem;}
+.nav-links a{color:var(--muted);}
+.nav-links a:hover{color:var(--navy);}
+.nav-cta{background:var(--navy);color:#fff!important;padding:8px 18px;border-radius:8px;font-weight:600;font-size:.82rem;}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:4px;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--navy);margin:5px 0;border-radius:2px;}
+.mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);padding:16px 5%;z-index:99;flex-direction:column;gap:0;}
+.mobile-menu a{padding:12px 0;border-bottom:1px solid var(--border);font-size:.9rem;color:var(--body);display:block;}
+.mobile-menu.open{display:flex;}
+@media(max-width:680px){.nav-links{display:none;}.hamburger{display:block;}}
+
+.hero{background:var(--navy);padding:64px 5% 56px;text-align:center;}
+.eyebrow{font-size:.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.6rem);color:#fff;margin-bottom:12px;line-height:1.15;}
+.hero h1 span{color:var(--green);}
+.hero p{font-size:.92rem;color:rgba(255,255,255,.65);max-width:480px;margin:0 auto;line-height:1.8;}
+
+.page{max-width:860px;margin:0 auto;padding:40px 20px 80px;}
+
+/* PROGRESS */
+.progress-wrap{margin-bottom:28px;}
+.progress-label{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin-bottom:6px;}
+.progress-bar{height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.progress-fill{height:100%;background:var(--green);border-radius:99px;transition:width .4s ease;}
+
+/* STEPS */
+.step{display:none;}
+.step.active{display:block;}
+
+.step-hd{margin-bottom:24px;}
+.step-eyebrow{font-size:.68rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.step-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:6px;}
+.step-sub{font-size:.85rem;color:var(--muted);line-height:1.6;}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.form-full{grid-column:1/-1;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.field input,.field select{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.9rem;color:var(--navy);outline:none;transition:border-color .2s;width:100%;}
+.field input:focus,.field select:focus{border-color:var(--navy);}
+.field .hint{font-size:.72rem;color:var(--muted);}
+.prefix-wrap{position:relative;}
+.prefix-wrap::before{content:'$';position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.9rem;pointer-events:none;}
+.prefix-wrap input{padding-left:26px;}
+
+/* OPTIONS GRID */
+.opts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-bottom:20px;}
+.opt-tile{border:1.5px solid var(--border);border-radius:12px;padding:14px 12px;cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;user-select:none;}
+.opt-tile:hover{border-color:var(--navy);}
+.opt-tile.sel{border-color:var(--green);background:var(--green-lt);}
+.opt-tile-icon{font-size:1.3rem;margin-bottom:6px;}
+.opt-tile-label{font-size:.78rem;font-weight:600;color:var(--navy);}
+.opt-tile-sub{font-size:.65rem;color:var(--muted);margin-top:2px;}
+
+/* RADIO ROW */
+.radio-row{display:flex;gap:10px;flex-wrap:wrap;}
+.radio-opt{border:1.5px solid var(--border);border-radius:10px;padding:11px 18px;cursor:pointer;font-size:.85rem;font-weight:600;transition:all .15s;background:var(--surface);user-select:none;}
+.radio-opt:hover{border-color:var(--navy);}
+.radio-opt.sel{border-color:var(--navy);background:var(--navy);color:#fff;}
+
+/* NAV BTNS */
+.step-nav{display:flex;align-items:center;justify-content:space-between;margin-top:24px;}
+.btn-back{background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:10px;padding:11px 20px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-back:hover{border-color:var(--navy);color:var(--navy);}
+.btn-next{background:var(--navy);color:#fff;border:none;border-radius:10px;padding:12px 28px;font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;transition:all .15s;margin-left:auto;}
+.btn-next:hover{background:#0d1f3c;}
+.btn-next:disabled{opacity:.4;cursor:not-allowed;}
+.btn-green{background:var(--green)!important;}
+.btn-green:hover{background:var(--green-dk)!important;}
+
+/* LEAD GATE */
+.gate-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:32px;text-align:center;max-width:480px;margin:0 auto;}
+.gate-icon{font-size:2.5rem;margin-bottom:12px;}
+.gate-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:8px;}
+.gate-sub{font-size:.85rem;color:var(--muted);line-height:1.7;margin-bottom:24px;}
+.gate-preview{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:24px;}
+.gate-pill{background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:6px 14px;font-size:.75rem;font-weight:600;color:var(--muted);}
+.gate-field{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;text-align:left;}
+.gate-field label{font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.gate-field input{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.9rem;color:var(--navy);outline:none;transition:border-color .2s;width:100%;font-family:'DM Sans',sans-serif;}
+.gate-field input:focus{border-color:var(--navy);}
+.gate-legal{font-size:.7rem;color:var(--muted);line-height:1.6;margin-top:8px;}
+.gate-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .2s;margin-top:4px;}
+.gate-btn:hover{background:var(--green-dk);}
+.gate-btn:disabled{opacity:.5;cursor:not-allowed;}
+
+/* RESULTS */
+.results-hd{background:var(--navy);border-radius:16px;padding:28px;color:#fff;text-align:center;margin-bottom:20px;}
+.results-hd h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;margin-bottom:6px;}
+.results-hd p{font-size:.82rem;color:rgba(255,255,255,.6);line-height:1.6;}
+
+.results-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.result-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:20px;}
+.result-card.savings{border-color:var(--green);background:var(--green-lt);}
+.result-card.danger{border-color:var(--amber);}
+.rc-label{font-size:.68rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.rc-amount{font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);}
+.result-card.savings .rc-amount{color:var(--green-dk);}
+.rc-sub{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.5;}
+
+.breakdown{background:var(--surface);border:1px solid var(--border);border-radius:14px;margin-bottom:16px;overflow:hidden;}
+.breakdown-hd{padding:14px 18px;background:var(--bg);border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:8px;}
+.breakdown-row{display:flex;align-items:center;justify-content:space-between;padding:11px 18px;border-bottom:1px solid var(--bg);font-size:.83rem;}
+.breakdown-row:last-child{border-bottom:none;}
+.br-label{color:var(--body);}
+.br-label .br-sub{font-size:.7rem;color:var(--muted);margin-top:2px;}
+.br-val{font-weight:700;color:var(--navy);}
+.br-val.red{color:var(--red);}
+.br-val.green{color:var(--green-dk);}
+.br-val.amber{color:#d97706;}
+.br-total{background:var(--navy);color:#fff!important;font-weight:700;}
+.br-total .br-label{color:rgba(255,255,255,.8)!important;}
+.br-total .br-val{color:#fff!important;}
+
+.savings-breakdown{background:var(--green-lt);border:1.5px solid var(--green);border-radius:14px;padding:20px;margin-bottom:16px;}
+.sb-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:var(--navy);margin-bottom:4px;}
+.sb-sub{font-size:.78rem;color:var(--muted);margin-bottom:16px;}
+.sb-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid rgba(61,186,126,.2);font-size:.82rem;}
+.sb-item:last-child{border-bottom:none;padding-bottom:0;}
+.sb-icon{font-size:.9rem;flex-shrink:0;margin-top:1px;}
+.sb-body{}
+.sb-name{font-weight:700;color:var(--navy);}
+.sb-desc{font-size:.72rem;color:var(--muted);margin-top:2px;line-height:1.5;}
+.sb-save{font-family:'Syne',sans-serif;font-weight:800;color:var(--green-dk);font-size:.85rem;flex-shrink:0;margin-left:auto;}
+
+.disclaimer{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 16px;font-size:.75rem;color:#92400e;line-height:1.6;margin-bottom:20px;}
+
+/* RESULTS CTA */
+.results-cta{background:var(--navy);border-radius:14px;padding:28px;text-align:center;color:#fff;}
+.results-cta h3{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:8px;}
+.results-cta p{font-size:.83rem;color:rgba(255,255,255,.65);margin-bottom:20px;line-height:1.7;}
+.cta-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.cta-btn-g{background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:800;padding:13px 22px;border-radius:10px;font-size:.88rem;transition:all .2s;}
+.cta-btn-g:hover{background:var(--green-dk);}
+.cta-btn-o{background:rgba(255,255,255,.08);color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:13px 22px;border-radius:10px;font-size:.88rem;border:1px solid rgba(255,255,255,.15);}
+.cta-btn-o:hover{background:rgba(255,255,255,.14);}
+
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+.info-box{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.78rem;color:var(--muted);line-height:1.6;margin-top:12px;}
+.info-box strong{color:var(--navy);}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr;}
+  .results-grid{grid-template-columns:1fr;}
+  .opts-grid{grid-template-columns:repeat(2,1fr);}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="index.html" class="logo">Trader<span>Tax</span></a>
+  <div class="nav-links">
+    <a href="services.html">Services</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="faq.html">FAQ</a>
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+    <a href="login.html" class="nav-cta">Log In</a>
+  </div>
+  <button class="hamburger" onclick="document.querySelector('.mobile-menu').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="mobile-menu">
+  <a href="services.html">Services</a>
+  <a href="pricing.html">Pricing</a>
+  <a href="faq.html">FAQ</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html">Log In</a>
+  <a href="snapshot.html" style="color:var(--green);font-weight:700;">Get My Snapshot →</a>
+</div>
+
+<div class="hero">
+  <div class="eyebrow">Free Tool</div>
+  <h1>Trader Tax <span>Calculator</span></h1>
+  <p>Estimate your 2025 tax liability in 60 seconds. See what you owe — and how much you could save with the right strategies.</p>
+</div>
+
+<div class="page">
+
+  <!-- PROGRESS -->
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="prog-label">Step 1 of 4 — Trading Income</span><span id="prog-pct">25%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:25%"></div></div>
+  </div>
+
+  <!-- ===== STEP 1: INCOME ===== -->
+  <div class="step active" id="step1">
+    <div class="step-hd">
+      <div class="step-eyebrow">Step 1 of 4</div>
+      <div class="step-title">Your Trading Income</div>
+      <div class="step-sub">Enter your 2025 trading results. Use negative numbers for losses.</div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>Total Trading Profit / Loss (2025)</label>
+        <div class="prefix-wrap">
+          <input type="number" id="trading-pnl" placeholder="0" oninput="checkStep1()"/>
+        </div>
+        <span class="hint">Include all realized gains/losses from stocks, options, futures, forex. Use negative for a net loss.</span>
+      </div>
+      <div class="field">
+        <label>Prop Firm Payouts Received</label>
+        <div class="prefix-wrap">
+          <input type="number" id="prop-payouts" placeholder="0" oninput="checkStep1()"/>
+        </div>
+        <span class="hint">Total withdrawals from Apex, FTMO, TopStep, Tradeify, etc.</span>
+      </div>
+      <div class="field">
+        <label>Other Self-Employment Income</label>
+        <div class="prefix-wrap">
+          <input type="number" id="se-income" placeholder="0"/>
+        </div>
+        <span class="hint">Freelance, consulting, 1099 work</span>
+      </div>
+      <div class="field">
+        <label>W-2 / Salary Income</label>
+        <div class="prefix-wrap">
+          <input type="number" id="w2-income" placeholder="0"/>
+        </div>
+        <span class="hint">Gross wages from employer(s)</span>
+      </div>
+      <div class="field">
+        <label>Deductible Trading Expenses</label>
+        <div class="prefix-wrap">
+          <input type="number" id="expenses" placeholder="0"/>
+        </div>
+        <span class="hint">Platform fees, eval costs, education, home office</span>
+      </div>
+    </div>
+
+    <div class="info-box">💡 <strong>Prop firm payouts</strong> are taxed as self-employment income (SE tax applies) — even if you had a net loss on evaluations. This surprises most traders.</div>
+
+    <div class="step-nav">
+      <div></div>
+      <button class="btn-next" id="next1" onclick="goStep(2)" disabled>Next →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 2: TRADING TYPE & PROFILE ===== -->
+  <div class="step" id="step2">
+    <div class="step-hd">
+      <div class="step-eyebrow">Step 2 of 4</div>
+      <div class="step-title">What Do You Trade?</div>
+      <div class="step-sub">Different instruments have different tax rules. Select all that apply.</div>
+    </div>
+
+    <div class="opts-grid" id="trade-types">
+      <div class="opt-tile" onclick="toggleTile(this,'stocks')">
+        <div class="opt-tile-icon">📊</div>
+        <div class="opt-tile-label">Stocks / ETFs</div>
+        <div class="opt-tile-sub">Short + long term rates</div>
+      </div>
+      <div class="opt-tile" onclick="toggleTile(this,'options')">
+        <div class="opt-tile-icon">⚡</div>
+        <div class="opt-tile-label">Options</div>
+        <div class="opt-tile-sub">Complex assignment rules</div>
+      </div>
+      <div class="opt-tile" onclick="toggleTile(this,'futures')">
+        <div class="opt-tile-icon">🔢</div>
+        <div class="opt-tile-label">Futures</div>
+        <div class="opt-tile-sub">Section 1256 — 60/40</div>
+      </div>
+      <div class="opt-tile" onclick="toggleTile(this,'forex')">
+        <div class="opt-tile-icon">💱</div>
+        <div class="opt-tile-label">Forex</div>
+        <div class="opt-tile-sub">Section 988 ordinary income</div>
+      </div>
+      <div class="opt-tile" onclick="toggleTile(this,'crypto')">
+        <div class="opt-tile-icon">₿</div>
+        <div class="opt-tile-label">Crypto</div>
+        <div class="opt-tile-sub">Every trade is taxable</div>
+      </div>
+      <div class="opt-tile" onclick="toggleTile(this,'prop')">
+        <div class="opt-tile-icon">🏢</div>
+        <div class="opt-tile-label">Prop Firm</div>
+        <div class="opt-tile-sub">SE tax on payouts</div>
+      </div>
+    </div>
+
+    <div class="step-hd" style="margin-top:8px;">
+      <div class="step-title" style="font-size:1rem;">Filing Status</div>
+    </div>
+    <div class="radio-row" id="filing-status" style="margin-bottom:20px;">
+      <div class="radio-opt sel" onclick="selectRadio(this,'filing')">Single</div>
+      <div class="radio-opt" onclick="selectRadio(this,'filing')">Married Filing Jointly</div>
+      <div class="radio-opt" onclick="selectRadio(this,'filing')">Head of Household</div>
+    </div>
+
+    <div class="step-hd">
+      <div class="step-title" style="font-size:1rem;">Business Entity</div>
+    </div>
+    <div class="radio-row" id="entity-type" style="margin-bottom:20px;">
+      <div class="radio-opt sel" onclick="selectRadio(this,'entity')">No Entity</div>
+      <div class="radio-opt" onclick="selectRadio(this,'entity')">LLC</div>
+      <div class="radio-opt" onclick="selectRadio(this,'entity')">S-Corp</div>
+    </div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(1)">← Back</button>
+      <button class="btn-next" onclick="goStep(3)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 3: STATE ===== -->
+  <div class="step" id="step3">
+    <div class="step-hd">
+      <div class="step-eyebrow">Step 3 of 4</div>
+      <div class="step-title">State of Residence</div>
+      <div class="step-sub">State taxes vary significantly — some states have no income tax at all.</div>
+    </div>
+
+    <div class="form-grid">
+      <div class="field form-full">
+        <label>State</label>
+        <select id="state-select">
+          <option value="AL">Alabama — 5%</option>
+          <option value="AK">Alaska — No income tax 🎉</option>
+          <option value="AZ">Arizona — 2.5%</option>
+          <option value="AR">Arkansas — 4.4%</option>
+          <option value="CA">California — Up to 13.3%</option>
+          <option value="CO">Colorado — 4.4%</option>
+          <option value="CT">Connecticut — Up to 6.99%</option>
+          <option value="DE">Delaware — Up to 6.6%</option>
+          <option value="FL">Florida — No income tax 🎉</option>
+          <option value="GA">Georgia — 5.49%</option>
+          <option value="HI">Hawaii — Up to 11%</option>
+          <option value="ID">Idaho — 5.8%</option>
+          <option value="IL">Illinois — 4.95%</option>
+          <option value="IN">Indiana — 3.05%</option>
+          <option value="IA">Iowa — Up to 6%</option>
+          <option value="KS">Kansas — Up to 5.7%</option>
+          <option value="KY">Kentucky — 4%</option>
+          <option value="LA">Louisiana — Up to 4.25%</option>
+          <option value="ME">Maine — Up to 7.15%</option>
+          <option value="MD">Maryland — Up to 5.75%</option>
+          <option value="MA">Massachusetts — 5%</option>
+          <option value="MI">Michigan — 4.25%</option>
+          <option value="MN">Minnesota — Up to 9.85%</option>
+          <option value="MS">Mississippi — 4.7%</option>
+          <option value="MO">Missouri — Up to 4.95%</option>
+          <option value="MT">Montana — Up to 6.75%</option>
+          <option value="NE">Nebraska — Up to 5.84%</option>
+          <option value="NV">Nevada — No income tax 🎉</option>
+          <option value="NH">New Hampshire — No income tax 🎉</option>
+          <option value="NJ">New Jersey — Up to 10.75%</option>
+          <option value="NM">New Mexico — Up to 5.9%</option>
+          <option value="NY">New York — Up to 10.9%</option>
+          <option value="NC">North Carolina — 4.5%</option>
+          <option value="ND">North Dakota — Up to 2.5%</option>
+          <option value="OH">Ohio — Up to 3.99%</option>
+          <option value="OK">Oklahoma — Up to 4.75%</option>
+          <option value="OR">Oregon — Up to 9.9%</option>
+          <option value="PA">Pennsylvania — 3.07%</option>
+          <option value="RI">Rhode Island — Up to 5.99%</option>
+          <option value="SC">South Carolina — Up to 6.5%</option>
+          <option value="SD">South Dakota — No income tax 🎉</option>
+          <option value="TN">Tennessee — No income tax 🎉</option>
+          <option value="TX">Texas — No income tax 🎉</option>
+          <option value="UT">Utah — 4.65%</option>
+          <option value="VT">Vermont — Up to 8.75%</option>
+          <option value="VA">Virginia — Up to 5.75%</option>
+          <option value="WA">Washington — No income tax 🎉</option>
+          <option value="WV">West Virginia — Up to 5.12%</option>
+          <option value="WI">Wisconsin — Up to 7.65%</option>
+          <option value="WY">Wyoming — No income tax 🎉</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="info-box">🏖️ <strong>No income tax states:</strong> Alaska, Florida, Nevada, New Hampshire, South Dakota, Tennessee, Texas, Washington, Wyoming. If you're in California or New York, state tax is a significant part of your total bill.</div>
+
+    <div class="step-nav">
+      <button class="btn-back" onclick="goStep(2)">← Back</button>
+      <button class="btn-next btn-green" onclick="goStep(4)">Calculate My Taxes →</button>
+    </div>
+  </div>
+
+  <!-- ===== STEP 4: LEAD GATE ===== -->
+  <div class="step" id="step4">
+    <div class="gate-card">
+      <div class="gate-icon">🔓</div>
+      <div class="gate-title">Your estimate is ready.</div>
+      <div class="gate-sub">Enter your email to unlock your full tax breakdown, potential savings analysis, and a free copy of our <strong>2025 Trader Tax Strategy Guide</strong>.</div>
+
+      <div class="gate-preview">
+        <div class="gate-pill">Federal Tax Estimate</div>
+        <div class="gate-pill">SE Tax Breakdown</div>
+        <div class="gate-pill">State Tax</div>
+        <div class="gate-pill">Potential Savings</div>
+      </div>
+
+      <div class="gate-field">
+        <label>Email Address *</label>
+        <input type="email" id="gate-email" placeholder="you@email.com" oninput="checkGate()"/>
+      </div>
+      <div class="gate-field">
+        <label>Phone Number (optional)</label>
+        <input type="tel" id="gate-phone" placeholder="(555) 000-0000"/>
+      </div>
+
+      <button class="gate-btn" id="gate-btn" onclick="unlockResults()" disabled>
+        Show My Tax Estimate →
+      </button>
+      <div class="gate-legal">No spam. No sales calls. By entering your email you agree to receive your tax estimate and occasional tax tips from TraderTax. You can unsubscribe anytime.</div>
+    </div>
+  </div>
+
+  <!-- ===== RESULTS ===== -->
+  <div class="step" id="step-results">
+
+    <div class="results-hd">
+      <h2>📊 Your 2025 Trader Tax Estimate</h2>
+      <p id="results-subline">Based on your inputs — estimates only. Actual liability may vary.</p>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="results-grid">
+      <div class="result-card danger">
+        <div class="rc-label">Estimated Taxes Owed</div>
+        <div class="rc-amount" id="res-total">$0</div>
+        <div class="rc-sub">Federal + SE + State combined</div>
+      </div>
+      <div class="result-card savings">
+        <div class="rc-label">Potential Savings with TraderTax</div>
+        <div class="rc-amount" id="res-savings">$0</div>
+        <div class="rc-sub">Through deductions, elections & entity strategy</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">Effective Tax Rate</div>
+        <div class="rc-amount" id="res-rate">0%</div>
+        <div class="rc-sub">Of total gross income</div>
+      </div>
+      <div class="result-card">
+        <div class="rc-label">After-Tax Income</div>
+        <div class="rc-amount" id="res-after">$0</div>
+        <div class="rc-sub">Estimated take-home</div>
+      </div>
+    </div>
+
+    <!-- TAX BREAKDOWN -->
+    <div class="breakdown">
+      <div class="breakdown-hd">📋 Tax Breakdown</div>
+      <div class="breakdown-row">
+        <div class="br-label">Total Gross Income<div class="br-sub">Trading P&L + Prop Payouts + W-2 + SE</div></div>
+        <div class="br-val" id="br-gross">$0</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="br-label">Deductible Expenses<div class="br-sub">Platform fees, evals, education, home office</div></div>
+        <div class="br-val green" id="br-expenses">-$0</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="br-label">Adjusted Gross Income</div>
+        <div class="br-val" id="br-agi">$0</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="br-label">Federal Income Tax<div class="br-sub" id="br-federal-sub">Based on 2025 brackets</div></div>
+        <div class="br-val red" id="br-federal">$0</div>
+      </div>
+      <div class="breakdown-row" id="se-row">
+        <div class="br-label">Self-Employment Tax<div class="br-sub">15.3% on prop firm / SE income (employer + employee share)</div></div>
+        <div class="br-val red" id="br-se">$0</div>
+      </div>
+      <div class="breakdown-row">
+        <div class="br-label">State Income Tax<div class="br-sub" id="br-state-sub">Based on your state</div></div>
+        <div class="br-val red" id="br-state">$0</div>
+      </div>
+      <div class="breakdown-row br-total">
+        <div class="br-label" style="color:rgba(255,255,255,.8);">Total Estimated Tax</div>
+        <div class="br-val" id="br-total-row">$0</div>
+      </div>
+    </div>
+
+    <!-- SAVINGS BREAKDOWN -->
+    <div class="savings-breakdown" id="savings-section">
+      <div class="sb-title">💰 Where Your Savings Come From</div>
+      <div class="sb-sub">With the right strategies, here's what TraderTax clients typically save:</div>
+      <div id="savings-items"></div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer">
+      ⚠️ <strong>Estimate only.</strong> These figures are for educational purposes and are based on simplified tax assumptions. They do not constitute tax advice. Actual tax liability depends on your complete financial picture. TraderTax is a platform — tax services are provided by independent licensed tax professionals. Consult a licensed CPA or EA before making any tax decisions.
+    </div>
+
+    <!-- CTA -->
+    <div class="results-cta">
+      <h3>Ready to lock in these savings?</h3>
+      <p>A TraderTax professional can verify your estimate, maximize your deductions, and file your return — no guesswork.</p>
+      <div class="cta-btns">
+        <a href="file-it.html" class="cta-btn-g">Start Filing — From $197 →</a>
+        <a href="snapshot.html" class="cta-btn-o">Get My Full Tax Snapshot</a>
+      </div>
+    </div>
+
+  </div><!-- end results -->
+
+</div><!-- end .page -->
+
+<!-- FOOTER -->
+<footer style="background:var(--navy);color:rgba(255,255,255,.5);text-align:center;padding:28px 5%;font-size:.78rem;line-height:1.8;">
+  <div style="display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:8px;">
+    <a href="index.html" style="color:rgba(255,255,255,.5);">Home</a>
+    <a href="pricing.html" style="color:rgba(255,255,255,.5);">Pricing</a>
+    <a href="blog.html" style="color:rgba(255,255,255,.5);">Blog</a>
+    <a href="contact.html" style="color:rgba(255,255,255,.5);">Contact</a>
+    <a href="privacy.html" style="color:rgba(255,255,255,.5);">Privacy</a>
+    <a href="terms.html" style="color:rgba(255,255,255,.5);">Terms</a>
+  </div>
+  <div>© 2025 TraderTax · Taxes Built for Traders</div>
+  <div style="margin-top:4px;">This calculator provides estimates only and does not constitute tax advice. TraderTax is a platform, not a CPA firm.</div>
+</footer>
+
+<script>
+// ======= STATE =======
+const state = {
+  pnl: 0, propPayouts: 0, seIncome: 0, w2: 0, expenses: 0,
+  trades: [], filing: 'Single', entity: 'No Entity', stateCode: 'TX',
+  email: '', phone: ''
+};
+
+// ======= STATE TAX RATES =======
+const stateTax = {
+  AL:0.05,AK:0,AZ:0.025,AR:0.044,CA:0.093,CO:0.044,CT:0.055,DE:0.066,
+  FL:0,GA:0.0549,HI:0.09,ID:0.058,IL:0.0495,IN:0.0305,IA:0.06,KS:0.057,
+  KY:0.04,LA:0.0425,ME:0.0715,MD:0.0575,MA:0.05,MI:0.0425,MN:0.0985,
+  MS:0.047,MO:0.0495,MT:0.0675,NE:0.0584,NV:0,NH:0,NJ:0.0897,NM:0.059,
+  NY:0.0685,NC:0.045,ND:0.025,OH:0.0399,OK:0.0475,OR:0.099,PA:0.0307,
+  RI:0.0599,SC:0.065,SD:0,TN:0,TX:0,UT:0.0465,VT:0.0875,VA:0.0575,
+  WA:0,WV:0.0512,WI:0.0765,WY:0
+};
+
+// ======= FEDERAL TAX BRACKETS 2025 =======
+function federalTax(income, filing) {
+  let brackets;
+  if (filing === 'Married Filing Jointly') {
+    brackets = [[23850,0.10],[96950,0.12],[206700,0.22],[394600,0.24],[501050,0.32],[751600,0.35],[Infinity,0.37]];
+  } else {
+    brackets = [[11925,0.10],[48475,0.12],[103350,0.22],[197300,0.24],[250525,0.32],[626350,0.35],[Infinity,0.37]];
+  }
+  const stdDed = filing === 'Married Filing Jointly' ? 30000 : 15000;
+  const taxable = Math.max(0, income - stdDed);
+  let tax = 0, prev = 0;
+  for (const [limit, rate] of brackets) {
+    if (taxable <= prev) break;
+    tax += (Math.min(taxable, limit) - prev) * rate;
+    prev = limit;
+  }
+  return Math.round(tax);
+}
+
+// Marginal rate
+function marginalRate(income, filing) {
+  const stdDed = filing === 'Married Filing Jointly' ? 30000 : 15000;
+  const taxable = Math.max(0, income - stdDed);
+  if (filing === 'Married Filing Jointly') {
+    if (taxable <= 23850) return 0.10;
+    if (taxable <= 96950) return 0.12;
+    if (taxable <= 206700) return 0.22;
+    if (taxable <= 394600) return 0.24;
+    if (taxable <= 501050) return 0.32;
+    if (taxable <= 751600) return 0.35;
+    return 0.37;
+  } else {
+    if (taxable <= 11925) return 0.10;
+    if (taxable <= 48475) return 0.12;
+    if (taxable <= 103350) return 0.22;
+    if (taxable <= 197300) return 0.24;
+    if (taxable <= 250525) return 0.32;
+    if (taxable <= 626350) return 0.35;
+    return 0.37;
+  }
+}
+
+// SE Tax
+function seTax(seIncome) {
+  if (seIncome <= 0) return 0;
+  const wageBase = 176100; // 2025
+  const subject = Math.min(seIncome * 0.9235, wageBase);
+  const ss = subject * 0.124;
+  const medicare = seIncome * 0.9235 * 0.029;
+  return Math.round(ss + medicare);
+}
+
+// ======= UI =======
+function checkStep1() {
+  const pnl = parseFloat(document.getElementById('trading-pnl').value) || 0;
+  const prop = parseFloat(document.getElementById('prop-payouts').value) || 0;
+  const btn = document.getElementById('next1');
+  // Enable if any income entered (including 0 to allow no income cases)
+  btn.disabled = (document.getElementById('trading-pnl').value === '' && document.getElementById('prop-payouts').value === '');
+}
+
+function toggleTile(el, type) {
+  el.classList.toggle('sel');
+  const idx = state.trades.indexOf(type);
+  idx > -1 ? state.trades.splice(idx, 1) : state.trades.push(type);
+}
+
+function selectRadio(el, group) {
+  el.closest('.radio-row').querySelectorAll('.radio-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  if (group === 'filing') state.filing = el.textContent;
+  if (group === 'entity') state.entity = el.textContent;
+}
+
+function goStep(n) {
+  // Collect values on step transition
+  if (n >= 2) {
+    state.pnl = parseFloat(document.getElementById('trading-pnl').value) || 0;
+    state.propPayouts = parseFloat(document.getElementById('prop-payouts').value) || 0;
+    state.seIncome = parseFloat(document.getElementById('se-income').value) || 0;
+    state.w2 = parseFloat(document.getElementById('w2-income').value) || 0;
+    state.expenses = parseFloat(document.getElementById('expenses').value) || 0;
+  }
+  if (n >= 4) {
+    state.stateCode = document.getElementById('state-select').value;
+  }
+
+  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+  if (n === 'results') {
+    document.getElementById('step-results').classList.add('active');
+    renderResults();
+    updateProgress(5, 'Results');
+  } else {
+    document.getElementById('step' + n).classList.add('active');
+    updateProgress(n, ['','Trading Income','What You Trade','State','Your Estimate'][n]);
+  }
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateProgress(step, label) {
+  const pct = step >= 5 ? 100 : Math.round((step / 4) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-label').textContent = step >= 5 ? 'Complete — Your Results' : `Step ${step} of 4 — ${label}`;
+  document.getElementById('prog-pct').textContent = pct + '%';
+}
+
+function checkGate() {
+  const email = document.getElementById('gate-email').value;
+  const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  document.getElementById('gate-btn').disabled = !valid;
+}
+
+function unlockResults() {
+  state.email = document.getElementById('gate-email').value;
+  state.phone = document.getElementById('gate-phone').value;
+
+  const btn = document.getElementById('gate-btn');
+  btn.innerHTML = '<span class="spinner"></span>Calculating...';
+  btn.disabled = true;
+
+  // Save lead
+  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec', {
+    method: 'POST', mode: 'no-cors',
+    body: JSON.stringify({
+      timestamp: new Date().toISOString(),
+      email: state.email, phone: state.phone,
+      source: 'tax-calculator',
+      tradingPnl: state.pnl, propPayouts: state.propPayouts,
+      w2: state.w2, expenses: state.expenses,
+      filing: state.filing, entity: state.entity,
+      state: state.stateCode, trades: state.trades.join(',')
+    })
+  }).catch(() => {});
+
+  setTimeout(() => { goStep('results'); }, 1000);
+}
+
+function fmt(n) {
+  if (n < 0) return '-$' + Math.abs(Math.round(n)).toLocaleString();
+  return '$' + Math.round(n).toLocaleString();
+}
+
+function renderResults() {
+  // Income calculations
+  const grossSE = state.propPayouts + state.seIncome;
+  const grossTotal = state.pnl + state.propPayouts + state.seIncome + state.w2;
+  const agi = Math.max(0, grossTotal - state.expenses - (grossSE * 0.0765)); // SE deduction
+  const seTaxAmt = seTax(grossSE);
+  const fedTax = federalTax(agi, state.filing);
+  const stateRate = stateTax[state.stateCode] || 0;
+  const stateTaxAmt = Math.round(Math.max(0, agi) * stateRate);
+  const totalTax = Math.max(0, fedTax + seTaxAmt + stateTaxAmt);
+  const afterTax = grossTotal - totalTax;
+  const effRate = grossTotal > 0 ? (totalTax / grossTotal * 100).toFixed(1) : '0.0';
+  const margRate = marginalRate(agi, state.filing);
+
+  // Savings calculation
+  const savings = [];
+
+  if (state.expenses < 500 && (state.trades.includes('prop') || state.trades.includes('stocks'))) {
+    const expSave = Math.round(2500 * margRate);
+    savings.push({ icon: '🖥️', name: 'Unclaimed Trading Deductions', desc: 'Platform fees, eval costs, education, home office — most traders miss $2,000–$5,000 in deductions', save: expSave });
+  }
+
+  if (state.propPayouts > 5000 && state.entity === 'No Entity') {
+    const scSave = Math.round(state.propPayouts * 0.08);
+    savings.push({ icon: '🏢', name: 'S-Corp Election', desc: `With ${fmt(state.propPayouts)} in prop payouts, an S-Corp structure could reduce your SE tax significantly by splitting income into salary + distributions`, save: scSave });
+  }
+
+  if (state.trades.includes('futures') && state.pnl > 10000) {
+    const mtmSave = Math.round(state.pnl * 0.05);
+    savings.push({ icon: '📊', name: 'Section 1256 / MTM Election', desc: 'Futures already get favorable 60/40 treatment. A Mark-to-Market election can further optimize your position for qualifying traders', save: mtmSave });
+  }
+
+  if (state.trades.includes('stocks') && state.pnl > 0) {
+    const washSave = Math.round(state.pnl * 0.03);
+    savings.push({ icon: '🔄', name: 'Wash Sale Rule Strategy', desc: 'Many traders unknowingly trigger wash sale violations — costing them thousands in disallowed losses. We prevent this.', save: washSave });
+  }
+
+  if (state.w2 > 0 && grossSE > 0) {
+    savings.push({ icon: '📅', name: 'Quarterly Estimated Tax Planning', desc: 'With W-2 + SE income, smart quarterly payments prevent underpayment penalties and optimize cash flow', save: Math.round(totalTax * 0.03) });
+  }
+
+  // Default savings if none found
+  if (savings.length === 0) {
+    savings.push({ icon: '💡', name: 'Trader-Specific Deductions', desc: 'A TraderTax professional review typically finds $1,000–$5,000 in missed deductions for active traders', save: Math.round(totalTax * 0.1) });
+  }
+
+  const totalSavings = savings.reduce((sum, s) => sum + s.save, 0);
+
+  // Render summary cards
+  document.getElementById('res-total').textContent = fmt(totalTax);
+  document.getElementById('res-savings').textContent = fmt(totalSavings);
+  document.getElementById('res-rate').textContent = effRate + '%';
+  document.getElementById('res-after').textContent = fmt(afterTax);
+
+  // Subline
+  const stateName = document.getElementById('state-select').options[document.getElementById('state-select').selectedIndex].text.split(' —')[0];
+  document.getElementById('results-subline').textContent = `${state.filing} · ${stateName} · ${state.trades.join(', ') || 'Trader'}`;
+
+  // Breakdown
+  document.getElementById('br-gross').textContent = fmt(grossTotal);
+  document.getElementById('br-expenses').textContent = fmt(-(state.expenses));
+  document.getElementById('br-agi').textContent = fmt(agi);
+  document.getElementById('br-federal').textContent = fmt(fedTax);
+  document.getElementById('br-federal-sub').textContent = `${state.filing} · Marginal rate: ${Math.round(margRate * 100)}%`;
+  document.getElementById('br-se').textContent = fmt(seTaxAmt);
+  document.getElementById('br-state').textContent = fmt(stateTaxAmt);
+  document.getElementById('br-state-sub').textContent = `${stateName} · ${Math.round(stateRate * 100)}% effective rate`;
+  document.getElementById('br-total-row').textContent = fmt(totalTax);
+
+  if (seTaxAmt === 0) document.getElementById('se-row').style.display = 'none';
+
+  // Savings items
+  document.getElementById('savings-items').innerHTML = savings.map(s =>
+    `<div class="sb-item">
+      <span class="sb-icon">${s.icon}</span>
+      <div class="sb-body">
+        <div class="sb-name">${s.name}</div>
+        <div class="sb-desc">${s.desc}</div>
+      </div>
+      <div class="sb-save">~${fmt(s.save)}</div>
+    </div>`
+  ).join('');
+}
+</script>
+</body>
+</html>
