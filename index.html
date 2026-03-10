@@ -368,6 +368,12 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
 /* Process steps */
 .ps-t { font-size: 1rem !important; }
 .ps-d { font-size: .85rem !important; color: #374151 !important; }
+
+/* Feature showcase responsive */
+@media(max-width:760px){
+  #features .feat-top-grid{grid-template-columns:1fr!important;}
+  #features .feat-bottom-grid{grid-template-columns:1fr!important;}
+}
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":'What does TraderTax do?',"acceptedAnswer":{"@type":"Answer","text":'TraderTax specializes in tax preparation and planning for active traders — including prop firm traders, futures traders, options traders, and crypto traders. We connect you with licensed CPAs who understand your specific trading situation.'}},
@@ -468,11 +474,11 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
 <div style="background:var(--green-lt);border-top:2px solid var(--green);border-bottom:2px solid var(--green);padding:20px 5%;">
   <div style="max-width:900px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
     <div>
-      <div style="font-size:.62rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-dk);margin-bottom:4px;">Free Tool</div>
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:var(--navy);margin-bottom:3px;">🧮 Trader Tax Estimator — How Much Might You Owe?</div>
-      <div style="font-size:.8rem;color:var(--muted);">Enter your income, state, and trading type. Get a federal + SE + state breakdown in 60 seconds. W-2 jobs included.</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green-dk);margin-bottom:5px;">Free Tool</div>
+      <div style="font-family:'DM Sans',sans-serif;font-weight:700;font-size:1.05rem;color:var(--navy);margin-bottom:4px;">🧮 Trader Tax Estimator — How Much Might You Owe?</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--muted);line-height:1.5;">Enter your income, state, and trading type. Get a federal + SE + state breakdown in 60 seconds. W-2 jobs included.</div>
     </div>
-    <a href="calculator.html" style="background:var(--navy);color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;padding:12px 22px;border-radius:9px;white-space:nowrap;flex-shrink:0;text-decoration:none;">Try the Estimator →</a>
+    <a href="calculator.html" style="background:var(--navy);color:#fff;font-family:'DM Sans',sans-serif;font-weight:700;font-size:.9rem;padding:13px 24px;border-radius:9px;white-space:nowrap;flex-shrink:0;text-decoration:none;">Try the Estimator →</a>
   </div>
 </div>
 
@@ -630,6 +636,141 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
         </div>
       </div>
     </div>
+  </div>
+</section>
+
+
+<!-- FEATURE SHOWCASE -->
+<section id="features" style="background:#0a1628;padding:72px 5% 80px;">
+  <div style="max-width:1000px;margin:0 auto;">
+    <div style="text-align:center;margin-bottom:48px;">
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#3dba7e;margin-bottom:10px;">Built For Traders</div>
+      <h2 style="font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.6rem,3vw,2.1rem);color:#fff;line-height:1.15;">Every Tool You Need.<br/>Nothing You Don't.</h2>
+    </div>
+
+    <!-- TOP ROW: 3 small cards -->
+    <div class="feat-top-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;">
+
+      <!-- Card 1: Tax Estimator -->
+      <div style="background:#111d33;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px;overflow:hidden;">
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">Free Tool</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">Tax Estimator</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">See a breakdown of federal, SE, and state taxes based on your income and state — in 60 seconds.</div>
+        <!-- Mini UI mockup -->
+        <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
+          <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Estimated Breakdown</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+            <span style="font-size:.72rem;color:rgba(255,255,255,.55);">Federal Tax</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:#f87171;">$4,820</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
+            <span style="font-size:.72rem;color:rgba(255,255,255,.55);">SE Tax (prop firm)</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:#f87171;">$5,086</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+            <span style="font-size:.72rem;color:rgba(255,255,255,.55);">State Tax (TX)</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:#3dba7e;">$0 🎉</span>
+          </div>
+          <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:8px;display:flex;justify-content:space-between;">
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);font-weight:600;">Total Est.</span>
+            <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;color:#fff;">$9,906</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Smart Checklist -->
+      <div style="background:#111d33;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px;overflow:hidden;">
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">File It</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">Smart Doc Checklist</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">9 questions about your situation. Get a personalized list of exactly what to upload — nothing generic.</div>
+        <!-- Mini UI mockup -->
+        <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
+          <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Your Document Checklist</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="color:#3dba7e;font-size:.75rem;">✓</span>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">Apex payout history (bank statements)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="color:#3dba7e;font-size:.75rem;">✓</span>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">Eval fee receipts (all challenges)</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="color:#3dba7e;font-size:.75rem;">✓</span>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">TradingView subscription receipt</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+            <span style="color:rgba(255,255,255,.25);font-size:.75rem;">○</span>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.35);">W-2 from employer</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span style="color:rgba(255,255,255,.25);font-size:.75rem;">○</span>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.35);">Home office measurements</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: No Call Required -->
+      <div style="background:#111d33;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:22px;overflow:hidden;">
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">Fully Async</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">No Calls. Ever.</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">Upload your docs, we handle everything. No scheduling, no waiting on hold, no awkward "what's a prop firm?" questions.</div>
+        <!-- Mini UI mockup — process steps -->
+        <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:24px;height:24px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;">1</div>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">Answer 9 questions online</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:24px;height:24px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;">2</div>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">Upload your documents</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+            <div style="width:24px;height:24px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;">3</div>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">CPA prepares your return</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="width:24px;height:24px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;">4</div>
+            <span style="font-size:.72rem;color:rgba(255,255,255,.7);">Review &amp; e-file ✓</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTTOM ROW: 1 wide card -->
+    <div style="background:#111d33;border:1px solid rgba(255,255,255,.08);border-radius:16px;padding:28px;overflow:hidden;">
+      <div class="feat-bottom-grid" style="display:grid;grid-template-columns:1fr 1.6fr;gap:28px;align-items:start;">
+        <div>
+          <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">Prop Firm Specialist</div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:#fff;margin-bottom:10px;line-height:1.3;">We Know Exactly How Apex, FTMO &amp; TopStep Are Taxed.</div>
+          <div style="font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.7;">No 1099? We handle it. Eval fees? We deduct them. SE tax on payouts? We calculate it correctly — and find every legal way to reduce it. Most CPAs have never seen a prop firm payout. We've filed thousands of them.</div>
+        </div>
+        <!-- Wide mockup: prop firm tax breakdown -->
+        <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;">
+          <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Prop Firm Income — Tax Breakdown</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+            <div style="background:rgba(255,255,255,.05);border-radius:8px;padding:11px;text-align:center;">
+              <div style="font-size:.62rem;color:rgba(255,255,255,.4);margin-bottom:4px;">Payouts</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">$40,000</div>
+            </div>
+            <div style="background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.2);border-radius:8px;padding:11px;text-align:center;">
+              <div style="font-size:.62rem;color:rgba(255,255,255,.4);margin-bottom:4px;">SE Tax</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#f87171;">$5,086</div>
+            </div>
+            <div style="background:rgba(61,186,126,.1);border:1px solid rgba(61,186,126,.2);border-radius:8px;padding:11px;text-align:center;">
+              <div style="font-size:.62rem;color:rgba(255,255,255,.4);margin-bottom:4px;">Eval Deductions</div>
+              <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#3dba7e;">-$3,200</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <div style="background:rgba(255,255,255,.06);border-radius:99px;padding:5px 12px;font-size:.7rem;color:rgba(255,255,255,.6);">✓ No 1099 handled</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:99px;padding:5px 12px;font-size:.7rem;color:rgba(255,255,255,.6);">✓ SS wage base coordinated</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:99px;padding:5px 12px;font-size:.7rem;color:rgba(255,255,255,.6);">✓ Section 1256 applied</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:99px;padding:5px 12px;font-size:.7rem;color:rgba(255,255,255,.6);">✓ S-Corp analysis included</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </section>
 

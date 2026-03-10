@@ -141,6 +141,36 @@ h3.sub-hd{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-
   .new-tier-btn{width:100%;text-align:center;display:block;padding:12px;}
 }
 @media(max-width:420px){.addons-grid{grid-template-columns:1fr;}}
+
+/* ===== TURBOTAX-STYLE CARDS ===== */
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px;align-items:start;}
+.card{background:#fff;border:1.5px solid var(--border);border-radius:16px;overflow:hidden;position:relative;}
+.card-popular{border-color:var(--navy);box-shadow:0 8px 32px rgba(10,22,40,.13);}
+.card-popular-banner{background:var(--navy);color:#fff;text-align:center;font-size:.72rem;font-weight:700;letter-spacing:.5px;padding:9px 16px;}
+.card-head{padding:22px 22px 0;}
+.card-check-icon{width:34px;height:34px;background:var(--green-lt);border:1.5px solid var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--green);margin-bottom:10px;}
+.card-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:var(--navy);margin-bottom:4px;}
+.card-tagline{font-size:.82rem;color:var(--body);line-height:1.5;margin-bottom:0;}
+.card-price-area{padding:18px 22px 0;}
+.card-price{font-family:'Syne',sans-serif;font-weight:800;font-size:2.2rem;color:var(--navy);line-height:1;}
+.card-price-sub{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.4;}
+.card-btn-tt{display:block;margin:16px 22px 0;padding:13px 16px;background:var(--navy);color:#fff;border-radius:9px;text-align:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.88rem;transition:all .2s;text-decoration:none;}
+.card-btn-tt:hover{background:#0d1f3c;}
+.popular-btn{background:var(--green);}
+.popular-btn:hover{background:var(--green-dk);}
+.card-btn-sub{display:block;font-family:'DM Sans',sans-serif;font-weight:400;font-size:.68rem;color:rgba(255,255,255,.7);margin-top:2px;}
+.card-stars{padding:12px 22px 0;display:flex;align-items:center;gap:7px;}
+.stars{color:#f59e0b;font-size:.85rem;letter-spacing:1px;}
+.stars-text{font-size:.72rem;color:var(--muted);}
+.card-divider{height:1px;background:var(--border);margin:16px 22px;}
+.card-features-tt{padding:0 22px 22px;display:flex;flex-direction:column;gap:9px;}
+.cft{display:flex;align-items:flex-start;gap:9px;font-size:.82rem;color:var(--body);line-height:1.4;}
+.cft-dim{color:var(--muted);}
+.cft-icon{width:16px;height:16px;flex-shrink:0;margin-top:1px;color:var(--green);}
+.cft-icon.dim{color:var(--border);stroke:var(--muted);opacity:.5;}
+
+@media(max-width:860px){.cards{grid-template-columns:1fr;max-width:420px;margin-left:auto;margin-right:auto;}}
+
 </style>
 </head>
 <body>
@@ -182,78 +212,110 @@ h3.sub-hd{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-
 
 <div class="page">
 
-  <!-- NEW TIER CALLOUT -->
-  <div class="new-tier">
-    <div class="new-tier-text">
-      <div class="new-tier-badge">New</div>
-      <div class="new-tier-title">File It — No call required. Upload docs, we handle everything.</div>
-      <div class="new-tier-sub">Starting at $197 · 7–14 business day turnaround · Perfect for straightforward situations</div>
-    </div>
-    <a href="file-it.html" class="new-tier-btn">Get My Personalized Checklist →</a>
-  </div>
+  <!-- SECTION LABEL -->
+  <div class="section-label">Choose Your Plan</div>
 
-  <!-- MAIN PLANS -->
-  <div class="section-label">Service Plans</div>
+  <!-- TURBOTAX-STYLE CARDS -->
   <div class="cards">
 
     <!-- FILE IT -->
     <div class="card">
-      <div class="card-tag tag-new">New — No Call Required</div>
-      <div class="card-icon">📎</div>
-      <div class="card-name">File It</div>
-      <div class="card-desc">100% async. Answer questions, upload docs, we file your return. No phone calls ever required.</div>
-      <div class="card-price">From $197</div>
-      <div class="card-price-sub">Price adjusts based on complexity</div>
-      <div class="card-features">
-        <div class="cf"><span class="cf-check">✓</span> No phone call required — ever</div>
-        <div class="cf"><span class="cf-check">✓</span> Smart document checklist generated for you</div>
-        <div class="cf"><span class="cf-check">✓</span> Federal + state return</div>
-        <div class="cf"><span class="cf-check">✓</span> E-file included</div>
-        <div class="cf"><span class="cf-check">✓</span> 7–14 business day turnaround</div>
-        <div class="cf"><span class="cf-x">—</span> Strategy or planning advice</div>
-        <div class="cf"><span class="cf-x">—</span> Year-round access</div>
+      <div class="card-head">
+        <div class="card-check-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        </div>
+        <div class="card-name">File It</div>
+        <div class="card-tagline">File your taxes — no calls required</div>
       </div>
-      <a href="file-it.html" class="card-btn green">Start — File It →</a>
+      <div class="card-price-area">
+        <div class="card-price">$197</div>
+        <div class="card-price-sub">starting price · per tax year</div>
+      </div>
+      <a href="file-it.html" class="card-btn-tt">
+        Get started
+        <span class="card-btn-sub">See your exact price →</span>
+      </a>
+      <div class="card-stars">
+        <span class="stars">★★★★★</span>
+        <span class="stars-text">Async — no phone calls</span>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-features-tt">
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Personalized document checklist</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Federal + state return prepared</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Prop firm &amp; SE income handled</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>All deductions captured</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>E-file included · 7–14 day turnaround</span></div>
+        <div class="cft cft-dim"><svg class="cft-icon dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg><span>Strategy or planning calls</span></div>
+        <div class="cft cft-dim"><svg class="cft-icon dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg><span>Year-round CPA access</span></div>
+      </div>
     </div>
 
-    <!-- OPTIMIZE IT -->
-    <div class="card popular">
-      <div class="card-badge">Most Popular</div>
-      <div class="card-icon">⚡</div>
-      <div class="card-name">Optimize It</div>
-      <div class="card-desc">One strategy call + async filing. Your CPA reviews every deduction and makes sure nothing is missed.</div>
-      <div class="card-price">From $497</div>
-      <div class="card-price-sub">One 30-min call included</div>
-      <div class="card-features">
-        <div class="cf"><span class="cf-check">✓</span> One 30-min onboarding call</div>
-        <div class="cf"><span class="cf-check">✓</span> Deduction maximization review</div>
-        <div class="cf"><span class="cf-check">✓</span> Federal + state return</div>
-        <div class="cf"><span class="cf-check">✓</span> E-file included</div>
-        <div class="cf"><span class="cf-check">✓</span> 3–5 business day turnaround</div>
-        <div class="cf"><span class="cf-check">✓</span> Quarterly estimate guidance</div>
-        <div class="cf"><span class="cf-x">—</span> Year-round access</div>
+    <!-- OPTIMIZE IT — POPULAR -->
+    <div class="card card-popular">
+      <div class="card-popular-banner">⭐ Most Popular with Traders</div>
+      <div class="card-head">
+        <div class="card-check-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        </div>
+        <div class="card-name">Optimize It</div>
+        <div class="card-tagline">File with expert deduction review</div>
       </div>
-      <a href="snapshot.html" class="card-btn navy">Get Started →</a>
+      <div class="card-price-area">
+        <div class="card-price">$497</div>
+        <div class="card-price-sub">starting price · one 30-min call included</div>
+      </div>
+      <a href="snapshot.html" class="card-btn-tt popular-btn">
+        Get started
+        <span class="card-btn-sub">Includes strategy call →</span>
+      </a>
+      <div class="card-stars">
+        <span class="stars">★★★★★</span>
+        <span class="stars-text">Most traders save $2K–$6K more</span>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-features-tt">
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Everything in File It</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>One 30-min CPA strategy call</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Full deduction maximization review</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Quarterly estimated tax guidance</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>3–5 business day turnaround</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Section 1256 &amp; wash sale analysis</span></div>
+        <div class="cft cft-dim"><svg class="cft-icon dim" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg><span>Year-round CPA access</span></div>
+      </div>
     </div>
 
     <!-- STRATEGIZE IT -->
-    <div class="card featured">
-      <div class="card-badge navy">Full Service</div>
-      <div class="card-icon">🎯</div>
-      <div class="card-name">Strategize It</div>
-      <div class="card-desc">Full-service, year-round. For profitable traders who need proactive planning, not just filing.</div>
-      <div class="card-price">From $997</div>
-      <div class="card-price-sub">Multiple calls included</div>
-      <div class="card-features">
-        <div class="cf"><span class="cf-check">✓</span> Multiple strategy calls</div>
-        <div class="cf"><span class="cf-check">✓</span> MTM election analysis</div>
-        <div class="cf"><span class="cf-check">✓</span> Entity structure guidance</div>
-        <div class="cf"><span class="cf-check">✓</span> Federal + state return</div>
-        <div class="cf"><span class="cf-check">✓</span> Year-round CPA access</div>
-        <div class="cf"><span class="cf-check">✓</span> Quarterly tax planning</div>
-        <div class="cf"><span class="cf-check">✓</span> Priority turnaround</div>
+    <div class="card">
+      <div class="card-head">
+        <div class="card-check-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="18" height="18"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+        </div>
+        <div class="card-name">Strategize It</div>
+        <div class="card-tagline">Full-service tax strategy &amp; filing</div>
       </div>
-      <a href="snapshot.html" class="card-btn green">Get Started →</a>
+      <div class="card-price-area">
+        <div class="card-price">$997</div>
+        <div class="card-price-sub">starting price · multiple calls included</div>
+      </div>
+      <a href="snapshot.html" class="card-btn-tt">
+        Get started
+        <span class="card-btn-sub">Year-round CPA access →</span>
+      </a>
+      <div class="card-stars">
+        <span class="stars">★★★★★</span>
+        <span class="stars-text">Best for $50K+ trading income</span>
+      </div>
+      <div class="card-divider"></div>
+      <div class="card-features-tt">
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Everything in Optimize It</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Multiple strategy sessions</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>MTM election analysis &amp; filing</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Entity structure optimization</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Quarterly tax planning sessions</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Year-round CPA email access</span></div>
+        <div class="cft"><svg class="cft-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg><span>Priority turnaround</span></div>
+      </div>
     </div>
 
   </div>
