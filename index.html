@@ -374,6 +374,17 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   #features .feat-top-grid{grid-template-columns:1fr!important;}
   #features .feat-bottom-grid{grid-template-columns:1fr!important;}
 }
+
+/* Fix: why-vis widget — all text must be white/visible on dark background */
+.why-vis { color: #fff !important; }
+.why-vis .why-vt { color: rgba(255,255,255,.5) !important; }
+.why-vis .m-lbl  { color: rgba(255,255,255,.65) !important; font-size: .75rem; }
+.why-vis .m-val  { color: #ffffff !important; font-family: 'Syne', sans-serif; font-weight: 700; }
+.why-vis .m-val[style*="f87171"] { color: #f87171 !important; }
+.why-vis .sav-lbl  { color: rgba(255,255,255,.5) !important; }
+.why-vis .sav-num  { color: #3dba7e !important; }
+.why-vis .sav-note { color: rgba(255,255,255,.4) !important; }
+.why-vis .sav-box  { background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 14px; margin-top: 16px; }
 </style>
 <script type="application/ld+json">
 {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":'What does TraderTax do?',"acceptedAnswer":{"@type":"Answer","text":'TraderTax specializes in tax preparation and planning for active traders — including prop firm traders, futures traders, options traders, and crypto traders. We connect you with licensed CPAs who understand your specific trading situation.'}},
