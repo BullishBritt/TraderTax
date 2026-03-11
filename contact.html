@@ -64,11 +64,19 @@ async function submitContactForm() {
       traderType: document.getElementById('cf-trader-type').value,
       service: document.getElementById('cf-service').value,
       notes: document.getElementById('cf-notes').value.trim(),
-      source: 'Contact Form',
+      source: 'Contact Lead',
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     btn.textContent = 'Request Sent ✓';
     btn.style.background = '#2ea86c';
+    try {
+      const n = document.getElementById('cf-fname').value + ' ' + document.getElementById('cf-lname').value;
+      const em = document.getElementById('cf-email').value;
+      const ph = document.getElementById('cf-phone').value;
+      const tt = document.getElementById('cf-trader-type').value;
+      const msg = document.getElementById('cf-notes').value;
+      sendLeadEmail('Contact Lead', n, em, ph, tt, msg);
+    } catch(e2) {}
   } catch(e) {
     console.error(e);
     btn.textContent = 'Try Again';
@@ -76,6 +84,21 @@ async function submitContactForm() {
   }
 }
 </script>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+      emailjs.init("dL1qGwo32XBoAeMPB");
+      function sendLeadEmail(source, name, email, phone, traderType, message) {
+        emailjs.send("service_5wzw27k", "template_vtt9a58", {
+          source: source,
+          name: name || "Unknown",
+          email: email || "Unknown",
+          phone: phone || "",
+          trader_type: traderType || "",
+          message: message || ""
+        }).catch(function(err) { console.log("EmailJS error:", err); });
+      }
+    </script>
 </head>
 <body>
 <nav>

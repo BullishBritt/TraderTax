@@ -68,6 +68,21 @@ h1{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:var(--na
 
 footer{text-align:center;padding:20px;font-size:.72rem;color:var(--muted);border-top:1px solid var(--border);}
 </style>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+      emailjs.init("dL1qGwo32XBoAeMPB");
+      function sendLeadEmail(source, name, email, phone, traderType, message) {
+        emailjs.send("service_5wzw27k", "template_vtt9a58", {
+          source: source,
+          name: name || "Unknown",
+          email: email || "Unknown",
+          phone: phone || "",
+          trader_type: traderType || "",
+          message: message || ""
+        }).catch(function(err) { console.log("EmailJS error:", err); });
+      }
+    </script>
 </head>
 <body>
 
@@ -158,7 +173,7 @@ function checkStrength(pw) {
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-  import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   // ⚠️  PASTE YOUR FIREBASE CONFIG HERE
   const firebaseConfig = {
@@ -226,6 +241,22 @@ function checkStrength(pw) {
       } catch(snapErr) { /* silent */ }
 
       await setDoc(doc(db, 'users', cred.user.uid), userData);
+
+      // Also save to leads collection so admin dashboard captures signups
+      try {
+        const leadsRef = collection(db, 'leads');
+        await addDoc(leadsRef, {
+          firstName,
+          lastName,
+          email,
+          source: 'Signup Lead',
+          uid: cred.user.uid,
+          snapshotLinked: userData.snapshotLinked || false,
+          createdAt: new Date().toISOString()
+        });
+      } catch(leadErr) { /* silent — don't block account creation */ }
+
+      try { sendLeadEmail('Signup Lead', firstName + ' ' + lastName, email, '', '', ''); } catch(e) {}
 
       showMsg('Account created! Redirecting to your dashboard...', 'success');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);

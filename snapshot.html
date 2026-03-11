@@ -153,6 +153,21 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
   .progress-wrap,.step-card,.results-wrap{padding-left:1rem;padding-right:1rem;}
 }
 </style>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+      emailjs.init("dL1qGwo32XBoAeMPB");
+      function sendLeadEmail(source, name, email, phone, traderType, message) {
+        emailjs.send("service_5wzw27k", "template_vtt9a58", {
+          source: source,
+          name: name || "Unknown",
+          email: email || "Unknown",
+          phone: phone || "",
+          trader_type: traderType || "",
+          message: message || ""
+        }).catch(function(err) { console.log("EmailJS error:", err); });
+      }
+    </script>
 </head>
 <body>
 
@@ -562,10 +577,15 @@ Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
       urgency: aiSummary.urgency_flag || 'medium',
       priceLow: aiSummary.price_low || '$497',
       priceHigh: aiSummary.price_high || '$1,297',
-      source: 'snapshot',
+      source: 'Snapshot Lead',
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   } catch(e) { /* silent fail */ }
+
+  // Send email notification
+  try {
+    sendLeadEmail('Snapshot Lead', profile.name, profile.email, profile.phone, profile.instruments, profile.situation);
+  } catch(e) {}
 
   // Store snapshot in localStorage so signup page can link it to the account
   try {

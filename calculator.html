@@ -23,6 +23,7 @@
   window._saveLead = async (data) => {
     try {
       await addDoc(collection(db,"calculator_leads"),{...data, createdAt:serverTimestamp()});
+      sendLeadEmail('Calculator Lead', data.name || '', data.email, data.phone || '', data.tradingStyle || '', '');
       console.log("Lead saved");
     } catch(e){ console.warn("Firestore:",e); }
   };
@@ -231,6 +232,21 @@ footer a:hover{color:#fff;}
   .gate{padding:22px 16px;}
 }
 </style>
+    <!-- EmailJS -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script type="text/javascript">
+      emailjs.init("dL1qGwo32XBoAeMPB");
+      function sendLeadEmail(source, name, email, phone, traderType, message) {
+        emailjs.send("service_5wzw27k", "template_vtt9a58", {
+          source: source,
+          name: name || "Unknown",
+          email: email || "Unknown",
+          phone: phone || "",
+          trader_type: traderType || "",
+          message: message || ""
+        }).catch(function(err) { console.log("EmailJS error:", err); });
+      }
+    </script>
 </head>
 <body>
 
@@ -1054,7 +1070,7 @@ function unlock() {
 
   if (window._saveLead) {
     window._saveLead({
-      email: S.email, phone: S.phone, source: 'tax-calculator',
+      email: S.email, phone: S.phone, source: 'Calculator Lead',
       w2: S.w2, pnl: S.pnl, futuresPnl: S.futuresPnl, prop: S.prop,
       otherSe: S.otherSe, expenses: S.expenses,
       trades: S.trades.join(','), filing: S.filing,
@@ -1069,7 +1085,7 @@ function unlock() {
     method:'POST', mode:'no-cors',
     body:JSON.stringify({
       timestamp:new Date().toISOString(),
-      email:S.email, phone:S.phone, source:'tax-calculator',
+      email:S.email, phone:S.phone, source:'Calculator Lead',
       state:S.stateCode, filing:S.filing, trades:S.trades.join(','),
       w2:S.w2, prop:S.prop, pnl:S.pnl, futuresPnl:S.futuresPnl,
       estimatedTax:Math.round(calculate().totalTax)
