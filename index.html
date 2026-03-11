@@ -14,7 +14,7 @@
 <meta property="og:description" content="Licensed CPAs who specialize in prop firm, futures, options, and crypto taxation."/>
 <meta property="og:url" content="https://tradertax.net/"/>
 <meta property="og:type" content="website"/>
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"FinancialService","name":"TraderTax","url":"https://tradertax.net","description":"TraderTax is a tax preparation platform for active traders. We connect prop firm, futures, options, and crypto traders with licensed CPAs and Enrolled Agents who specialize in trader taxation.","priceRange":"$497 - $2997","areaServed":"US","image":"https://tradertax.net/favicon.svg"}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"ProfessionalService","name":"TraderTax","url":"https://tradertax.net","description":"Tax preparation and planning for active traders","serviceType":"Tax Preparation"}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7RF9PP8BRN"></script>
@@ -327,15 +327,18 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
 .hc-rows .hc-row,.hc-m{background:#f7f8fb!important;}
 
 /* READABILITY FIXES */
+/* Card titles — lighter weight, easier to read */
 .svc-n, .wn, .prob-q, .ps-t, .bt, .pname, .tn {
   font-weight: 700 !important;
   letter-spacing: -0.2px !important;
 }
+/* Body text in cards — bigger and darker */
 .svc-d, .wd, .prob-a, .ps-d, .be, .tq {
   font-size: .88rem !important;
   color: #374151 !important;
   line-height: 1.7 !important;
 }
+/* Service card — more padding, cleaner spacing */
 .svc-c {
   padding: 28px 24px !important;
 }
@@ -351,13 +354,18 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   font-size: .7rem !important;
   margin-bottom: 10px !important;
 }
+/* Who cards */
 .wn { font-size: .95rem !important; }
 .wd { font-size: .83rem !important; }
+/* Problem cards */
 .prob-q { font-size: .95rem !important; }
 .prob-a { font-size: .84rem !important; }
+/* Blog cards */
 .bt { font-size: .95rem !important; }
 .be { font-size: .82rem !important; }
+/* Testimonial quotes */
 .tq { font-size: .88rem !important; }
+/* Process steps */
 .ps-t { font-size: 1rem !important; }
 .ps-d { font-size: .85rem !important; color: #374151 !important; }
 
@@ -367,7 +375,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   #features .feat-bottom-grid{grid-template-columns:1fr!important;}
 }
 
-/* Fix: why-vis widget */
+/* Fix: why-vis widget — all text must be white/visible on dark background */
 .why-vis { color: #fff !important; }
 .why-vis .why-vt { color: rgba(255,255,255,.5) !important; }
 .why-vis .m-lbl  { color: rgba(255,255,255,.65) !important; font-size: .75rem; }
@@ -378,9 +386,12 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
 .why-vis .sav-note { color: rgba(255,255,255,.4) !important; }
 .why-vis .sav-box  { background: rgba(255,255,255,.06) !important; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 14px; margin-top: 16px; }
 </style>
-<!-- ✅ FIXED: FAQPage JSON-LD — replaced invalid single quotes with double quotes -->
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What does TraderTax do?","acceptedAnswer":{"@type":"Answer","text":"TraderTax specializes in tax preparation and planning for active traders — including prop firm traders, futures traders, options traders, and crypto traders. We connect you with licensed CPAs who understand your specific trading situation."}},{"@type":"Question","name":"How much does TraderTax cost?","acceptedAnswer":{"@type":"Answer","text":"Pricing starts at $497 for loss optimization (unprofitable traders), $1,297 for profitable trader returns, and $2,997 for full business structuring. All packages include a free consultation."}},{"@type":"Question","name":"Do you help with prop firm taxes?","acceptedAnswer":{"@type":"Answer","text":"Yes — prop firm taxation is our core specialty. We work with traders on Apex, TopStep, FTMO, Tradeify, Take Profit, and all major funded account programs."}},{"@type":"Question","name":"What is the Tax Snapshot tool?","acceptedAnswer":{"@type":"Answer","text":"The Tax Snapshot is a free 2-minute questionnaire. Answer 8 questions about your trading and get a personalized summary of your tax exposure, missed deductions, and recommended next steps — reviewed by a real CPA."}},{"@type":"Question","name":"Can you help traders who lost money?","acceptedAnswer":{"@type":"Answer","text":"Absolutely. Unprofitable traders often need a CPA more than profitable ones. Properly filed trading losses can offset W-2 income, create carryforwards, and set you up for maximum savings when you become profitable."}}]}
+{"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":'What does TraderTax do?',"acceptedAnswer":{"@type":"Answer","text":'TraderTax specializes in financial services for active traders — including prop firm traders, futures traders, options traders, and crypto traders. We connect you with licensed CPAs who understand your specific trading situation.'}},
+{"@type":"Question","name":'How much does TraderTax cost?',"acceptedAnswer":{"@type":"Answer","text":'Pricing starts at $497 for loss optimization (unprofitable traders), $1,297 for profitable trader returns, and $2,997 for full business structuring. All packages include a free consultation.'}},
+{"@type":"Question","name":'Do you help with prop firm taxes?',"acceptedAnswer":{"@type":"Answer","text":'Yes — prop firm taxation is our core specialty. We work with traders on Apex, TopStep, FTMO, Tradeify, Take Profit, and all major funded account programs.'}},
+{"@type":"Question","name":'What is the Tax Snapshot tool?',"acceptedAnswer":{"@type":"Answer","text":'The Tax Snapshot is a free 2-minute questionnaire. Answer 8 questions about your trading and get a personalized summary of your tax exposure, missed deductions, and recommended next steps — reviewed by a real CPA.'}},
+{"@type":"Question","name":'Can you help traders who lost money?',"acceptedAnswer":{"@type":"Answer","text":'Absolutely. Unprofitable traders often need a CPA more than profitable ones. Properly filed trading losses can offset W-2 income, create carryforwards, and set you up for maximum savings when you become profitable.'}}]}
 </script>
 </head>
 <body>
@@ -482,6 +493,8 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   </div>
 </div>
 
+
+
 <!-- TICKER -->
 <div class="ticker-strip">
   <div class="tick-inner">
@@ -499,6 +512,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
     <div class="tick-item"><span class="tick-sym">S-CORP SETUP</span><span class="tick-val">Entity Optimization</span><span class="tick-chg">Save 15%+ SE Tax</span></div>
   </div>
 </div>
+
 
 <!-- WHAT TYPE OF TRADER ARE YOU -->
 <section style="background:#fff;padding:72px 5%;border-bottom:1px solid #e5e8ef;">
@@ -636,6 +650,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   </div>
 </section>
 
+
 <!-- FEATURE SHOWCASE -->
 <section id="features" style="background:#0a1628;padding:72px 5% 80px;">
   <div style="max-width:1000px;margin:0 auto;">
@@ -652,6 +667,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
         <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">Free Tool</div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">Tax Estimator</div>
         <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">See a breakdown of federal, SE, and state taxes based on your income and state — in 60 seconds.</div>
+        <!-- Mini UI mockup -->
         <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
           <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Estimated Breakdown</div>
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;">
@@ -678,6 +694,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
         <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">File It</div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">Smart Doc Checklist</div>
         <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">9 questions about your situation. Get a personalized list of exactly what to upload — nothing generic.</div>
+        <!-- Mini UI mockup -->
         <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
           <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Your Document Checklist</div>
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -708,6 +725,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
         <div style="font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#3dba7e;margin-bottom:8px;">Fully Async</div>
         <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:8px;">No Calls. Ever.</div>
         <div style="font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;margin-bottom:16px;">Upload your docs, we handle everything. No scheduling, no waiting on hold, no awkward "what's a prop firm?" questions.</div>
+        <!-- Mini UI mockup — process steps -->
         <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:10px;padding:14px;">
           <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
             <div style="width:24px;height:24px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;">1</div>
@@ -737,6 +755,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
           <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:#fff;margin-bottom:10px;line-height:1.3;">We Know Exactly How Apex, FTMO &amp; TopStep Are Taxed.</div>
           <div style="font-size:.8rem;color:rgba(255,255,255,.5);line-height:1.7;">No 1099? We handle it. Eval fees? We deduct them. SE tax on payouts? We calculate it correctly — and find every legal way to reduce it. Most CPAs have never seen a prop firm payout. We've filed thousands of them.</div>
         </div>
+        <!-- Wide mockup: prop firm tax breakdown -->
         <div style="background:#0a1628;border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;">
           <div style="font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;">Prop Firm Income — Tax Breakdown</div>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
@@ -946,12 +965,14 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
           <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
           <span class="logo-txt"><span style="color:#fff;">Trader</span><span class="gr">Tax</span></span>
         </a>
-        <p>Taxes Built for Traders. Independent, licensed tax professionals who understand prop firms, futures, options, and crypto taxation. TraderTax is a tax preparation platform, not a CPA firm.</p>
-        <p style="margin-top:9px;color:rgba(255,255,255,.25);font-size:.7rem;"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f474a4343406f5b5d4e4b4a5d5b4e5701414a5b">[email&#160;protected]</a></p>
+        <p>Taxes Built for Traders. Independent, licensed tax professionals who understand prop firms, futures, options, and crypto taxation. TraderTax is a financial services platform, not a CPA firm.</p>
+        <p style="margin-top:9px;color:rgba(255,255,255,.25);font-size:.7rem;">hello@tradertax.net</p>
       </div>
       <div class="ft-col"><h4>Services</h4><ul><li><a href="services.html">All Services</a></li><li><a href="prop-firm-taxes.html">Prop Firm Taxes</a></li><li><a href="mark-to-market.html">Mark-to-Market</a></li><li><a href="services.html">LLC &amp; S-Corp</a></li><li><a href="pricing.html">Pricing</a></li></ul></div>
-      <div class="ft-col"><h4>Resources</h4><ul><li><a href="blog.html">Blog</a></li><li><a href="faq.html">FAQ</a></li><li><a href="ultimate-guide.html">Tax Guide</a></li><li><a href="snapshot.html">Tax Snapshot</a></li><li><a href="partners.html">Partner Program</a></li></ul></div>
-      <div class="ft-col"><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="partners.html">Partners</a></li><li><a href="contact.html">Contact</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Service</a></li></ul></div>
+      <div class="ft-col"><h4>Resources</h4><ul><li><a href="blog.html">Blog</a></li><li><a href="faq.html">FAQ</a></li><li><a href="ultimate-guide.html">Tax Guide</a></li><li><a href="snapshot.html">Tax Snapshot</a></li>
+        <li><a href="partners.html">Partner Program</a></li></ul></div>
+      <div class="ft-col"><h4>Company</h4><ul><li><a href="about.html">About</a></li><li><a href="partners.html" style="font-size:.875rem;font-weight:500;color:#374151;text-decoration:none;">Partners</a></li>
+    <li><a href="contact.html">Contact</a></li><li><a href="privacy.html">Privacy Policy</a></li><li><a href="terms.html">Terms of Service</a></li></ul></div>
     </div>
     <div class="ft-bot">
       <div class="ft-copy">&copy; 2025 TraderTax. All rights reserved. Not a licensed CPA firm &mdash; we partner with licensed CPAs to deliver services.</div>
@@ -979,7 +1000,7 @@ p,.sec-sub,.h-sub,.prob-a,.svc-d,.wd,.ps-d,.be,.bm,.sav-note,.tq{color:#374151!i
   </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 function openModal(){document.getElementById('modal').classList.add('open');document.body.style.overflow='hidden';}
 function closeModal(){document.getElementById('modal').classList.remove('open');document.body.style.overflow='';}
 document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
@@ -987,4 +1008,8 @@ document.querySelectorAll('.cta-trigger').forEach(el=>el.addEventListener('click
 function submitModal(){const e=document.getElementById('m-email').value.trim();if(!e){alert('Please enter your email.');return;}closeModal();alert('Thanks! A licensed CPA will be in touch within one business day.');}
 const ro=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');ro.unobserve(e.target);}});},{threshold:0.1});
 document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
-const bo=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e
+const bo=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.m-fill').forEach(b=>{b.style.width=(b.dataset.width||0)+'%';});bo.unobserve(e.target);}});},{threshold:0.3});
+document.querySelectorAll('.why-vis').forEach(el=>bo.observe(el));
+</script>
+</body>
+</html>
