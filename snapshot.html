@@ -11,6 +11,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7RF9PP8BRN"></script>
 <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7RF9PP8BRN');</script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+const db = firebase.firestore();
+</script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 :root{
@@ -97,30 +111,31 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .results-wrap{width:100%;max-width:700px;padding:1.5rem;animation:fadeUp .4s ease;}
 .results-header{text-align:center;margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--navy-border);}
 .results-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--green-dim);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:.35rem .9rem;font-size:.75rem;color:var(--green);font-weight:700;margin-bottom:.9rem;letter-spacing:.5px;text-transform:uppercase;}
-.results-name{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:.4rem;}
-.results-sub{color:var(--gray);font-size:.9rem;line-height:1.55;}
+.results-name{font-family:'Syne',sans-serif;font-size:1.9rem;font-weight:800;margin-bottom:.4rem;color:#0a1628;}
+.results-sub{color:#6b7280;font-size:.9rem;line-height:1.55;}
 
-.ai-note{display:flex;align-items:flex-start;gap:.75rem;background:rgba(255,255,255,.03);border:1px solid var(--navy-border);border-radius:11px;padding:1rem 1.1rem;margin-bottom:1.25rem;}
+.ai-note{display:flex;align-items:flex-start;gap:.75rem;background:#fffbeb;border:1.5px solid #fbbf24;border-radius:11px;padding:1rem 1.1rem;margin-bottom:1.25rem;}
 .ai-note-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
-.ai-note-text{font-size:.8rem;color:var(--gray);line-height:1.6;}
-.ai-note-text strong{color:var(--light, #c8d8e8);font-weight:500;}
+.ai-note-text{font-size:.83rem;color:#374151;line-height:1.65;}
+.ai-note-text strong{color:#0a1628;font-weight:700;}
 
 .snap-section{margin-bottom:1rem;}
-.snap-section-label{font-size:.7rem;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:.6rem;}
+.snap-section-label{font-size:.72rem;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;font-weight:800;margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem;}
+.snap-section-label::after{content:'';flex:1;height:1px;background:var(--navy-border);}
 .snap-card{background:var(--navy-card);border:1.5px solid var(--navy-border);border-radius:13px;padding:1.25rem 1.3rem;margin-bottom:.65rem;}
-.snap-card.highlight{border-color:rgba(61,186,126,.4);}
-.snap-card-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:.5rem;display:flex;align-items:center;gap:.5rem;}
-.snap-card-body{font-size:.875rem;color:#aabbd0;line-height:1.65;}
+.snap-card.highlight{border-color:rgba(61,186,126,.4);background:#f8fffe;}
+.snap-card-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin-bottom:.65rem;display:flex;align-items:center;gap:.5rem;color:#0a1628;}
+.snap-card-body{font-size:.95rem;color:#374151;line-height:1.7;}
 .snap-card-body p{margin-bottom:.4rem;}
 .snap-card-body p:last-child{margin-bottom:0;}
 .snap-card-body ul{padding-left:1.1rem;}
-.snap-card-body li{margin-bottom:.3rem;}
-.price-range{font-family:'Syne',sans-serif;font-size:1.6rem;font-weight:800;color:var(--green);margin:.4rem 0 .2rem;}
-.price-note{font-size:.78rem;color:var(--gray);}
+.snap-card-body li{margin-bottom:.55rem;color:#374151;font-size:.95rem;}
+.price-range{font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--green);margin:.75rem 0 .35rem;letter-spacing:-1px;}
+.price-note{font-size:.82rem;color:#6b7280;margin-top:.25rem;}
 
 .cta-block{background:linear-gradient(135deg,rgba(61,186,126,.12),rgba(61,186,126,.04));border:1.5px solid rgba(61,186,126,.35);border-radius:16px;padding:1.75rem;text-align:center;margin-top:1.5rem;}
 .cta-block h3{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;margin-bottom:.4rem;}
-.cta-block p{font-size:.85rem;color:var(--gray);margin-bottom:1.25rem;line-height:1.5;}
+.cta-block p{font-size:.88rem;color:rgba(255,255,255,.75);margin-bottom:1.25rem;line-height:1.6;}
 .cta-disclaimer{font-size:.75rem;color:var(--gray);margin-top:.9rem;line-height:1.5;}
 .cta-disclaimer strong{color:var(--white);}
 .btn-cta{display:inline-block;background:var(--green);color:var(--navy);font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;padding:1rem 2.5rem;border-radius:10px;text-decoration:none;border:none;cursor:pointer;transition:all .2s;width:100%;letter-spacing:.3px;}
@@ -527,6 +542,50 @@ Urgency: ${aiSummary.urgency_flag?.toUpperCase()}
 Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
     formData.append('source', 'Tax Snapshot Tool');
     await fetch(APPS_SCRIPT_URL, {method:'POST', body:formData, mode:'no-cors'});
+  } catch(e) { /* silent fail */ }
+
+  // Save to Firestore 'leads' collection so admin dashboard sees it
+  try {
+    await db.collection('leads').add({
+      email: profile.email,
+      phone: profile.phone,
+      name: profile.name,
+      who: profile.who,
+      trades: profile.instruments,
+      profitable: profile.profitable,
+      income: profile.income,
+      situation: profile.situation,
+      structure: profile.structure,
+      needs: profile.needs,
+      bestTime: profile.bestTime,
+      notes: profile.notes,
+      cpaBreif: aiSummary.cpa_brief || '',
+      urgency: aiSummary.urgency_flag || 'medium',
+      priceLow: aiSummary.price_low || '$497',
+      priceHigh: aiSummary.price_high || '$1,297',
+      source: 'snapshot',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  } catch(e) { /* silent fail */ }
+
+  // Store snapshot in localStorage so signup page can link it to the account
+  try {
+    localStorage.setItem('tt_snapshot', JSON.stringify({
+      email: profile.email,
+      name: profile.name,
+      who: profile.who,
+      instruments: profile.instruments,
+      income: profile.income,
+      situation_summary: aiSummary.situation_summary,
+      key_issues: aiSummary.key_issues,
+      top_deductions: aiSummary.top_deductions,
+      recommended_service: aiSummary.recommended_service,
+      price_low: aiSummary.price_low,
+      price_high: aiSummary.price_high,
+      cpa_brief: aiSummary.cpa_brief,
+      urgency: aiSummary.urgency_flag,
+      timestamp: new Date().toISOString()
+    }));
   } catch(e) { /* silent fail */ }
 
   // Final loading step done

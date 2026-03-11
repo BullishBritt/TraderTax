@@ -311,8 +311,27 @@ main{padding:32px 40px;overflow-y:auto;}
           document.getElementById('stat-since').textContent = d.toLocaleDateString('en-US',{month:'short',year:'numeric'});
         }
 
-        // Snapshots
-        const snapshots = userData.snapshots || [];
+        // Snapshots — check for snapshot linked at signup OR in snapshots array
+        let snapshots = userData.snapshots || [];
+        
+        // If snapshot was linked at signup, show it as first entry
+        if (userData.snapshot && userData.snapshotLinked) {
+          const linkedSnap = {
+            year: new Date(userData.snapshot.timestamp || userData.createdAt).getFullYear(),
+            traderType: userData.snapshot.who || 'Trader',
+            summary: userData.snapshot.situation_summary || 'Tax snapshot completed',
+            date: userData.snapshot.timestamp || userData.createdAt,
+            priceRange: `${userData.snapshot.price_low} – ${userData.snapshot.price_high}`,
+            keyIssues: userData.snapshot.key_issues || [],
+            deductions: userData.snapshot.top_deductions || [],
+            recommendedService: userData.snapshot.recommended_service || '',
+          };
+          // Only add if not already in snapshots array
+          if (!snapshots.find(s => s.date === linkedSnap.date)) {
+            snapshots = [linkedSnap, ...snapshots];
+          }
+        }
+        
         document.getElementById('stat-snaps').textContent = snapshots.length;
         renderSnapshots(snapshots);
       }
@@ -338,18 +357,28 @@ main{padding:32px 40px;overflow-y:auto;}
       return;
     }
 
-    const cards = snapshots.slice().reverse().map(s => `
-      <div class="snapshot-card">
-        <div class="snap-year">${s.year || '—'}</div>
-        <div class="snap-info">
-          <div class="snap-type">${s.traderType || 'Trader Snapshot'}</div>
-          <div class="snap-summary">${s.summary || 'Tax analysis completed'}</div>
-          <div class="snap-date">${s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : ''}</div>
+    const cards = snapshots.slice().map(s => {
+      const issuesList = (s.keyIssues||[]).map(i=>`<li style="font-size:.8rem;color:#374151;margin-bottom:3px;">${i}</li>`).join('');
+      const dedList = (s.deductions||[]).map(d=>`<li style="font-size:.8rem;color:#374151;margin-bottom:3px;">${d}</li>`).join('');
+      return `
+      <div class="snapshot-card" style="flex-direction:column;align-items:flex-start;gap:12px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="snap-year">${s.year || new Date().getFullYear()}</div>
+            <div>
+              <div class="snap-type">${s.traderType || 'Trader Snapshot'}</div>
+              <div class="snap-date">${s.date ? new Date(s.date).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}) : ''}</div>
+            </div>
+          </div>
+          ${s.priceRange ? `<div style="font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800;color:#3dba7e;">${s.priceRange}</div>` : ''}
         </div>
-        <div class="snap-actions">
-          <button class="snap-btn primary" onclick="window.location.href='snapshot.html'">New Snapshot</button>
-        </div>
-      </div>`).join('');
+        ${s.summary ? `<div class="snap-summary" style="color:#374151;font-size:.88rem;line-height:1.6;">${s.summary}</div>` : ''}
+        ${issuesList ? `<div style="width:100%;"><div style="font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3dba7e;margin-bottom:6px;">Key Issues</div><ul style="padding-left:1.1rem;">${issuesList}</ul></div>` : ''}
+        ${dedList ? `<div style="width:100%;"><div style="font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#3dba7e;margin-bottom:6px;">Deductions to Capture</div><ul style="padding-left:1.1rem;">${dedList}</ul></div>` : ''}
+        ${s.recommendedService ? `<div style="background:#f0fdf7;border:1px solid #3dba7e;border-radius:8px;padding:10px 14px;width:100%;font-size:.83rem;color:#374151;">${s.recommendedService}</div>` : ''}
+        <button class="snap-btn primary" onclick="window.location.href='snapshot.html'" style="margin-top:4px;">Take New Snapshot →</button>
+      </div>`;
+    }).join('');
 
     overviewEl.innerHTML = cards;
     listEl.innerHTML = cards;

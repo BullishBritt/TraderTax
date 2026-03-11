@@ -201,14 +201,31 @@ function checkStrength(pw) {
       await updateProfile(cred.user, { displayName: `${firstName} ${lastName}` });
 
       // Save profile to Firestore
-      await setDoc(doc(db, 'users', cred.user.uid), {
+      const userData = {
         firstName,
         lastName,
         email,
         createdAt: new Date().toISOString(),
         taxYear: new Date().getFullYear(),
         snapshots: [],
-      });
+      };
+
+      // If they filled out a snapshot before signing up, link it to their account
+      try {
+        const snapRaw = localStorage.getItem('tt_snapshot');
+        if (snapRaw) {
+          const snap = JSON.parse(snapRaw);
+          // Only link if email matches or snapshot email is empty
+          if (!snap.email || snap.email.toLowerCase() === email.toLowerCase()) {
+            userData.snapshot = snap;
+            userData.snapshotLinked = true;
+            // Also update the Firestore leads record with their UID
+            localStorage.removeItem('tt_snapshot');
+          }
+        }
+      } catch(snapErr) { /* silent */ }
+
+      await setDoc(doc(db, 'users', cred.user.uid), userData);
 
       showMsg('Account created! Redirecting to your dashboard...', 'success');
       setTimeout(() => window.location.href = 'dashboard.html', 1000);

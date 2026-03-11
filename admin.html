@@ -259,6 +259,15 @@ let sortField = 'date';
 let sortDir = -1;
 
 // ADMIN EMAILS — only these can access
+// URL token protection — admin requires ?key=tt2025admin in URL
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('key') !== 'tt2025admin') {
+    document.body.innerHTML = '';
+    window.location.replace('index.html');
+  }
+})();
+
 const ADMIN_EMAILS = ['hello@tradertax.net', 'brittainalfaro@gmail.com', 'brittain0404@yahoo.com'];
 
 // ===== AUTH =====
