@@ -215,7 +215,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 <div id="cpa-profile"></div>
 
 <script>
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec';
+
 
 const steps = [
   {
@@ -541,7 +541,6 @@ ${aiSummary.cpa_brief}
 Urgency: ${aiSummary.urgency_flag?.toUpperCase()}
 Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
     formData.append('source', 'Tax Snapshot Tool');
-    await fetch(APPS_SCRIPT_URL, {method:'POST', body:formData, mode:'no-cors'});
   } catch(e) { /* silent fail */ }
 
   // Save to Firestore 'leads' collection so admin dashboard sees it

@@ -2,14 +2,29 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Leads — allow anyone to write (public forms), only admin can read
+    match /leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Calculator leads — same
+    match /calculator_leads/{leadId} {
+      allow create: if true;
+      allow read, update, delete: if request.auth != null;
+    }
+
+    // Users — only the account owner
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow read: if request.auth != null && request.auth.token.email == "hello@tradertax.net";
     }
 
-    match /submissions/{userId} {
+    // User snapshots
+    match /users/{userId}/snapshots/{snapId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
       allow read: if request.auth != null && request.auth.token.email == "hello@tradertax.net";
     }
+
   }
 }
