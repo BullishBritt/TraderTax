@@ -20,15 +20,12 @@
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
   </url>
-
   <url>
     <loc>https://www.tradertax.net/about.html</loc>
     <lastmod>2026-03-06</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
-
-
   <url>
     <loc>https://www.tradertax.net/contact.html</loc>
     <lastmod>2026-03-06</lastmod>
@@ -139,11 +136,41 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://www.tradertax.net/snapshot.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://www.tradertax.net/stock-trading-taxes.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.tradertax.net/short-selling-taxes.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.tradertax.net/options-strategies-taxes.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.tradertax.net/capital-gains-tax-traders.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.tradertax.net/partners.html</loc>
+    <lastmod>2026-03-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
-  <url><loc>https://tradertax.net/snapshot.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://tradertax.net/stock-trading-taxes.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradertax.net/short-selling-taxes.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradertax.net/options-strategies-taxes.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradertax.net/capital-gains-tax-traders.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://tradertax.net/partners.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
 </urlset>
