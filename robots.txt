@@ -23,5 +23,5 @@ Allow: /
 User-agent: Bingbot
 Allow: /
 
-Sitemap: https://tradertax.net/sitemap.xml
+Sitemap: https://www.tradertax.net/sitemap.xml
 LLMs: https://tradertax.net/llms.txt
