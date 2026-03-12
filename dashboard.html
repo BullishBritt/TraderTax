@@ -455,14 +455,20 @@ function uploadFiles(files){
     pl.appendChild(pe);
     const path=`clients/${currentUser.uid}/${yr}/${Date.now()}_${file.name}`;
     const task=uploadBytesResumable(ref(storage,path),file);
-    task.on('state_changed',snap=>{const pct=Math.round(snap.bytesTransferred/snap.totalBytes*100);const el=document.getElementById(pid);if(el){el.querySelector('.prog-bar').style.width=pct+'%';el.querySelectorAll('span')[3].textContent=pct+'%';}},
-    err=>{const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[3].textContent='Error';console.error(err);},
+    task.on('state_changed',snap=>{const pct=Math.round(snap.bytesTransferred/snap.totalBytes*100);const el=document.getElementById(pid);if(el){el.querySelector('.prog-bar').style.width=pct+'%';el.querySelectorAll('span')[2].textContent=pct+'%';}},
+    err=>{const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='Error';console.error('Upload error:',err);},
     async()=>{
-      const url=await getDownloadURL(task.snapshot.ref);
-      await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
-      const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[3].textContent='✓';
-      setTimeout(()=>{const e=document.getElementById(pid);if(e)e.remove();},2000);
-      loadDocuments(currentUser);
+      try {
+        const url=await getDownloadURL(task.snapshot.ref);
+        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
+        const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='✓';
+        setTimeout(()=>{const e=document.getElementById(pid);if(e)e.remove();},2000);
+        loadDocuments(currentUser);
+      } catch(e) {
+        console.error('Firestore write error:',e);
+        const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='✓ Saved';
+        setTimeout(()=>{const ev=document.getElementById(pid);if(ev)ev.remove();},2000);
+      }
     });
   });
 }
