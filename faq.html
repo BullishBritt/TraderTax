@@ -125,6 +125,29 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .tt-mob a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
 @media(max-width:860px){.tt-nav-links{display:none;}.tt-ham{display:flex;}}
 </style>
+<style id="tt-overflow-fix">
+html, body { overflow-x: hidden; max-width: 100%; }
+* { box-sizing: border-box; }
+</style>
+<style id="tt-nav-responsive">
+nav { overflow: hidden; }
+html, body { overflow-x: hidden; }
+* { box-sizing: border-box; }
+/* Hide less important nav links at medium screens */
+@media(max-width:1100px) {
+  .tt-nav-links li:nth-child(4),
+  .tt-nav-links li:nth-child(5),
+  .tt-nav-links li:nth-child(6) { display: none; }
+}
+@media(max-width:960px) {
+  .tt-nav-links li:nth-child(3),
+  .tt-nav-links li:nth-child(7) { display: none; }
+}
+@media(max-width:860px) {
+  .tt-nav-links { display: none !important; }
+  .tt-ham { display: flex !important; }
+}
+</style>
 </head>
 <body>
 <!-- NAV -->
