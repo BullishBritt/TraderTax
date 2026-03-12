@@ -653,7 +653,7 @@ async function confirmAssign() {
 
 async function loadCPAs() {
   try {
-    const snap=await db.collection('users').where('role','==','cpa').get().catch(()=>({docs:[]}));
+    const snap=await db.collection('cpas').where('status','==','active').get().catch(()=>({docs:[]}));
     allCPAs=snap.docs.map(d=>({id:d.id,...d.data()}));
     document.getElementById('tn-cpas').textContent=allCPAs.length;
     document.getElementById('tn-cpas-sub').textContent=allCPAs.length+' specialists';
@@ -677,14 +677,29 @@ window.createCPA = async function() {
   const pw=document.getElementById('cpa-pw').value.trim();
   const creds=document.getElementById('cpa-creds').value.trim();
   const msg=document.getElementById('cpa-create-msg');
-  if(!email||!pw||!first){msg.textContent='First name, email, and password are required.';msg.style.color='var(--red)';return;}
+  if(!email||!first){msg.textContent='First name and email are required.';msg.style.color='var(--red)';return;}
   msg.textContent='Creating account...';msg.style.color='var(--muted)';
   try {
-    await db.collection('pending_cpas').add({firstName:first,lastName:last,email,credentials:creds,temporaryPassword:pw,role:'cpa',createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:'admin'});
-    msg.textContent='✓ CPA request saved. Complete setup in Firebase Auth console.';msg.style.color='var(--green-dk)';
-    showToast('CPA account queued','green-t');
+    // Save CPA to cpas collection (used by admin CPA tab)
+    const ref = await db.collection('cpas').add({
+      firstName:first, lastName:last, email, credentials:creds,
+      role:'cpa', status:'active', clientCount:0,
+      temporaryPassword:pw||'',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:'admin'
+    });
+    // Send welcome email via EmailJS
+    try {
+      emailjs.send('service_9p67iy9','template_vtt9a58',{
+        name: first+' '+last, email,
+        message:`You've been added as a CPA/Specialist on TraderTax!\n\nLog in to your workspace at: https://www.tradertax.net/cpa.html\n\nEmail: ${email}\n${pw?'Temporary password: '+pw+'\n(Please change this after first login)':''}\n\nWelcome to the team!`
+      }).catch(()=>{});
+    } catch(e){}
+    msg.textContent='✓ CPA account created! Welcome email sent.';msg.style.color='var(--green-dk)';
+    showToast('CPA account created','green-t');
     document.getElementById('cpa-first').value='';document.getElementById('cpa-last').value='';
     document.getElementById('cpa-email').value='';document.getElementById('cpa-pw').value='';document.getElementById('cpa-creds').value='';
+    loadCPAs();
   }catch(e){msg.textContent='Error: '+e.message;msg.style.color='var(--red)';}
 };
 

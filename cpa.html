@@ -229,7 +229,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
     <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
     <button class="lg-btn" onclick="lgIn()">Sign In to Workspace</button>
     <div class="lg-err" id="lg-err">Incorrect credentials or access not authorized.</div>
-    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="mailto:hello@tradertax.net" style="color:var(--green);font-weight:600;">hello@tradertax.net</a></div>
+    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="/cdn-cgi/l/email-protection#5c34393030331c282e3d38392e283d2472323928" style="color:var(--green);font-weight:600;"><span class="__cf_email__" data-cfemail="94fcf1f8f8fbd4e0e6f5f0f1e6e0f5ecbafaf1e0">[email&#160;protected]</span></a></div>
   </div>
 </div>
 
@@ -460,7 +460,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
   </main>
 </div><!-- end app -->
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
@@ -645,8 +645,12 @@ async function openClient(clientId) {
 
   // Load docs for client
   try {
-    const docsSnap = await db.collection('client_documents').where('uid','==',clientId).orderBy('uploadedAt','desc').get();
-    const docs = docsSnap.docs.map(d => ({id:d.id,...d.data()}));
+    const docsSnap = await db.collection('client_documents').where('uid','==',clientId).get();
+    const docs = docsSnap.docs.map(d => ({id:d.id,...d.data()})).sort((a,b)=>{
+      const at=a.uploadedAt?.toMillis?.()||0;
+      const bt=b.uploadedAt?.toMillis?.()||0;
+      return bt-at;
+    });
     document.getElementById('ws-doc-count').textContent = docs.length;
     document.getElementById('ws-docs-count').textContent = `(${docs.length} files)`;
 
@@ -735,9 +739,12 @@ async function loadClientNotes(clientId) {
   try {
     const snap = await db.collection('cpa_notes')
       .where('clientUid','==',clientId)
-      .where('cpaUid','==',currentUser.uid)
-      .orderBy('createdAt','desc').get();
-    const notes = snap.docs.map(d=>({id:d.id,...d.data()}));
+      .where('cpaUid','==',currentUser.uid).get();
+    const notes = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
+      const at=a.createdAt?.toMillis?.()||0;
+      const bt=b.createdAt?.toMillis?.()||0;
+      return bt-at;
+    });
     if (!notes.length) {
       document.getElementById('ws-notes-list').innerHTML = '<div class="empty"><div class="empty-icon">📝</div><h3>No notes yet</h3><p>Your notes are private — never visible to clients.</p></div>';
     } else {
@@ -806,8 +813,12 @@ function renderAllDocs() {
 /* ── ALL NOTES ── */
 async function loadAllNotes() {
   try {
-    const snap = await db.collection('cpa_notes').where('cpaUid','==',currentUser.uid).orderBy('createdAt','desc').limit(100).get();
-    allMyNotes = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const snap = await db.collection('cpa_notes').where('cpaUid','==',currentUser.uid).limit(100).get();
+    allMyNotes = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
+      const at=a.createdAt?.toMillis?.()||0;
+      const bt=b.createdAt?.toMillis?.()||0;
+      return bt-at;
+    });
     if(!allMyNotes.length){
       document.getElementById('all-notes-list').innerHTML='<div class="empty"><div class="empty-icon">📝</div><h3>No notes yet</h3><p>Notes you add in client workspaces appear here.</p></div>';
       return;
@@ -901,12 +912,4 @@ window.showTab = function(tab) {
 
 /* ── TOAST ── */
 function showToast(msg,type='') {
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.className='toast'+(type?' '+type:'');
-  setTimeout(()=>t.classList.add('show'),10);
-  setTimeout(()=>t.classList.remove('show'),3000);
-}
-</script>
-  <script src="affiliate-tracker.js"></script>
-</body>
-</html>
+  const t=document.getElementByI

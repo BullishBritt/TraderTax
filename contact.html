@@ -237,7 +237,7 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
       <div class="cm-icon">✉️</div>
       <div>
         <div class="cm-label">Email</div>
-        <div class="cm-value"><a href="mailto:hello@tradertax.net" style="color:var(--navy);">hello@tradertax.net</a></div>
+        <div class="cm-value"><a href="/cdn-cgi/l/email-protection#442c2128282b0430362520213630253c6a2a2130" style="color:var(--navy);"><span class="__cf_email__" data-cfemail="1179747d7d7e516563707574636570693f7f7465">[email&#160;protected]</span></a></div>
         <div class="cm-note">General inquiries, existing client questions</div>
       </div>
     </div>
@@ -325,7 +325,7 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
           <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;"><span style="color:#fff;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
         </a>
         <p style="font-size:.85rem;line-height:1.7;margin-bottom:8px;">Taxes Built for Traders. Independent, licensed tax professionals who understand prop firms, futures, options, and crypto taxation.</p>
-        <p style="font-size:.75rem;color:rgba(255,255,255,.3);">hello@tradertax.net</p>
+        <p style="font-size:.75rem;color:rgba(255,255,255,.3);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="3f575a5353507f4b4d5e5b5a4d4b5e4711515a4b">[email&#160;protected]</a></p>
       </div>
       <div>
         <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Services</h4>
@@ -365,21 +365,10 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
   </div>
 </footer>
 
-<script src="affiliate-tracker.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="affiliate-tracker.js"></script>
 <script>
 // Pre-fill referral code from affiliate tracker after it loads
 window.addEventListener('load', function() {
   setTimeout(function() {
     try {
-      const stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
-      const affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
-      if (affCode) {
-        const el = document.getElementById('cf-refcode');
-        if (el && !el.value) el.value = affCode;
-      }
-    } catch(e) {}
-  }, 300);
-});
-</script>
-</body>
-</html>
+      const stored = localStorage.getItem('tt_affiliate_ref') || loca
