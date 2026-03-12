@@ -371,6 +371,15 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
         <div class="stat amber"><div class="stat-lbl">Conversions</div><div class="stat-val" id="sa-converted">—</div><div class="stat-sub">Became clients</div></div>
         <div class="stat"><div class="stat-lbl">Payouts Owed</div><div class="stat-val" id="sa-owed">—</div><div class="stat-sub">Unpaid commissions</div></div>
       </div>
+
+      <!-- PENDING APPLICATIONS -->
+      <div id="pending-apps-section" style="display:none;margin-bottom:24px;">
+        <div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          Pending Applications <span id="pending-count" style="background:#f59e0b;color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;">0</span>
+        </div>
+        <div id="pending-apps-body"></div>
+      </div>
+
       <div class="form-card" style="margin-bottom:24px;">
         <div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;">Add New Affiliate</div>
         <div class="form-grid">
@@ -481,7 +490,7 @@ function showApp(user) {
   document.getElementById('login-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user').textContent = user.email;
-  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates();
+  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates(); loadPendingApplications();
 }
 
 function handleSignOut() { auth.signOut(); location.reload(); }
@@ -771,6 +780,65 @@ window.showTab = function(tab) {
 };
 
 let allAffiliates = [];
+
+async function loadPendingApplications() {
+  try {
+    const snap = await db.collection('affiliate_applications').where('status','==','pending').orderBy('createdAt','desc').get().catch(()=>({docs:[]}));
+    const apps = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const section = document.getElementById('pending-apps-section');
+    const body = document.getElementById('pending-apps-body');
+    const count = document.getElementById('pending-count');
+    if(!apps.length){section.style.display='none';return;}
+    section.style.display='block';
+    count.textContent = apps.length;
+    body.innerHTML = apps.map(a=>`
+      <div style="background:var(--bg);border:1.5px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-weight:700;font-size:.95rem;">${a.firstName||''} ${a.lastName||''}</div>
+          <div style="font-size:.82rem;color:var(--muted);">${a.email||''}</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px;">${a.partnerType||''} · ${a.platform||''} · ${a.audience||''}</div>
+          ${a.notes?`<div style="font-size:.78rem;color:var(--muted);margin-top:2px;font-style:italic;">"${a.notes}"</div>`:''}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-action" style="padding:8px 16px;font-size:.82rem;" onclick="approveAffiliate('${a.id}','${a.firstName} ${a.lastName}','${a.email}')">✓ Approve</button>
+          <button class="btn-action" style="padding:8px 16px;font-size:.82rem;background:#dc2626;" onclick="rejectAffiliate('${a.id}')">✕ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch(e){console.error('Pending apps:',e);}
+}
+
+async function approveAffiliate(appId, name, email) {
+  const code = (name.split(' ')[0]||'AFF').toUpperCase().replace(/[^A-Z]/g,'') + Math.floor(Math.random()*900+100);
+  try {
+    // Create affiliate record
+    await db.collection('affiliates').add({
+      name, email, code,
+      commissionType:'flat', commissionAmount:75,
+      status:'active', approved:true,
+      totalLeads:0, totalClients:0, totalPaid:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:'admin'
+    });
+    // Mark application as approved
+    await db.collection('affiliate_applications').doc(appId).update({status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // Send welcome email via EmailJS
+    try {
+      emailjs.send('service_9p67iy9','template_vtt9a58',{
+        name, email,
+        message:`You've been approved as a TraderTax affiliate!\n\nYour referral code: ${code}\nYour referral link: https://www.tradertax.net/?ref=${code}\n\nLog in to your affiliate portal at: https://www.tradertax.net/affiliate-portal.html\n\nFirst time logging in? Click "New Affiliate? Set up your account" on the portal page to create your password.\n\nWelcome to the team!`
+      }).catch(()=>{});
+    } catch(e){}
+    alert(`✓ Approved! ${name} has been added with code ${code}. Welcome email sent.`);
+    loadPendingApplications();
+    loadAffiliates();
+  } catch(e){alert('Error approving: '+e.message);}
+}
+
+async function rejectAffiliate(appId) {
+  if(!confirm('Reject this application?'))return;
+  await db.collection('affiliate_applications').doc(appId).update({status:'rejected'});
+  loadPendingApplications();
+}
 
 async function loadAffiliates() {
   try {

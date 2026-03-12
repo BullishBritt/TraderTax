@@ -160,13 +160,35 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);}
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
       <div class="login-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></div>
     </div>
-    <div class="login-sub">Sign in to your affiliate portal</div>
+    <div class="login-sub">Affiliate Portal</div>
     <div class="login-tag">Affiliate Partner</div>
-    <div class="lg-field"><label>Email</label><input type="email" id="lg-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')lgIn()"/></div>
-    <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
-    <button class="lg-btn" onclick="lgIn()">Sign In</button>
-    <div class="lg-err" id="lg-err">Incorrect credentials.</div>
-    <div class="lg-noacct">Want to become an affiliate? <a href="partners.html">Apply here →</a></div>
+
+    <!-- Tab switcher -->
+    <div style="display:flex;gap:0;margin-bottom:24px;border:1.5px solid var(--border);border-radius:9px;overflow:hidden;">
+      <button id="tab-signin" onclick="switchAffTab('signin')" style="flex:1;padding:9px;border:none;background:var(--navy);color:#fff;font-family:Syne,sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">Sign In</button>
+      <button id="tab-setup" onclick="switchAffTab('setup')" style="flex:1;padding:9px;border:none;background:var(--surface);color:var(--muted);font-family:Syne,sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">First Time Setup</button>
+    </div>
+
+    <!-- Sign In -->
+    <div id="pane-signin">
+      <div class="lg-field"><label>Email</label><input type="email" id="lg-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+      <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+      <button class="lg-btn" onclick="lgIn()">Sign In</button>
+      <div class="lg-err" id="lg-err">Incorrect credentials.</div>
+    </div>
+
+    <!-- First Time Setup -->
+    <div id="pane-setup" style="display:none;">
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:16px;line-height:1.6;">Already approved? Enter your email and create a password to access your portal.</p>
+      <div class="lg-field"><label>Email (must match approved application)</label><input type="email" id="setup-email" placeholder="your@email.com"/></div>
+      <div class="lg-field"><label>Create Password</label><input type="password" id="setup-pw" placeholder="Min 6 characters"/></div>
+      <div class="lg-field"><label>Confirm Password</label><input type="password" id="setup-pw2" placeholder="Repeat password"/></div>
+      <button class="lg-btn" onclick="setupAccount()">Create My Account</button>
+      <div class="lg-err" id="setup-err"></div>
+      <div id="setup-ok" style="display:none;color:#3dba7e;font-size:.82rem;margin-top:8px;text-align:center;font-weight:700;">✓ Account created! Signing you in...</div>
+    </div>
+
+    <div class="lg-noacct">Not approved yet? <a href="partners.html">Apply here →</a></div>
   </div>
 </div>
 
@@ -279,6 +301,41 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);}
 <script>
 const db = firebase.firestore();
 const auth = firebase.auth();
+
+function switchAffTab(tab) {
+  document.getElementById('pane-signin').style.display = tab==='signin'?'block':'none';
+  document.getElementById('pane-setup').style.display = tab==='setup'?'block':'none';
+  document.getElementById('tab-signin').style.background = tab==='signin'?'var(--navy)':'var(--surface)';
+  document.getElementById('tab-signin').style.color = tab==='signin'?'#fff':'var(--muted)';
+  document.getElementById('tab-setup').style.background = tab==='setup'?'var(--navy)':'var(--surface)';
+  document.getElementById('tab-setup').style.color = tab==='setup'?'#fff':'var(--muted)';
+}
+
+async function setupAccount() {
+  const email = document.getElementById('setup-email').value.trim();
+  const pw = document.getElementById('setup-pw').value;
+  const pw2 = document.getElementById('setup-pw2').value;
+  const err = document.getElementById('setup-err');
+  err.style.display='none';
+  if(!email){err.textContent='Enter your email.';err.style.display='block';return;}
+  if(pw.length<6){err.textContent='Password must be at least 6 characters.';err.style.display='block';return;}
+  if(pw!==pw2){err.textContent='Passwords do not match.';err.style.display='block';return;}
+  // Check if email is an approved affiliate
+  const snap = await db.collection('affiliates').where('email','==',email).where('status','==','active').limit(1).get().catch(()=>({docs:[]}));
+  if(snap.docs.length===0){err.textContent='No approved affiliate account found for this email. Contact hello@tradertax.net.';err.style.display='block';return;}
+  try {
+    await auth.createUserWithEmailAndPassword(email, pw);
+    document.getElementById('setup-ok').style.display='block';
+  } catch(e) {
+    if(e.code==='auth/email-already-in-use'){
+      // Account exists, just sign them in
+      try { await auth.signInWithEmailAndPassword(email, pw); }
+      catch(e2){ err.textContent='Account exists — try signing in instead.';err.style.display='block'; }
+    } else {
+      err.textContent = e.message; err.style.display='block';
+    }
+  }
+}
 let currentUser = null;
 let affData = null;
 
