@@ -1217,17 +1217,24 @@ window.openClientProfile = async function(clientId) {
   body.innerHTML='<div class="loading"><span class="spin"></span>Loading profile...</div>';
 
   const clientFromList = allClients.find(c=>c.id===clientId)||null;
-  const userDoc = clientFromList ? null : await db.collection('users').doc(clientId).get().catch(()=>null);
-  const emailFallback = uidEmailLookup[clientId] || (_allDocs.find(d=>d.uid===clientId)?.clientEmail) || '';
-  const client = clientFromList || (userDoc?.exists ? {id:clientId,...userDoc.data(),email:userDoc.data().email||emailFallback} : {id:clientId,email:emailFallback});
-  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||emailFallback||clientId||'Client';
-  title.textContent=name+' — Profile';
+  const userDoc = await db.collection('users').doc(clientId).get().catch(()=>null);
+  const userEmail = userDoc?.exists ? (userDoc.data().email||'') : '';
 
-  const [docsSnap,notesSnap,returnsSnap]=await Promise.all([
+  const [docsSnap,notesSnap,returnsSnap,ticketSnap]=await Promise.all([
     db.collection('client_documents').where('uid','==',clientId).get().catch(()=>({docs:[]})),
     db.collection('cpa_notes').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
-    db.collection('tax_returns').where('clientUid','==',clientId).get().catch(()=>({docs:[]}))
+    db.collection('tax_returns').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('support_tickets').where('clientUid','==',clientId).limit(1).get().catch(()=>({docs:[]}))
   ]);
+
+  const emailFromDoc = docsSnap.docs.find(d=>d.data().clientEmail)?.data().clientEmail||'';
+  const emailFromTicket = ticketSnap.docs[0]?.data().clientEmail||'';
+  const resolvedEmail = userEmail||emailFromDoc||emailFromTicket||uidEmailLookup[clientId]||'';
+
+  const baseData = userDoc?.exists ? {id:clientId,...userDoc.data(),email:resolvedEmail} : {id:clientId,email:resolvedEmail};
+  const client = clientFromList ? {...clientFromList,email:clientFromList.email||resolvedEmail} : baseData;
+  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||resolvedEmail||'Unknown Client';
+  title.textContent = name + ' — Profile';
 
   const docs=docsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.seconds||0)-(a.uploadedAt?.seconds||0));
   const notes=notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
@@ -1249,7 +1256,7 @@ window.openClientProfile = async function(clientId) {
   body.innerHTML=`
     <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
       <div style="width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
-      <div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">${name}</div><div style="font-size:.78rem;color:rgba(255,255,255,.6);">${client.email||'—'}${client.phone?' · '+client.phone:''}</div></div>
+      <div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">${name==='Unknown Client'&&resolvedEmail?resolvedEmail:name}</div><div style="font-size:.78rem;color:rgba(255,255,255,.6);">${resolvedEmail||'No email on file'}${client.phone?' · '+client.phone:''}</div></div>
       <div style="text-align:right;"><span style="background:${stColors[st]||'#6b7280'};color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;text-transform:uppercase;">${st}</span><div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">Tax Year ${client.taxYear||2025}</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
@@ -1263,9 +1270,33 @@ window.openClientProfile = async function(clientId) {
     ${taxReturn.timeline?.length?`<div style="margin-bottom:20px;"><div class="modal-sec-title">📅 Return Timeline</div>${taxReturn.timeline.map(t=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.74rem;color:var(--muted);white-space:nowrap;min-width:60px;">${new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div style="font-size:.82rem;color:var(--navy);">${t.note}</div></div>`).join('')}</div>`:''}
     <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
       <button onclick="closeClientProfile();openAssignModal('${clientId}','${name.replace(/'/g,'')}')" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:1.5px solid var(--border);border-radius:9px;background:none;cursor:pointer;color:var(--navy);">${client.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button>
-      <a href="mailto:${client.email||''}" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;display:block;">Email Client</a>
+      <a href="mailto:${resolvedEmail||''}" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;display:block;">Email Client</a>
     </div>
+    ${!resolvedEmail?`<div style="margin-top:14px;padding:12px 14px;background:#fff8ed;border:1.5px solid #f59e0b;border-radius:10px;">
+      <div style="font-size:.76rem;font-weight:700;color:#b45309;margin-bottom:8px;">⚠️ No email found — set it manually:</div>
+      <div style="display:flex;gap:8px;">
+        <input id="manual-email-input" type="email" placeholder="client@email.com" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:.82rem;outline:none;"/>
+        <button onclick="saveClientEmail('${clientId}',document.getElementById('manual-email-input').value)" style="padding:8px 16px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:.8rem;font-weight:700;cursor:pointer;">Save</button>
+      </div>
+    </div>`:''}
   `;
+};
+
+window.saveClientEmail = async function(clientId, email) {
+  if(!email||!email.includes('@')){showToast('Enter a valid email','error');return;}
+  try {
+    // Write to users doc
+    await db.collection('users').doc(clientId).set({email},{merge:true});
+    // Backfill all their docs
+    const snap = await db.collection('client_documents').where('uid','==',clientId).get();
+    const batch = db.batch();
+    snap.docs.forEach(d=>{ if(!d.data().clientEmail) batch.update(d.ref,{clientEmail:email}); });
+    await batch.commit();
+    uidEmailLookup[clientId] = email;
+    showToast('Email saved ✓','success');
+    loadAllDocuments();
+    openClientProfile(clientId);
+  } catch(e){ showToast('Error: '+e.message,'error'); }
 };
 
 // ── DOCUMENTS TAB ──
@@ -1333,7 +1364,8 @@ function renderDocs(){
   const typeColors={client:'var(--blue-lt)',return:'var(--green-lt)'};
   const typeLabels={client:'Client Doc',return:'CPA Return'};
   document.getElementById('docs-body').innerHTML=docs.map(d=>{
-    const clientName=d.clientEmail||(d.uid?(clientLookup[d.uid]||uidEmailLookup[d.uid]||d.uid):'—');
+    const clientName=d.clientEmail||(d.uid?(clientLookup[d.uid]||uidEmailLookup[d.uid]||''):'');
+    const clientDisplay=clientName||'<span style="color:var(--muted);font-size:.74rem;">Unknown</span>';
     const uploaded=fmtDate(d.uploadedAt||d.createdAt);
     const category=d.category||d.documentType||'General';
     const typeBadge=`<span style="background:${typeColors[d._type]||'var(--bg)'};color:var(--navy);padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:700;">${typeLabels[d._type]||d._type}</span>`;
@@ -1343,7 +1375,7 @@ function renderDocs(){
     const safeName=(d.fileName||d.name||'Document').replace(/'/g,"\\'");
     const viewBtn=docUrl?`<button onclick="event.stopPropagation();openDocPreview('${safeUrl}','${safeName}')" style="font-size:.75rem;font-weight:700;color:var(--green-dk);background:none;border:1.5px solid var(--green);border-radius:7px;padding:5px 12px;cursor:pointer;">${isImg?'🖼 View':'📄 View'}</button>`:'<span style="font-size:.74rem;color:var(--muted);">No link</span>';
     const clientId=d.uid||'';
-    return`<div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 100px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="if(event.target.tagName!=='BUTTON'&&'${clientId}')openClientProfile('${clientId}')"><div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Untitled'}</div><div style="margin-top:3px;">${typeBadge}</div></div><div style="font-size:.82rem;color:var(--body);">${clientName}</div><div style="font-size:.8rem;color:var(--muted);">${category}</div><div style="font-size:.78rem;color:var(--muted);">${uploaded}</div><div>${viewBtn}</div></div>`;
+    return`<div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 100px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="if(event.target.tagName!=='BUTTON'&&'${clientId}')openClientProfile('${clientId}')"><div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Untitled'}</div><div style="margin-top:3px;">${typeBadge}</div></div><div style="font-size:.82rem;color:var(--body);">${clientDisplay}</div><div style="font-size:.8rem;color:var(--muted);">${category}</div><div style="font-size:.78rem;color:var(--muted);">${uploaded}</div><div>${viewBtn}</div></div>`;
   }).join('');
 }
 
