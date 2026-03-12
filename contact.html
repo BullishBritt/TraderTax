@@ -36,7 +36,6 @@ footer p{font-size:0.72rem;color:rgba(255,255,255,.4);margin:0;}
 footer a{color:rgba(255,255,255,.4);}
 @media(max-width:768px){.nav-links-inner{display:none;}}
 </style>
-<!-- Google Analytics GA4 -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-7RF9PP8BRN"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -55,6 +54,12 @@ async function submitContactForm() {
   if (!email) { alert('Please enter your email.'); return; }
   btn.textContent = 'Sending...';
   btn.disabled = true;
+
+  // Referral code: manual entry takes priority, then affiliate tracker
+  const manualRef = document.getElementById('cf-refcode').value.trim();
+  const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
+  if (manualRef) affPayload.affiliateCode = manualRef;
+
   try {
     await db.collection('leads').add({
       firstName: document.getElementById('cf-fname').value.trim(),
@@ -64,8 +69,9 @@ async function submitContactForm() {
       traderType: document.getElementById('cf-trader-type').value,
       service: document.getElementById('cf-service').value,
       notes: document.getElementById('cf-notes').value.trim(),
+      referralCode: manualRef || affPayload.affiliateCode || '',
       source: 'Contact Lead',
-      ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
+      ...affPayload,
       createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     btn.textContent = 'Request Sent ✓';
@@ -85,7 +91,6 @@ async function submitContactForm() {
   }
 }
 </script>
-    <!-- EmailJS -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <script type="text/javascript">
       emailjs.init("dL1qGwo32XBoAeMPB");
@@ -122,32 +127,15 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .tt-mob a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
 @media(max-width:860px){.tt-nav-links{display:none;}.tt-ham{display:flex;}}
 </style>
-<style id="tt-overflow-fix">
-html, body { overflow-x: hidden; max-width: 100%; }
-* { box-sizing: border-box; }
-</style>
+<style id="tt-overflow-fix">html,body{overflow-x:hidden;max-width:100%;}*{box-sizing:border-box;}</style>
 <style id="tt-nav-responsive">
-nav { overflow: hidden; }
-html, body { overflow-x: hidden; }
-* { box-sizing: border-box; }
-/* Hide less important nav links at medium screens */
-@media(max-width:1100px) {
-  .tt-nav-links li:nth-child(4),
-  .tt-nav-links li:nth-child(5),
-  .tt-nav-links li:nth-child(6) { display: none; }
-}
-@media(max-width:960px) {
-  .tt-nav-links li:nth-child(3),
-  .tt-nav-links li:nth-child(7) { display: none; }
-}
-@media(max-width:860px) {
-  .tt-nav-links { display: none !important; }
-  .tt-ham { display: flex !important; }
-}
+nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
+@media(max-width:1100px){.tt-nav-links li:nth-child(4),.tt-nav-links li:nth-child(5),.tt-nav-links li:nth-child(6){display:none;}}
+@media(max-width:960px){.tt-nav-links li:nth-child(3),.tt-nav-links li:nth-child(7){display:none;}}
+@media(max-width:860px){.tt-nav-links{display:none!important;}.tt-ham{display:flex!important;}}
 </style>
 </head>
 <body>
-<!-- NAV -->
 <nav>
   <a href="index.html" class="tt-logo">
     <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
@@ -185,8 +173,9 @@ html, body { overflow-x: hidden; }
   <a href="login.html">Log In</a>
   <a href="signup.html">Sign Up</a>
   <a href="snapshot.html" style="background:#3dba7e;color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:10px;border-radius:8px;text-align:center;">Get My Snapshot →</a>
-</div><div class="page">
+</div>
 
+<div class="page">
   <div class="page-hero">
     <div class="page-hero-inner">
       <span class="page-tag">Get In Touch</span>
@@ -224,14 +213,18 @@ html, body { overflow-x: hidden; }
 .submit-btn{width:100%;background:var(--green);color:#fff;border:none;padding:15px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.95rem;cursor:pointer;transition:all 0.2s;}
 .submit-btn:hover{background:var(--green-dk);transform:translateY(-1px);}
 .trust-note{display:flex;align-items:center;gap:8px;font-size:0.75rem;color:var(--muted);margin-top:14px;justify-content:center;}
+/* Referral code field — small and subtle */
+.ref-field{margin-bottom:20px;}
+.ref-field label{display:block;font-size:0.72rem;font-weight:600;color:var(--muted);margin-bottom:6px;font-family:'DM Sans',sans-serif;letter-spacing:.3px;}
+.ref-field input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--navy);font-family:'DM Sans',sans-serif;font-size:0.82rem;transition:border-color 0.2s;outline:none;}
+.ref-field input:focus{border-color:var(--green);}
+.ref-field .ref-hint{font-size:0.68rem;color:var(--muted);margin-top:4px;}
 @media(max-width:768px){.contact-layout{grid-template-columns:1fr;}.field-row{grid-template-columns:1fr;}}
 </style>
 
 <div class="contact-layout">
-  <!-- Left: Info -->
   <div class="contact-info">
     <h3>Ways to Reach Us</h3>
-
     <div class="contact-method">
       <div class="cm-icon">📅</div>
       <div>
@@ -240,16 +233,14 @@ html, body { overflow-x: hidden; }
         <div class="cm-note">Fill out the form → we'll reach out within 24 hours to schedule</div>
       </div>
     </div>
-
     <div class="contact-method">
       <div class="cm-icon">✉️</div>
       <div>
         <div class="cm-label">Email</div>
-        <div class="cm-value"><a href="mailto:hello@tradertax.net" style="color:var(--white);">hello@tradertax.net</a></div>
+        <div class="cm-value"><a href="mailto:hello@tradertax.net" style="color:var(--navy);">hello@tradertax.net</a></div>
         <div class="cm-note">General inquiries, existing client questions</div>
       </div>
     </div>
-
     <div class="contact-method">
       <div class="cm-icon">🔒</div>
       <div>
@@ -258,7 +249,6 @@ html, body { overflow-x: hidden; }
         <div class="cm-note">Securely upload documents and communicate with your licensed tax professional</div>
       </div>
     </div>
-
     <div class="contact-hours">
       <h4>Response Times</h4>
       <div class="hours-row"><span class="hours-day">Consultation requests</span><span class="hours-time">Within 24 hrs</span></div>
@@ -266,14 +256,12 @@ html, body { overflow-x: hidden; }
       <div class="hours-row"><span class="hours-day">Existing client support</span><span class="hours-time">Same business day</span></div>
       <div class="hours-row"><span class="hours-day">Tax season (Jan–Apr)</span><span class="hours-time">Priority turnaround</span></div>
     </div>
-
     <div style="margin-top:24px;background:#f0fdf7;border:1.5px solid #3dba7e;border-radius:14px;padding:20px 22px;">
       <div style="font-size:0.65rem;font-weight:700;color:#3dba7e;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">Free Consultation</div>
       <p style="font-size:0.85rem;margin-bottom:0;color:#374151;">Your first call is completely free. No pitch, no pressure — just a real conversation about your trading taxes and how we can help.</p>
     </div>
   </div>
 
-  <!-- Right: Form -->
   <div class="contact-form">
     <h3>Book a Free Consultation</h3>
     <p class="sub">Takes 2 minutes. A specialist will reach out within 24 hours.</p>
@@ -312,6 +300,14 @@ html, body { overflow-x: hidden; }
       <label>Anything specific you'd like to discuss?</label>
       <textarea id="cf-notes" placeholder="e.g. I got Apex payouts this year and have no idea how to file them..."></textarea>
     </div>
+
+    <!-- REFERRAL CODE — small, subtle, optional -->
+    <div class="ref-field">
+      <label>Referral code <span style="font-weight:400;color:#9ca3af;">(optional)</span></label>
+      <input type="text" id="cf-refcode" placeholder="e.g. APEX10" autocomplete="off" style="max-width:200px;">
+      <div class="ref-hint">Were you referred by someone? Enter their code so they get credit.</div>
+    </div>
+
     <button class="submit-btn" id="cf-btn" onclick="submitContactForm()">Book Free Consultation →</button>
     <div class="trust-note">🔒 Your info is private and never shared.</div>
   </div>
@@ -319,6 +315,7 @@ html, body { overflow-x: hidden; }
 
   </div>
 </div>
+
 <footer style="background:#0a1628;border-top:1px solid rgba(255,255,255,.07);padding:52px 5% 28px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;">
   <div style="max-width:1100px;margin:0 auto;">
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;">
@@ -367,6 +364,22 @@ html, body { overflow-x: hidden; }
     <div style="margin-top:16px;font-size:.7rem;color:rgba(255,255,255,.25);line-height:1.7;text-align:center;">TraderTax is a tax preparation referral platform, not a licensed CPA firm. Tax services are performed by independent licensed CPAs and Enrolled Agents. Content is for informational purposes only.</div>
   </div>
 </footer>
-  <script src="affiliate-tracker.js"></script>
+
+<script src="affiliate-tracker.js"></script>
+<script>
+// Pre-fill referral code from affiliate tracker after it loads
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      const stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
+      const affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
+      if (affCode) {
+        const el = document.getElementById('cf-refcode');
+        if (el && !el.value) el.value = affCode;
+      }
+    } catch(e) {}
+  }, 300);
+});
+</script>
 </body>
 </html>
