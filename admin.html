@@ -745,33 +745,51 @@ async function confirmAssign() {
   if(!cpaId){msg.textContent='Please select a specialist.';msg.style.color='var(--red)';return;}
   const cpa=allCPAs.find(c=>c.id===cpaId);
   if(!cpa){msg.textContent='CPA not found.';return;}
+  msg.textContent='Saving...';msg.style.color='var(--muted)';
   try {
-    console.log('Assign step 1: users doc', assignClientId);
+    const cpaName=((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
+    const clientEmail=uidEmailLookup[assignClientId]||'';
+
+    // Write assignment to users doc
     await db.collection('users').doc(assignClientId).set({
-      assignedCPA:{uid:cpaId,name:((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()},
-      taxYear, returnStatus:'assigned', updatedAt:new Date().toISOString(),
-      ...(uidEmailLookup[assignClientId]?{email:uidEmailLookup[assignClientId]}:{})
+      assignedCPA:{uid:cpaId,name:cpaName},
+      role:'client',
+      taxYear:parseInt(taxYear),
+      returnStatus:'assigned',
+      updatedAt:new Date().toISOString(),
+      ...(clientEmail?{email:clientEmail}:{})
     },{merge:true});
-    console.log('Assign step 1 done');
 
-    console.log('Assign step 2: tax_returns query');
-    const retSnap=await db.collection('tax_returns').where('clientUid','==',assignClientId).where('taxYear','==',parseInt(taxYear)).get();
-    console.log('Assign step 2 done, empty:', retSnap.empty);
+    // Create tax return record — simple add, no compound index needed
+    await db.collection('tax_returns').add({
+      clientUid:assignClientId,
+      clientEmail:clientEmail,
+      cpaUid:cpaId,
+      cpaName:cpaName,
+      taxYear:parseInt(taxYear),
+      status:'assigned',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      timeline:[{date:new Date().toISOString(),note:'Assigned to '+cpaName+'.'}]
+    });
 
-    if(retSnap.empty){
-      console.log('Assign step 3: creating tax return');
-      await db.collection('tax_returns').add({clientUid:assignClientId,cpaUid:cpaId,cpaFirstName:cpa.firstName||'',taxYear:parseInt(taxYear),status:'assigned',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:[{date:new Date().toISOString(),note:'Assigned to specialist.'}]});
-      console.log('Assign step 3 done');
-    } else {
-      await retSnap.docs[0].ref.update({cpaUid:cpaId,cpaFirstName:cpa.firstName||'',status:'assigned',updatedAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:firebase.firestore.FieldValue.arrayUnion({date:new Date().toISOString(),note:'Reassigned to specialist.'})});
-    }
+    // Update local cache
     const c=allClients.find(cl=>cl.id===assignClientId);
-    if(c){c.assignedCPA={uid:cpaId,name:((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
-    msg.textContent='✓ CPA assigned!';msg.style.color='var(--green-dk)';
-    showToast('CPA assigned!','green-t');
-    setTimeout(()=>{closeAssignModal();renderClients();},1200);
-  } catch(e){msg.textContent='Error: '+e.message;msg.style.color='var(--red)';}
+    if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
+
+    msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
+    msg.style.color='var(--green-dk)';
+    showToast('✓ Assigned to '+cpaName,'green-t');
+    loadClients();
+    loadCPAs();
+    setTimeout(()=>closeAssignModal(),2500);
+  } catch(e){
+    console.error('Assign error full:',e);
+    msg.textContent='Error: '+e.message;
+    msg.style.color='var(--red)';
+  }
 }
+
 
 async function loadCPAs() {
   try {
