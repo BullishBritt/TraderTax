@@ -229,7 +229,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
     <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
     <button class="lg-btn" onclick="lgIn()">Sign In to Workspace</button>
     <div class="lg-err" id="lg-err">Incorrect credentials or access not authorized.</div>
-    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="/cdn-cgi/l/email-protection#5c34393030331c282e3d38392e283d2472323928" style="color:var(--green);font-weight:600;"><span class="__cf_email__" data-cfemail="94fcf1f8f8fbd4e0e6f5f0f1e6e0f5ecbafaf1e0">[email&#160;protected]</span></a></div>
+    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="mailto:hello@tradertax.net" style="color:var(--green);font-weight:600;">hello@tradertax.net</a></div>
   </div>
 </div>
 
@@ -460,7 +460,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
   </main>
 </div><!-- end app -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
@@ -524,11 +524,29 @@ function handleLogout() { auth.signOut(); location.reload(); }
 /* ── CLIENTS ── */
 async function loadClients() {
   try {
+    // Primary: query users by assignedCPA.uid
     const snap = await db.collection('users')
       .where('assignedCPA.uid', '==', currentUser.uid)
       .get().catch(()=>({docs:[]}));
 
-    myClients = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    // Fallback: also check tax_returns for this CPA in case users query fails
+    const retSnap = await db.collection('tax_returns')
+      .where('cpaUid','==',currentUser.uid)
+      .get().catch(()=>({docs:[]}));
+
+    const fromUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    
+    // For any tax_return clients not already in fromUsers, fetch their user doc
+    const existingIds = new Set(fromUsers.map(c=>c.id));
+    const extraFetches = retSnap.docs
+      .filter(d=>!existingIds.has(d.data().clientUid))
+      .map(d=>db.collection('users').doc(d.data().clientUid).get().catch(()=>null));
+    const extraDocs = await Promise.all(extraFetches);
+    const fromReturns = extraDocs
+      .filter(d=>d&&d.exists)
+      .map(d=>({id:d.id,...d.data()}));
+
+    myClients = [...fromUsers, ...fromReturns];
     document.getElementById('sb-client-count').textContent = myClients.length;
 
     // Populate upload-client-select
@@ -912,4 +930,12 @@ window.showTab = function(tab) {
 
 /* ── TOAST ── */
 function showToast(msg,type='') {
-  const t=document.getElementByI
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type?' '+type:'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+  <script src="affiliate-tracker.js"></script>
+</body>
+</html>
