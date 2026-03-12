@@ -802,18 +802,7 @@ async function confirmAssign() {
   showToast('✓ Assigned to '+cpaName,'green-t');
   loadClients(); loadCPAs();
   setTimeout(()=>closeAssignModal(),2500);
-
-  // Success
-  const c=allClients.find(cl=>cl.id===assignClientId);
-  if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
-  msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
-  msg.style.color='var(--green-dk)';
-  showToast('✓ Assigned to '+cpaName,'green-t');
-  loadClients();
-  loadCPAs();
-  setTimeout(()=>closeAssignModal(),2500);
 }
-
 
 async function loadCPAs() {
   try {
