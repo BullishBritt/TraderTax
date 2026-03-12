@@ -574,7 +574,25 @@ function showApp(user) {
   document.getElementById('login-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user').textContent = user.email;
-  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates(); loadPendingApplications(); loadAllDocuments();
+  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates(); loadPendingApplications();
+  loadAllDocuments().then(()=>backfillDocEmails());
+}
+
+// Backfill clientEmail onto existing docs that are missing it
+async function backfillDocEmails() {
+  try {
+    const snap = await db.collection('client_documents').get();
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (!data.clientEmail && data.uid && uidEmailLookup[data.uid]) {
+        batch.update(d.ref, {clientEmail: uidEmailLookup[data.uid]});
+        count++;
+      }
+    });
+    if (count > 0) { await batch.commit(); console.log(`Backfilled email on ${count} docs`); loadAllDocuments(); }
+  } catch(e) { console.warn('Backfill skipped:', e.message); }
 }
 
 function handleSignOut() { auth.signOut(); location.reload(); }
@@ -1199,10 +1217,10 @@ window.openClientProfile = async function(clientId) {
   body.innerHTML='<div class="loading"><span class="spin"></span>Loading profile...</div>';
 
   const clientFromList = allClients.find(c=>c.id===clientId)||null;
-  // Also fetch directly from users collection in case not loaded in allClients
   const userDoc = clientFromList ? null : await db.collection('users').doc(clientId).get().catch(()=>null);
-  const client = clientFromList || (userDoc?.exists ? {id:clientId,...userDoc.data()} : {id:clientId,email:uidEmailLookup[clientId]||''});
-  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||clientId||'Client';
+  const emailFallback = uidEmailLookup[clientId] || (_allDocs.find(d=>d.uid===clientId)?.clientEmail) || '';
+  const client = clientFromList || (userDoc?.exists ? {id:clientId,...userDoc.data(),email:userDoc.data().email||emailFallback} : {id:clientId,email:emailFallback});
+  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||emailFallback||clientId||'Client';
   title.textContent=name+' — Profile';
 
   const [docsSnap,notesSnap,returnsSnap]=await Promise.all([
@@ -1259,16 +1277,19 @@ let uidEmailLookup = {};
 
 async function loadAllDocuments() {
   try {
-    const [clientDocsSnap,taxReturnsSnap,leadsSnap,calcLeadsSnap,allUsersSnap]=await Promise.all([
+    const [clientDocsSnap,taxReturnsSnap,leadsSnap,calcLeadsSnap,allUsersSnap,ticketsSnap]=await Promise.all([
       db.collection('client_documents').limit(500).get().catch(()=>({docs:[]})),
       db.collection('tax_returns').limit(500).get().catch(()=>({docs:[]})),
       db.collection('leads').limit(500).get().catch(()=>({docs:[]})),
       db.collection('calculator_leads').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('users').limit(500).get().catch(()=>({docs:[]}))
+      db.collection('users').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('support_tickets').limit(500).get().catch(()=>({docs:[]}))
     ]);
     uidEmailLookup={};
-    allUsersSnap.docs.forEach(d=>{uidEmailLookup[d.id]=d.data().email||'';});
-    const clientDocs=clientDocsSnap.docs.map(d=>({id:d.id,...d.data(),url:d.data().fileUrl||d.data().url||null,clientEmail:uidEmailLookup[d.data().uid]||d.data().clientEmail||'',_type:'client'}));
+    allUsersSnap.docs.forEach(d=>{if(d.data().email)uidEmailLookup[d.id]=d.data().email;});
+    ticketsSnap.docs.forEach(d=>{const td=d.data();if(td.clientUid&&td.clientEmail&&!uidEmailLookup[td.clientUid])uidEmailLookup[td.clientUid]=td.clientEmail;});
+    clientDocsSnap.docs.forEach(d=>{const dd=d.data();if(dd.uid&&dd.clientEmail&&!uidEmailLookup[dd.uid])uidEmailLookup[dd.uid]=dd.clientEmail;});
+    const clientDocs=clientDocsSnap.docs.map(d=>({id:d.id,...d.data(),url:d.data().fileUrl||d.data().url||null,clientEmail:d.data().clientEmail||uidEmailLookup[d.data().uid]||'',_type:'client'}));
     const returnDocs=taxReturnsSnap.docs.filter(d=>d.data().returnFileUrl||d.data().fileUrl).map(d=>({id:d.id,...d.data(),fileName:d.data().fileName||'Tax Return '+d.data().taxYear,url:d.data().returnFileUrl||d.data().fileUrl,category:'Tax Return',_type:'return'}));
     _allDocs=[...clientDocs,...returnDocs].sort((a,b)=>(b.uploadedAt?.seconds||b.createdAt?.seconds||0)-(a.uploadedAt?.seconds||a.createdAt?.seconds||0));
     allSnapshots=leadsSnap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>d.source==='Snapshot'||d.source==='Calc + Snapshot').sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
