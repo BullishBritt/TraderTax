@@ -502,6 +502,12 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
   </div>
 </div>
 
+<div class="modal-bg" id="cpa-profile-modal" onclick="if(event.target===this)closeCPAProfile()" style="z-index:1100;">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-hd"><h2 id="cpa-profile-title">CPA Profile</h2><button class="modal-close" onclick="closeCPAProfile()">✕</button></div>
+    <div class="modal-body" id="cpa-profile-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+  </div>
+</div>
 <div class="modal-bg" id="client-profile-modal" onclick="if(event.target===this)closeClientProfile()" style="z-index:1100;">
   <div class="modal" style="max-width:720px;">
     <div class="modal-hd"><h2 id="cp-title">Client Profile</h2><button class="modal-close" onclick="closeClientProfile()">✕</button></div>
@@ -744,7 +750,7 @@ function renderCPAs() {
   document.getElementById('cpas-body').innerHTML=allCPAs.map(c=>{
     const name=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email;
     const clientCount=allClients.filter(cl=>cl.assignedCPA?.uid===c.id).length;
-    return `<div class="t-row cpas-grid"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div class="cell-muted">${c.credentials||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;">${clientCount}</div><div><span class="status-badge active">Active</span></div><div><button data-cpaid="${c.id}" onclick="deactivateCPA(this.dataset.cpaid)" style="font-size:.72rem;padding:4px 10px;border:1px solid var(--red-lt);border-radius:6px;background:none;color:var(--red);cursor:pointer;">Deactivate</button></div></div>`;
+    return `<div class="t-row cpas-grid" style="cursor:pointer;" onclick="openCPAProfile('${c.id}')" title="Click to view CPA profile"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div class="cell-muted">${c.credentials||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;">${clientCount}</div><div><span class="status-badge active">Active</span></div><div><button data-cpaid="${c.id}" onclick="event.stopPropagation();deactivateCPA(this.dataset.cpaid)" style="font-size:.72rem;padding:4px 10px;border:1px solid var(--red-lt);border-radius:6px;background:none;color:var(--red);cursor:pointer;">Deactivate</button></div></div>`;
   }).join('');
 }
 
@@ -1066,6 +1072,123 @@ function showToast(msg,cls='') {
 <script>
 // ── CLIENT PROFILE MODAL ──
 function closeClientProfile(){document.getElementById('client-profile-modal').classList.remove('open');}
+
+// ── CPA PROFILE MODAL ──
+function closeCPAProfile(){document.getElementById('cpa-profile-modal').classList.remove('open');}
+
+window.openCPAProfile = async function(cpaId) {
+  const modal = document.getElementById('cpa-profile-modal');
+  const body = document.getElementById('cpa-profile-body');
+  const title = document.getElementById('cpa-profile-title');
+  modal.classList.add('open');
+  body.innerHTML = '<div class="loading"><span class="spin"></span>Loading profile...</div>';
+
+  const cpa = allCPAs.find(c=>c.id===cpaId)||{};
+  const name = ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'CPA';
+  title.textContent = name + ' — Specialist Profile';
+
+  // Get assigned clients
+  const assignedClients = allClients.filter(c=>c.assignedCPA?.uid===cpaId);
+
+  // Load CPA's uploaded returns + notes in parallel
+  const [returnsSnap, notesSnap] = await Promise.all([
+    db.collection('tax_returns').where('cpaUid','==',cpaId).get().catch(()=>({docs:[]})),
+    db.collection('cpa_notes').where('cpaUid','==',cpaId).get().catch(()=>({docs:[]}))
+  ]);
+
+  const returns = returnsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const notes = notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  const stColors = {received:'#6b7280',assigned:'#1d4ed8',review:'#d97706',completed:'#2ea86c',filed:'#059669'};
+
+  body.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
+      <div style="flex:1;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;">${name}</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.6);">${cpa.email||'—'} · ${cpa.credentials||'CPA'}</div>
+      </div>
+      <div style="text-align:right;">
+        <span style="background:var(--green);color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;">Active</span>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">${assignedClients.length} client${assignedClients.length!==1?'s':''} assigned</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);">${assignedClients.length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Clients</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--green-dk);">${returns.filter(r=>r.returnFileUrl||r.fileUrl).length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Returns Filed</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);">${notes.length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Notes Written</div>
+      </div>
+    </div>
+
+    <!-- Assigned Clients -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">👥 Assigned Clients (${assignedClients.length})</div>
+      ${assignedClients.length ? assignedClients.map(c=>{
+        const cName=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Client';
+        const st=c.returnStatus||'received';
+        const taxReturn=returns.find(r=>r.clientUid===c.id)||{};
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="closeCPAProfile();openClientProfile('${c.id}')">
+          <div>
+            <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${cName}</div>
+            <div style="font-size:.72rem;color:var(--muted);">${c.email||''} · Tax Year ${c.taxYear||2025}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="background:${stColors[st]||'#6b7280'};color:#fff;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:700;text-transform:uppercase;">${st}</span>
+            <span style="font-size:.74rem;color:var(--green-dk);font-weight:700;">View →</span>
+          </div>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No clients assigned yet.</div>'}
+    </div>
+
+    <!-- Tax Returns uploaded by CPA -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📄 Tax Returns Uploaded (${returns.filter(r=>r.returnFileUrl||r.fileUrl).length})</div>
+      ${returns.filter(r=>r.returnFileUrl||r.fileUrl).length ? returns.filter(r=>r.returnFileUrl||r.fileUrl).map(r=>{
+        const client=allClients.find(c=>c.id===r.clientUid)||{};
+        const cName=((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||r.clientUid||'Client';
+        const url=r.returnFileUrl||r.fileUrl;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${r.fileName||'Tax Return '+r.taxYear}</div>
+            <div style="font-size:.72rem;color:var(--muted);">For: ${cName} · ${fmtDate(r.updatedAt||r.createdAt)}</div>
+          </div>
+          <a href="${url}" target="_blank" style="font-size:.75rem;font-weight:700;color:var(--green-dk);text-decoration:none;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;">📄 View</a>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No returns uploaded yet.</div>'}
+    </div>
+
+    <!-- Recent Notes -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📝 Recent Notes (${notes.length})</div>
+      ${notes.slice(0,5).length ? notes.slice(0,5).map(n=>{
+        const client=allClients.find(c=>c.id===n.clientUid)||{};
+        const cName=((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||'Client';
+        return `<div style="background:var(--bg);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;">${fmtDate(n.createdAt)} · Re: ${cName}</div>
+          <div style="font-size:.84rem;color:var(--navy);">${n.note||n.content||''}</div>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--border);">
+      <a href="mailto:${cpa.email||''}" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;">Email CPA</a>
+      <button onclick="closeCPAProfile();if(confirm('Deactivate this specialist?'))deactivateCPA('${cpaId}')" style="padding:10px 20px;font-size:.8rem;font-weight:700;border:1.5px solid var(--red-lt);border-radius:9px;background:none;color:var(--red);cursor:pointer;">Deactivate</button>
+    </div>
+  `;
+};
 
 window.openClientProfile = async function(clientId) {
   if(!clientId||clientId==='undefined') return;
