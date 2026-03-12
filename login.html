@@ -325,6 +325,7 @@ async function doAuth() {
   clearMsg();
 
   try {
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     if (mode === 'login') {
       await firebase.auth().signInWithEmailAndPassword(email, pw);
     } else {
@@ -350,6 +351,7 @@ async function doAuth() {
 async function googleAuth() {
   const provider = new firebase.auth.GoogleAuthProvider();
   try {
+    await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     await firebase.auth().signInWithPopup(provider);
     showMsg('Signing you in…', 'success');
     setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
