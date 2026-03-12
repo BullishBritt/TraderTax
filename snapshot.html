@@ -437,6 +437,10 @@ function renderStep() {
           </select>
         </div>
         <div class="field"><label>Anything specific on your mind? (optional)</label><textarea id="f-note" placeholder="e.g. I got hit with a huge tax bill last year and need help..."></textarea></div>
+        <div class="field" style="margin-top:.5rem;">
+          <label>Referral code <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#9ca3af;">(optional)</span></label>
+          <input id="f-refcode" type="text" placeholder="e.g. APEX10" autocomplete="off" style="max-width:180px;font-size:.85rem;padding:8px 11px;border-radius:8px;"/>
+        </div>
       </div>
       <div class="btn-row">
         <button class="btn-back" onclick="prevStep()">← Back</button>
@@ -509,6 +513,7 @@ async function submitForm() {
   if (!first || !email) { alert('Please enter your name and email.'); return; }
 
   const name = `${first} ${last}`.trim();
+  const manualRef = (document.getElementById('f-refcode')?.value || '').trim().toUpperCase();
 
   // Collect all answers
   const profile = {
@@ -641,6 +646,7 @@ Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
       priceHigh: aiSummary.price_high || '$1,297',
       source: 'Snapshot Lead',
       ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
+      ...(manualRef ? { affiliateCode: manualRef } : {}),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   } catch(e) { /* silent fail */ }
@@ -772,5 +778,14 @@ function showResults(profile, ai) {
 renderStep();
 </script>
   <script src="affiliate-tracker.js"></script>
+  <script>
+    // Pre-fill referral code if affiliate tracker captured one
+    setTimeout(() => {
+      const stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
+      const affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
+      const el = document.getElementById('f-refcode');
+      if (el && affCode && !el.value) el.value = affCode;
+    }, 300);
+  </script>
 </body>
 </html>
