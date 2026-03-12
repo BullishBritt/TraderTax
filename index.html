@@ -1083,5 +1083,6 @@ document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
 const bo=new IntersectionObserver((entries)=>{entries.forEach(e=>{if(e.isIntersecting){e.target.querySelectorAll('.m-fill').forEach(b=>{b.style.width=(b.dataset.width||0)+'%';});bo.unobserve(e.target);}});},{threshold:0.3});
 document.querySelectorAll('.why-vis').forEach(el=>bo.observe(el));
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

@@ -275,6 +275,7 @@ function checkStrength(pw) {
           source: 'Signup Lead',
           uid: cred.user.uid,
           snapshotLinked: userData.snapshotLinked || false,
+          ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
           createdAt: new Date().toISOString()
         });
       } catch(leadErr) { /* silent — don't block account creation */ }
@@ -307,5 +308,6 @@ function checkStrength(pw) {
     document.querySelector('.subtitle').textContent = 'Save your Tax Snapshot results. Access them every year.';
   }
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

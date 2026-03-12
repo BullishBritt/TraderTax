@@ -210,6 +210,20 @@ html, body { overflow-x: hidden; }
   .tt-ham { display: flex !important; }
 }
 </style>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <!-- EmailJS -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <script>
+      emailjs.init("dL1qGwo32XBoAeMPB");
+      function sendLeadEmail(source, name, email, phone, traderType, message) {
+        emailjs.send("service_9p67iy9", "template_vtt9a58", {
+          source: source, name: name||"Unknown", email: email||"Unknown",
+          phone: phone||"", trader_type: traderType||"", message: message||""
+        }).catch(function(err){ console.log("EmailJS error:", err); });
+      }
+    </script>
 </head>
 <body>
 
@@ -522,7 +536,18 @@ html, body { overflow-x: hidden; }
 const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');ro.unobserve(e.target);}});},{threshold:0.1});
 document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
 
-function submitPartner(){
+// Firebase setup
+const fbApp = firebase.initializeApp({
+  apiKey: "AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain: "taxtrader.firebaseapp.com",
+  projectId: "taxtrader",
+  storageBucket: "taxtrader.firebasestorage.app",
+  messagingSenderId: "887085050235",
+  appId: "1:887085050235:web:a7b8c6e6b416e413e975de"
+}, 'partners');
+const db = firebase.firestore(fbApp);
+
+async function submitPartner(){
   const firstName=document.getElementById('p-first').value.trim();
   const lastName=document.getElementById('p-last').value.trim();
   const email=document.getElementById('p-email').value.trim();
@@ -544,19 +569,28 @@ function submitPartner(){
     firstName,lastName,email,
     partnerType:type,
     platform,audience,notes,
-    source:'partner-application'
+    source:'Partner Application',
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
   };
 
+  // Save to Firestore
+  try {
+    await db.collection('leads').add({...data, ...(window.TTAffiliate && window.TTAffiliate.getPayload())});
+  } catch(e){ console.log('Firestore error:', e); }
+
+  // Send EmailJS notification
+  try {
+    sendLeadEmail('Partner Application', firstName+' '+lastName, email, '', type, platform+' | '+notes);
+  } catch(e){}
+
+  // Also send to Google Sheets (keep existing)
   fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec',{
-    method:'POST',
-    mode:'no-cors',
-    body:JSON.stringify(data)
+    method:'POST', mode:'no-cors', body:JSON.stringify(data)
   }).catch(()=>{});
 
-  setTimeout(()=>{
-    document.querySelector('.apply-form').innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:2.5rem;margin-bottom:12px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;font-size:1.2rem;color:#0a1628;margin-bottom:8px;">Application Received!</div><p style="font-size:.88rem;color:#6b7280;line-height:1.7;max-width:360px;margin:0 auto;">We will be in touch within 48 hours at <strong>'+email+'</strong> with your referral link and everything you need to start earning.</p></div>';
-  }, 800);
+  document.querySelector('.apply-form').innerHTML='<div style="text-align:center;padding:40px 0;"><div style="font-size:2.5rem;margin-bottom:12px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;font-size:1.2rem;color:#0a1628;margin-bottom:8px;">Application Received!</div><p style="font-size:.88rem;color:#6b7280;line-height:1.7;max-width:360px;margin:0 auto;">We will be in touch within 48 hours at <strong>'+email+'</strong> with your referral link and everything you need to start earning.</p></div>';
 }
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

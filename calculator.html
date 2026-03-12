@@ -22,7 +22,8 @@
   const db = getFirestore(app);
   window._saveLead = async (data) => {
     try {
-      await addDoc(collection(db,"calculator_leads"),{...data, createdAt:serverTimestamp()});
+      const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
+      await addDoc(collection(db,"calculator_leads"),{...data, ...affPayload, createdAt:serverTimestamp()});
       sendLeadEmail('Calculator Lead', data.name || '', data.email, data.phone || '', data.tradingStyle || '', '');
       console.log("Lead saved");
     } catch(e){ console.warn("Firestore:",e); }
@@ -1251,5 +1252,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateStateInfo();
 });
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

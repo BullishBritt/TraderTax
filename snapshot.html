@@ -640,6 +640,7 @@ Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
       priceLow: aiSummary.price_low || '$497',
       priceHigh: aiSummary.price_high || '$1,297',
       source: 'Snapshot Lead',
+      ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
     });
   } catch(e) { /* silent fail */ }
@@ -770,5 +771,6 @@ function showResults(profile, ai) {
 // Init
 renderStep();
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

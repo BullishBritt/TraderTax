@@ -282,6 +282,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
     <div class="tab-nav-item" onclick="showTab('cpas')" id="tnav-cpas">📊 CPAs <span class="tn-count" id="tn-cpas">0</span></div>
     <div class="tab-nav-item" onclick="showTab('support')" id="tnav-support">💬 Support <span class="tn-count" id="tn-support">0</span></div>
     <div class="tab-nav-item" onclick="showTab('activity')" id="tnav-activity">📈 Activity</div>
+    <div class="tab-nav-item" onclick="showTab('affiliates')" id="tnav-affiliates">🔗 Affiliates <span class="tn-count" id="tn-affiliates">0</span></div>
   </div>
 
   <div class="page-content">
@@ -426,6 +427,57 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
       </div>
     </div>
 
+    <!-- ── AFFILIATES ── -->
+    <div class="content-section" id="section-affiliates">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat"><div class="stat-lbl">Total Affiliates</div><div class="stat-val" id="sa-total">—</div><div class="stat-sub">Active partners</div></div>
+        <div class="stat green"><div class="stat-lbl">Total Referred</div><div class="stat-val" id="sa-leads">—</div><div class="stat-sub">Leads generated</div></div>
+        <div class="stat amber"><div class="stat-lbl">Conversions</div><div class="stat-val" id="sa-converted">—</div><div class="stat-sub">Became clients</div></div>
+        <div class="stat"><div class="stat-lbl">Payouts Owed</div><div class="stat-val" id="sa-owed">—</div><div class="stat-sub">Unpaid commissions</div></div>
+      </div>
+
+      <div class="form-card" style="margin-bottom:24px;">
+        <div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;">Add New Affiliate</div>
+        <div class="form-grid">
+          <div class="ff"><label>Name / Handle</label><input type="text" id="aff-name" placeholder="e.g. Apex Insider Discord"/></div>
+          <div class="ff"><label>Referral Code</label><input type="text" id="aff-code" placeholder="e.g. APEXGANG" style="text-transform:uppercase;"/></div>
+          <div class="ff" style="grid-column:1/-1"><label>Email (for payouts)</label><input type="email" id="aff-email" placeholder="affiliate@email.com"/></div>
+          <div class="ff"><label>Commission Type</label>
+            <select id="aff-type" style="background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.88rem;color:var(--navy);font-family:DM Sans,sans-serif;outline:none;">
+              <option value="flat">Flat rate per client ($)</option>
+              <option value="percent">% of plan price</option>
+            </select>
+          </div>
+          <div class="ff"><label>Commission Amount</label><input type="number" id="aff-commission" placeholder="e.g. 75 for $75 flat or 15 for 15%"/></div>
+          <div class="ff" style="grid-column:1/-1"><label>Notes (optional)</label><input type="text" id="aff-notes" placeholder="e.g. Discord mod, 12k members, posts weekly"/></div>
+        </div>
+        <button class="btn-action" style="margin-top:16px;" onclick="createAffiliate()">Add Affiliate</button>
+        <div id="aff-create-msg" style="font-size:.8rem;margin-top:8px;"></div>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl-title">All Affiliates</div>
+        <input class="search-box" type="text" id="aff-search" placeholder="Search..." oninput="renderAffiliates()"/>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head" style="display:grid;grid-template-columns:1.5fr 110px 90px 80px 80px 100px 100px 80px;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+          <div class="th">Name / Email</div><div class="th">Code</div><div class="th">Commission</div>
+          <div class="th">Leads</div><div class="th">Clients</div><div class="th">Owed</div>
+          <div class="th">Status</div><div class="th">Actions</div>
+        </div>
+        <div id="affiliates-body"><div class="loading"><span class="spin"></span>Loading affiliates...</div></div>
+      </div>
+
+      <div id="aff-breakdown" style="display:none;margin-top:24px;">
+        <div class="page-title" style="font-size:1.05rem;margin-bottom:4px;" id="aff-breakdown-title">Leads from —</div>
+        <div class="page-sub" id="aff-breakdown-sub">All leads attributed to this affiliate.</div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <div class="table-head leads-grid"><div class="th">Priority</div><div class="th">Email</div><div class="th">Phone</div><div class="th">Total Income</div><div class="th">State</div><div class="th">Instruments</div><div class="th">Source</div><div class="th">Date</div></div>
+          <div id="aff-leads-body"></div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- end page-content -->
 </div><!-- end app -->
 
@@ -496,7 +548,7 @@ function showApp(user) {
   document.getElementById('login-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user').textContent = user.email;
-  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity();
+  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates();
 }
 
 function handleSignOut() { auth.signOut(); location.reload(); }
@@ -808,11 +860,154 @@ window.showTab = function(tab) {
   document.getElementById('tnav-'+tab)?.classList.add('active');
 };
 
+
+/* ── AFFILIATES ── */
+let allAffiliates = [];
+
+async function loadAffiliates() {
+  try {
+    const snap = await db.collection('affiliates').orderBy('createdAt','desc').get().catch(()=>({docs:[]}));
+    allAffiliates = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('tn-affiliates').textContent = allAffiliates.length;
+    updateAffiliateStats();
+    renderAffiliates();
+  } catch(e){ console.error(e); }
+}
+
+function updateAffiliateStats() {
+  // Count leads per affiliate code
+  const codes = allAffiliates.map(a=>a.code);
+  const referred = allLeads.filter(l=>codes.includes(l.referredBy));
+  const converted = allClients.filter(c=>codes.includes(c.referredBy));
+  let owed = 0;
+  allAffiliates.forEach(a => {
+    if(a.status==='active') {
+      const clientsFromAff = allClients.filter(c=>c.referredBy===a.code&&!c.affiliatePaid);
+      if(a.commissionType==='flat') owed += clientsFromAff.length * (a.commissionAmount||0);
+      else owed += clientsFromAff.length * ((497 * (a.commissionAmount||0)) / 100); // estimate on base tier
+    }
+  });
+  document.getElementById('sa-total').textContent = allAffiliates.length;
+  document.getElementById('sa-leads').textContent = referred.length;
+  document.getElementById('sa-converted').textContent = converted.length;
+  document.getElementById('sa-owed').textContent = owed>0?'$'+Math.round(owed).toLocaleString():'$0';
+}
+
+function renderAffiliates() {
+  const search = (document.getElementById('aff-search')?.value||'').toLowerCase();
+  let affs = allAffiliates.filter(a => {
+    if(search) return (a.name+a.code+a.email).toLowerCase().includes(search);
+    return true;
+  });
+  if(!affs.length){
+    document.getElementById('affiliates-body').innerHTML='<div class="empty"><div class="empty-icon">🔗</div>No affiliates yet. Add one above.</div>';
+    return;
+  }
+  document.getElementById('affiliates-body').innerHTML = affs.map(a => {
+    const leadCount = allLeads.filter(l=>l.referredBy===a.code).length;
+    const clientCount = allClients.filter(c=>c.referredBy===a.code).length;
+    let owed = 0;
+    if(a.commissionType==='flat') owed = clientCount * (a.commissionAmount||0);
+    else owed = clientCount * ((497*(a.commissionAmount||0))/100);
+    const isActive = a.status !== 'inactive';
+    const link = 'https://tradertax.net/?ref=' + a.code;
+    return '<div class="t-row" style="display:grid;grid-template-columns:1.5fr 110px 90px 80px 80px 100px 100px 80px;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bg);align-items:center;cursor:default;">'
+      + '<div><div class="cell-name">'+a.name+'</div><div class="cell-email">'+a.email+'</div></div>'
+      + '<div><span style="font-family:Syne,sans-serif;font-weight:800;font-size:.78rem;background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;" onclick="copyLink(''+link+'',this)" title="Click to copy link">'+a.code+'</span></div>'
+      + '<div class="cell-muted">'+(a.commissionType==='flat'?'$'+a.commissionAmount+' flat':a.commissionAmount+'%')+'</div>'
+      + '<div style="font-family:Syne,sans-serif;font-weight:700;">'+leadCount+'</div>'
+      + '<div style="font-family:Syne,sans-serif;font-weight:700;color:var(--green);">'+clientCount+'</div>'
+      + '<div style="font-weight:700;color:'+(owed>0?'var(--amber)':'var(--muted)')+';">'+(owed>0?'$'+Math.round(owed).toLocaleString():'—')+'</div>'
+      + '<div><span class="status-badge '+(isActive?'active':'filed')+'">'+(isActive?'Active':'Inactive')+'</span></div>'
+      + '<div style="display:flex;gap:5px;">'
+        + '<button onclick="viewAffLeads(''+a.id+'')" style="font-size:.7rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;color:var(--navy);">Leads</button>'
+        + '<button onclick="markAffiliatePaid(''+a.id+'')" style="font-size:.7rem;padding:4px 8px;border:1px solid var(--green-lt);border-radius:6px;background:none;cursor:pointer;color:var(--green-dk);">Paid</button>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+window.createAffiliate = async function() {
+  const name = document.getElementById('aff-name').value.trim();
+  const code = document.getElementById('aff-code').value.toUpperCase().trim().replace(/\s+/g,'');
+  const email = document.getElementById('aff-email').value.trim();
+  const type = document.getElementById('aff-type').value;
+  const amount = parseFloat(document.getElementById('aff-commission').value)||0;
+  const notes = document.getElementById('aff-notes').value.trim();
+  const msg = document.getElementById('aff-create-msg');
+  if(!name||!code){msg.textContent='Name and code are required.';msg.style.color='var(--red)';return;}
+  // Check for duplicate code
+  if(allAffiliates.find(a=>a.code===code)){msg.textContent='Code already in use. Choose a different code.';msg.style.color='var(--red)';return;}
+  msg.textContent='Creating...';msg.style.color='var(--muted)';
+  try {
+    const ref = await db.collection('affiliates').add({
+      name, code, email, commissionType:type, commissionAmount:amount, notes,
+      status:'active', totalLeads:0, totalClients:0, totalPaid:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:'admin'
+    });
+    allAffiliates.push({id:ref.id,name,code,email,commissionType:type,commissionAmount:amount,notes,status:'active',totalLeads:0,totalClients:0,totalPaid:0});
+    msg.textContent='Affiliate created! Link: tradertax.net/?ref='+code;
+    msg.style.color='var(--green-dk)';
+    document.getElementById('tn-affiliates').textContent=allAffiliates.length;
+    document.getElementById('sa-total').textContent=allAffiliates.length;
+    renderAffiliates();
+    document.getElementById('aff-name').value='';document.getElementById('aff-code').value='';
+    document.getElementById('aff-email').value='';document.getElementById('aff-commission').value='';
+    document.getElementById('aff-notes').value='';
+    showToast('Affiliate created! Link: tradertax.net/?ref='+code,'green-t');
+  } catch(e){msg.textContent='Error: '+e.message;msg.style.color='var(--red)';}
+};
+
+window.copyLink = function(link, el) {
+  navigator.clipboard.writeText(link).then(()=>{
+    const orig=el.textContent;el.textContent='Copied!';el.style.color='var(--green)';
+    setTimeout(()=>{el.textContent=orig;el.style.color='';},1500);
+  });
+};
+
+window.viewAffLeads = function(affId) {
+  const aff = allAffiliates.find(a=>a.id===affId);
+  if(!aff)return;
+  const leads = allLeads.filter(l=>l.referredBy===aff.code);
+  document.getElementById('aff-breakdown-title').textContent='Leads from '+aff.name+' ('+aff.code+')';
+  document.getElementById('aff-breakdown-sub').textContent=leads.length+' lead'+(leads.length!==1?'s':'')+' attributed to this affiliate.';
+  const priLabel = p => p==='hot'?'<span class="pri hot">🔴 High</span>':p==='warm'?'<span class="pri warm">🟡 Warm</span>':'<span class="pri standard">🟢 Standard</span>';
+  const getPri = l => {const i=(l.w2||0)+(l.prop||0)+(l.pnl||0)+(l.futuresPnl||0)+(l.otherSe||0);return i>=50000?'hot':i>=20000?'warm':'standard';};
+  document.getElementById('aff-leads-body').innerHTML = leads.length
+    ? leads.map(l=>{
+        const i=(l.w2||0)+(l.prop||0)+(l.pnl||0)+(l.futuresPnl||0)+(l.otherSe||0);
+        const dt=l.createdAt instanceof Date?l.createdAt.toLocaleDateString('en-US',{month:'short',day:'numeric'}):typeof l.createdAt==='string'?new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+        return '<div class="t-row leads-grid">'+priLabel(getPri(l))+'<div class="cell-name">'+l.email+'</div><div class="cell-muted">'+l.phone+'</div><div style="font-weight:700;">'+(i>0?'$'+i.toLocaleString():'—')+'</div><div class="cell-muted">'+l.state+'</div><div class="cell-muted">'+l.trades+'</div><div class="cell-muted">'+l.source+'</div><div class="cell-muted">'+dt+'</div></div>';
+      }).join('')
+    : '<div class="empty"><div class="empty-icon">📭</div>No leads yet from this affiliate.</div>';
+  document.getElementById('aff-breakdown').style.display='block';
+  document.getElementById('aff-breakdown').scrollIntoView({behavior:'smooth'});
+};
+
+window.markAffiliatePaid = async function(affId) {
+  const aff = allAffiliates.find(a=>a.id===affId);
+  if(!aff||!confirm('Mark all outstanding commission for '+aff.name+' as paid?'))return;
+  try {
+    await db.collection('affiliates').doc(affId).update({lastPaidAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // Mark all referred clients as affiliate-paid
+    const clientsFromAff = allClients.filter(c=>c.referredBy===aff.code&&!c.affiliatePaid);
+    for(const c of clientsFromAff){
+      await db.collection('users').doc(c.id).update({affiliatePaid:true});
+      c.affiliatePaid=true;
+    }
+    showToast('Commission marked as paid for '+aff.name,'green-t');
+    updateAffiliateStats();
+    renderAffiliates();
+  } catch(e){showToast('Error: '+e.message);}
+};
+
 /* ── TOAST ── */
 function showToast(msg,cls='') {
   const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(cls?' '+cls:'');
   setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>t.classList.remove('show'),3000);
 }
 </script>
+  <script src="affiliate-tracker.js"></script>
 </body>
 </html>

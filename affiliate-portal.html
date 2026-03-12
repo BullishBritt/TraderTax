@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Affiliate Portal | TraderTax</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;
+  --bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--muted:#6b7280;
+  --red:#ef4444;--amber:#d97706;--amber-lt:#fffbeb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{overflow-x:hidden;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);}
+
+/* LOGIN */
+#login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:20px;}
+.login-box{background:var(--surface);border-radius:20px;padding:44px 40px;width:400px;text-align:center;box-shadow:0 28px 70px rgba(0,0,0,.38);}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px;}
+.login-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;}
+.login-logo-txt .nv{color:var(--navy);}.login-logo-txt .gr{color:var(--green);}
+.login-sub{font-size:.88rem;color:var(--muted);margin-bottom:10px;}
+.login-tag{display:inline-block;background:var(--green-lt);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:4px 14px;font-size:.72rem;font-weight:700;color:var(--green-dk);margin-bottom:26px;}
+.lg-field{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;text-align:left;}
+.lg-field label{font-size:.67rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.lg-field input{background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:13px 15px;font-size:.92rem;color:var(--navy);outline:none;width:100%;font-family:'DM Sans',sans-serif;transition:border-color .2s;}
+.lg-field input:focus{border-color:var(--navy);}
+.lg-btn{width:100%;padding:14px;background:var(--navy);color:#fff;border:none;border-radius:11px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;margin-top:6px;transition:background .2s;}
+.lg-btn:hover{background:#0d1f3c;}
+.lg-err{font-size:.76rem;color:var(--red);margin-top:10px;display:none;}
+.lg-err.show{display:block;}
+.lg-noacct{margin-top:18px;font-size:.76rem;color:var(--muted);}
+.lg-noacct a{color:var(--green);font-weight:600;text-decoration:none;}
+
+/* APP */
+#app{display:none;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+.topbar-logo-txt .nv{color:var(--navy);}.topbar-logo-txt .gr{color:var(--green);}
+.topbar-tag{background:var(--green-lt);color:var(--green-dk);font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:99px;border:1px solid rgba(61,186,126,.3);margin-left:4px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.logout-btn{font-size:.8rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.logout-btn:hover{color:var(--navy);}
+
+/* HERO SECTION */
+.hero{background:linear-gradient(135deg,var(--navy) 0%,#0d1f3c 100%);padding:48px 28px 52px;text-align:center;}
+.hero-tag{display:inline-block;background:rgba(61,186,126,.15);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:5px 16px;font-size:.75rem;font-weight:700;color:var(--green);margin-bottom:16px;letter-spacing:.5px;text-transform:uppercase;}
+.hero-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1.9rem;color:#fff;margin-bottom:6px;}
+.hero-sub{font-size:.92rem;color:rgba(255,255,255,.55);margin-bottom:28px;}
+.link-box{background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.15);border-radius:14px;padding:18px 22px;display:inline-flex;align-items:center;gap:14px;max-width:500px;width:100%;}
+.link-url{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;color:#fff;flex:1;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.copy-btn{padding:9px 18px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.copy-btn:hover{background:var(--green-dk);}
+.copy-btn.copied{background:#1a7a4a;}
+
+/* MAIN */
+.main-wrap{max-width:900px;margin:0 auto;padding:36px 24px 60px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px;}
+.stat-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px 20px;text-align:center;}
+.sc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--navy);margin-bottom:4px;}
+.sc-val.green{color:var(--green);}
+.sc-val.amber{color:var(--amber);}
+.sc-lbl{font-size:.72rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;}
+.sc-note{font-size:.72rem;color:var(--muted);margin-top:3px;}
+
+/* HOW IT WORKS */
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;margin-bottom:16px;}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
+.step-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:22px 18px;}
+.step-num{width:32px;height:32px;border-radius:50%;background:var(--green-lt);border:1.5px solid rgba(61,186,126,.3);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.85rem;color:var(--green-dk);margin-bottom:12px;}
+.step-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:5px;}
+.step-desc{font-size:.82rem;color:var(--muted);line-height:1.5;}
+
+/* PAYOUTS */
+.payout-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:24px 26px;margin-bottom:24px;}
+.payout-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--bg);}
+.payout-row:last-child{border-bottom:none;}
+.payout-label{font-size:.85rem;color:var(--muted);}
+.payout-val{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;color:var(--navy);}
+.payout-val.green{color:var(--green-dk);}
+
+/* LEAD TABLE */
+.lead-table{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:24px;}
+.lt-head{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;padding:11px 18px;background:var(--bg);border-bottom:1px solid var(--border);}
+.lt-th{font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);}
+.lt-row{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;padding:13px 18px;border-bottom:1px solid var(--bg);align-items:center;}
+.lt-row:last-child{border-bottom:none;}
+
+/* PROMO ASSETS */
+.promo-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.promo-card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;}
+.promo-card h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:6px;}
+.promo-card p{font-size:.8rem;color:var(--muted);margin-bottom:12px;line-height:1.5;}
+.promo-copy{width:100%;padding:9px;background:var(--bg);border:1.5px solid var(--border);border-radius:8px;font-size:.77rem;color:var(--navy);font-family:'DM Sans',sans-serif;resize:none;outline:none;line-height:1.5;}
+.copy-small{padding:6px 13px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-top:8px;transition:all .2s;}
+.copy-small:hover{background:#0d1f3c;}
+
+/* EMPTY */
+.empty{text-align:center;padding:36px;color:var(--muted);}
+.empty-icon{font-size:1.8rem;margin-bottom:8px;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:.84rem;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.green{background:var(--green-dk);}
+
+/* NOT FOUND */
+#not-found{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;background:var(--navy);padding:20px;text-align:center;}
+.nf-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:#fff;margin-bottom:16px;}
+.nf-logo span{color:var(--green);}
+.nf-icon{font-size:3rem;margin-bottom:12px;}
+.nf-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;margin-bottom:8px;}
+.nf-desc{font-size:.87rem;color:rgba(255,255,255,.5);max-width:340px;line-height:1.6;margin-bottom:24px;}
+.nf-btn{padding:13px 28px;background:var(--green);color:#fff;border:none;border-radius:11px;font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;cursor:pointer;}
+
+@media(max-width:700px){
+  .stats-grid{grid-template-columns:1fr 1fr;}
+  .steps{grid-template-columns:1fr;}
+  .promo-grid{grid-template-columns:1fr;}
+  .lt-head,.lt-row{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:460px){.stats-grid{grid-template-columns:1fr 1fr;}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- NOT AUTHORIZED -->
+<div id="not-found">
+  <div class="nf-logo">Trader<span>Tax</span></div>
+  <div class="nf-icon">🔒</div>
+  <div class="nf-title">No affiliate account found</div>
+  <div class="nf-desc">You need an active TraderTax affiliate account to access this portal. Reach out to us to get set up.</div>
+  <button class="nf-btn" onclick="window.location.href='mailto:hello@tradertax.net?subject=Affiliate Account Request'">Contact Us to Apply</button>
+</div>
+
+<!-- LOGIN -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <div class="login-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></div>
+    </div>
+    <div class="login-sub">Sign in to your affiliate portal</div>
+    <div class="login-tag">Affiliate Partner</div>
+    <div class="lg-field"><label>Email</label><input type="email" id="lg-email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <button class="lg-btn" onclick="lgIn()">Sign In</button>
+    <div class="lg-err" id="lg-err">Incorrect credentials.</div>
+    <div class="lg-noacct">Want to become an affiliate? <a href="partners.html">Apply here →</a></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <span class="topbar-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></span>
+      <span class="topbar-tag">Affiliate Portal</span>
+    </div>
+    <div class="topbar-right">
+      <span id="topbar-name" style="font-size:.84rem;font-weight:600;color:var(--navy);"></span>
+      <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">Your Referral Link</div>
+    <div class="hero-name" id="hero-name">Welcome back!</div>
+    <div class="hero-sub" id="hero-sub">Share your link. Every client you send earns you a commission.</div>
+    <div style="display:flex;justify-content:center;">
+      <div class="link-box">
+        <div class="link-url" id="hero-link">Loading...</div>
+        <button class="copy-btn" id="copy-hero-btn" onclick="copyHeroLink()">Copy Link</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+
+    <!-- STATS -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="sc-val" id="s-clicks">—</div><div class="sc-lbl">Link Clicks</div><div class="sc-note">All time</div></div>
+      <div class="stat-card"><div class="sc-val green" id="s-leads">—</div><div class="sc-lbl">Leads</div><div class="sc-note">Referred signups</div></div>
+      <div class="stat-card"><div class="sc-val green" id="s-clients">—</div><div class="sc-lbl">Clients</div><div class="sc-note">Converted</div></div>
+      <div class="stat-card"><div class="sc-val amber" id="s-earnings">—</div><div class="sc-lbl">Total Earned</div><div class="sc-note" id="s-earn-note">Lifetime</div></div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <div class="section-title">How It Works</div>
+    <div class="steps">
+      <div class="step-card"><div class="step-num">1</div><div class="step-title">Share Your Link</div><div class="step-desc">Post your unique link anywhere — Discord, YouTube, Reddit, Twitter, your website. Anyone who clicks it gets tagged to your account for 30 days.</div></div>
+      <div class="step-card"><div class="step-num">2</div><div class="step-title">They Sign Up</div><div class="step-desc">When someone from your link becomes a paying TraderTax client, we track it automatically. You'll see the conversion here in real time.</div></div>
+      <div class="step-card"><div class="step-num">3</div><div class="step-title">You Get Paid</div><div class="step-desc">We pay commissions monthly via Venmo, Zelle, or PayPal. Your dashboard always shows exactly what's owed and what's been paid.</div></div>
+    </div>
+
+    <!-- COMMISSION / PAYOUT INFO -->
+    <div class="section-title">Your Commission</div>
+    <div class="payout-card">
+      <div class="payout-row"><span class="payout-label">Commission structure</span><span class="payout-val" id="pay-structure">—</span></div>
+      <div class="payout-row"><span class="payout-label">Total clients converted</span><span class="payout-val" id="pay-clients">—</span></div>
+      <div class="payout-row"><span class="payout-label">Total earned (lifetime)</span><span class="payout-val green" id="pay-earned">—</span></div>
+      <div class="payout-row"><span class="payout-label">Already paid out</span><span class="payout-val" id="pay-paid">—</span></div>
+      <div class="payout-row"><span class="payout-label">Currently owed to you</span><span class="payout-val green" id="pay-owed" style="font-size:1.1rem;">—</span></div>
+      <div class="payout-row"><span class="payout-label">Last payout</span><span class="payout-val" id="pay-last">—</span></div>
+    </div>
+
+    <!-- LEAD LOG -->
+    <div class="section-title">Your Referred Leads</div>
+    <div class="lead-table">
+      <div class="lt-head">
+        <div class="lt-th">Email (partial)</div>
+        <div class="lt-th">Status</div>
+        <div class="lt-th">Became Client</div>
+        <div class="lt-th">Date</div>
+      </div>
+      <div id="lead-table-body"><div class="empty"><div class="empty-icon">📭</div>No leads yet — start sharing your link!</div></div>
+    </div>
+
+    <!-- PROMO ASSETS -->
+    <div class="section-title">Promo Copy</div>
+    <div class="promo-grid">
+
+      <div class="promo-card">
+        <h3>Discord / Reddit Message</h3>
+        <p>Drop in any trading community. Short, direct, no hype.</p>
+        <textarea class="promo-copy" id="promo-discord" rows="5" readonly></textarea>
+        <button class="copy-small" onclick="copyText('promo-discord')">Copy</button>
+      </div>
+
+      <div class="promo-card">
+        <h3>Twitter / X Post</h3>
+        <p>Under 280 characters, works standalone or as a reply.</p>
+        <textarea class="promo-copy" id="promo-twitter" rows="5" readonly></textarea>
+        <button class="copy-small" onclick="copyText('promo-twitter')">Copy</button>
+      </div>
+
+      <div class="promo-card">
+        <h3>YouTube Description Blurb</h3>
+        <p>Paste into your video description under Resources or Tools.</p>
+        <textarea class="promo-copy" id="promo-youtube" rows="5" readonly></textarea>
+        <button class="copy-small" onclick="copyText('promo-youtube')">Copy</button>
+      </div>
+
+      <div class="promo-card">
+        <h3>Short Pitch (verbal / DM)</h3>
+        <p>For voice chats, DMs, or mentioning your code verbally.</p>
+        <textarea class="promo-copy" id="promo-dm" rows="5" readonly></textarea>
+        <button class="copy-small" onclick="copyText('promo-dm')">Copy</button>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<script>
+const db = firebase.firestore();
+const auth = firebase.auth();
+let currentUser = null;
+let affData = null;
+
+/* ── AUTH ── */
+auth.onAuthStateChanged(async user => {
+  if (user) {
+    // Look up by email in affiliates collection
+    const snap = await db.collection('affiliates').where('email','==',user.email).limit(1).get().catch(()=>({docs:[]}));
+    if (snap.docs.length && snap.docs[0].data().status === 'active') {
+      currentUser = user;
+      affData = { id: snap.docs[0].id, ...snap.docs[0].data() };
+      showApp();
+    } else {
+      auth.signOut();
+      document.getElementById('login-gate').style.display = 'none';
+      document.getElementById('not-found').style.display = 'flex';
+    }
+  }
+});
+
+async function lgIn() {
+  const email = document.getElementById('lg-email').value.trim();
+  const pw = document.getElementById('lg-pw').value;
+  const err = document.getElementById('lg-err');
+  err.classList.remove('show');
+  try {
+    await auth.signInWithEmailAndPassword(email, pw);
+    // onAuthStateChanged handles the rest
+  } catch(e) {
+    err.textContent = 'Incorrect email or password.';
+    err.classList.add('show');
+  }
+}
+
+function handleLogout() { auth.signOut(); location.reload(); }
+
+/* ── SHOW APP ── */
+async function showApp() {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const name = affData.name || currentUser.email;
+  const link = 'https://tradertax.net/?ref=' + affData.code;
+
+  document.getElementById('topbar-name').textContent = name;
+  document.getElementById('hero-name').textContent = 'Hey, ' + (affData.name || 'Partner') + '!';
+  document.getElementById('hero-sub').textContent = 'Your code is ' + affData.code + '. Share your link and earn for every client you send our way.';
+  document.getElementById('hero-link').textContent = link;
+
+  loadStats();
+  loadLeads();
+  loadPromos(link);
+}
+
+/* ── STATS ── */
+async function loadStats() {
+  try {
+    // Count leads referred by this affiliate's code
+    const [leadsSnap, clientsSnap] = await Promise.all([
+      db.collection('leads').where('referredBy','==',affData.code).get().catch(()=>({docs:[]})),
+      db.collection('users').where('referredBy','==',affData.code).get().catch(()=>({docs:[]}))
+    ]);
+    const calcLeads = await db.collection('calculator_leads').where('referredBy','==',affData.code).get().catch(()=>({docs:[]}));
+
+    const totalLeads = leadsSnap.docs.length + calcLeads.docs.length;
+    const totalClients = clientsSnap.docs.length;
+
+    let earned = 0;
+    const paidClients = clientsSnap.docs.filter(d=>d.data().affiliatePaid).length;
+    const unpaidClients = totalClients - paidClients;
+
+    if (affData.commissionType === 'flat') {
+      earned = totalClients * (affData.commissionAmount || 0);
+    } else {
+      earned = totalClients * ((497 * (affData.commissionAmount || 0)) / 100);
+    }
+    const paid = paidClients * (affData.commissionType==='flat' ? affData.commissionAmount||0 : (497*(affData.commissionAmount||0)/100));
+    const owed = earned - paid;
+
+    document.getElementById('s-clicks').textContent = affData.clicks || '—';
+    document.getElementById('s-leads').textContent = totalLeads;
+    document.getElementById('s-clients').textContent = totalClients;
+    document.getElementById('s-earnings').textContent = earned > 0 ? '$' + Math.round(earned).toLocaleString() : '$0';
+
+    // Commission card
+    const structure = affData.commissionType === 'flat'
+      ? '$' + affData.commissionAmount + ' per client (flat rate)'
+      : affData.commissionAmount + '% of plan price';
+    document.getElementById('pay-structure').textContent = structure;
+    document.getElementById('pay-clients').textContent = totalClients;
+    document.getElementById('pay-earned').textContent = '$' + Math.round(earned).toLocaleString();
+    document.getElementById('pay-paid').textContent = '$' + Math.round(paid).toLocaleString();
+    document.getElementById('pay-owed').textContent = owed > 0 ? '$' + Math.round(owed).toLocaleString() : '$0';
+    document.getElementById('pay-last').textContent = affData.lastPaidAt
+      ? new Date(affData.lastPaidAt.toDate ? affData.lastPaidAt.toDate() : affData.lastPaidAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})
+      : 'No payouts yet';
+
+  } catch(e) { console.error(e); }
+}
+
+/* ── LEADS ── */
+async function loadLeads() {
+  try {
+    const [leadsSnap, calcSnap] = await Promise.all([
+      db.collection('leads').where('referredBy','==',affData.code).orderBy('createdAt','desc').limit(100).get().catch(()=>({docs:[]})),
+      db.collection('calculator_leads').where('referredBy','==',affData.code).orderBy('createdAt','desc').limit(100).get().catch(()=>({docs:[]}))
+    ]);
+
+    const leads = [
+      ...leadsSnap.docs.map(d=>({...d.data(),isClient:false})),
+      ...calcSnap.docs.map(d=>({...d.data(),isClient:false}))
+    ].sort((a,b)=>{
+      const da = a.createdAt?.toDate ? a.createdAt.toDate() : new Date(a.createdAt||0);
+      const db2 = b.createdAt?.toDate ? b.createdAt.toDate() : new Date(b.createdAt||0);
+      return db2 - da;
+    });
+
+    if (!leads.length) {
+      document.getElementById('lead-table-body').innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No leads yet — start sharing your link!</div>';
+      return;
+    }
+
+    // Check which became clients
+    const clientSnap = await db.collection('users').where('referredBy','==',affData.code).get().catch(()=>({docs:[]}));
+    const clientEmails = new Set(clientSnap.docs.map(d=>d.data().email));
+
+    document.getElementById('lead-table-body').innerHTML = leads.map(l => {
+      const email = l.email || '—';
+      const masked = email.length > 4 ? email.slice(0,3) + '***' + email.slice(email.indexOf('@')) : '***';
+      const isClient = clientEmails.has(email);
+      const dt = l.createdAt?.toDate ? l.createdAt.toDate() : new Date(l.createdAt || 0);
+      const dtStr = dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      return `<div class="lt-row">
+        <div style="font-size:.84rem;font-weight:600;">${masked}</div>
+        <div><span style="font-size:.7rem;font-weight:700;border-radius:99px;padding:3px 9px;${isClient?'background:var(--green-lt);color:var(--green-dk);':'background:var(--amber-lt);color:var(--amber);'}">${isClient?'✓ Client':'Lead'}</span></div>
+        <div style="font-size:.8rem;color:var(--muted);">${isClient?'Yes':'Pending'}</div>
+        <div style="font-size:.78rem;color:var(--muted);">${dtStr}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { console.error(e); }
+}
+
+/* ── PROMO COPY ── */
+function loadPromos(link) {
+  document.getElementById('promo-discord').value =
+    `If you trade prop firms or use a trading account, stop guessing on your taxes.\n\nTraderTax specializes in trader tax returns — they understand prop firm income, Section 1256, wash sales, and the stuff TurboTax completely misses.\n\nCheck them out: ${link}`;
+
+  document.getElementById('promo-twitter').value =
+    `Trader taxes are not regular taxes.\n\nProp firm payouts, Section 1256 contracts, wash sales — most CPAs get it wrong.\n\nTraderTax gets it right: ${link}`;
+
+  document.getElementById('promo-youtube').value =
+    `📊 Get your trader taxes done right:\n${link}\n\nThey handle prop firm income, Section 1256, wash sales, and everything a trading-specific return needs. Way beyond TurboTax.`;
+
+  document.getElementById('promo-dm').value =
+    `"Hey — if you trade prop firms or have a complex trading year, check out TraderTax. They actually understand trader taxes, not just regular W-2 stuff. My link is ${link} — or you can just use code ${affData.code} if you see a promo field."`;
+}
+
+/* ── COPY FUNCTIONS ── */
+function copyHeroLink() {
+  const link = document.getElementById('hero-link').textContent;
+  navigator.clipboard.writeText(link).then(() => {
+    const btn = document.getElementById('copy-hero-btn');
+    btn.textContent = 'Copied ✓'; btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy Link'; btn.classList.remove('copied'); }, 2000);
+    showToast('Link copied!', 'green');
+  });
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  navigator.clipboard.writeText(el.value).then(() => showToast('Copied!', 'green'));
+}
+
+/* ── TOAST ── */
+function showToast(msg, cls='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (cls?' '+cls:'');
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+<script src="affiliate-tracker.js"></script>
+</body>
+</html>
