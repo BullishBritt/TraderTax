@@ -574,6 +574,11 @@ function showApp(user) {
   document.getElementById('login-gate').style.display = 'none';
   document.getElementById('app').style.display = 'block';
   document.getElementById('topbar-user').textContent = user.email;
+  // Immediately seed the lookup with the logged-in admin's own UID→email
+  // (useful when admin is also the test client)
+  uidEmailLookup[user.uid] = user.email;
+  // Write email to their own users doc so future lookups work
+  db.collection('users').doc(user.uid).set({email:user.email},{merge:true}).catch(()=>{});
   loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates(); loadPendingApplications();
   loadAllDocuments().then(()=>backfillDocEmails());
 }
@@ -741,7 +746,15 @@ async function confirmAssign() {
   const cpa=allCPAs.find(c=>c.id===cpaId);
   if(!cpa){msg.textContent='CPA not found.';return;}
   try {
-    await db.collection('users').doc(assignClientId).update({assignedCPA:{uid:cpaId,name:((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()},taxYear,returnStatus:'assigned',updatedAt:new Date().toISOString()});
+    // Use set+merge so it works even if the users doc doesn't exist yet
+    await db.collection('users').doc(assignClientId).set({
+      assignedCPA:{uid:cpaId,name:((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()},
+      taxYear,
+      returnStatus:'assigned',
+      updatedAt:new Date().toISOString(),
+      // Capture email if we know it
+      ...(uidEmailLookup[assignClientId]?{email:uidEmailLookup[assignClientId]}:{})
+    },{merge:true});
     const retSnap=await db.collection('tax_returns').where('clientUid','==',assignClientId).where('taxYear','==',parseInt(taxYear)).get();
     if(retSnap.empty){await db.collection('tax_returns').add({clientUid:assignClientId,cpaUid:cpaId,cpaFirstName:cpa.firstName||'',taxYear:parseInt(taxYear),status:'assigned',createdAt:firebase.firestore.FieldValue.serverTimestamp(),updatedAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:[{date:new Date().toISOString(),note:'Assigned to specialist.'}]});}
     else{await retSnap.docs[0].ref.update({cpaUid:cpaId,cpaFirstName:cpa.firstName||'',status:'assigned',updatedAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:firebase.firestore.FieldValue.arrayUnion({date:new Date().toISOString(),note:'Reassigned to specialist.'})});}
