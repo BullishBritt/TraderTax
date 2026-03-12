@@ -525,11 +525,19 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
           <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option>
         </select>
       </div>
-      <div class="ff" style="margin-bottom:20px;">
+      <div class="ff" style="margin-bottom:16px;">
         <label>Assign to Specialist</label>
-        <select id="assign-cpa-select" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--navy);background:var(--surface);outline:none;">
+        <select id="assign-cpa-select" onchange="updateCPAPreview(this.value)" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--navy);background:var(--surface);outline:none;">
           <option value="">Loading CPAs...</option>
         </select>
+      </div>
+      <!-- CPA preview card — shown when a CPA is selected -->
+      <div id="cpa-preview-card" style="display:none;background:var(--navy);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:none;align-items:center;gap:12px;">
+        <div id="cpa-preview-avatar" style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0;">?</div>
+        <div>
+          <div id="cpa-preview-name" style="font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;color:#fff;">—</div>
+          <div id="cpa-preview-meta" style="font-size:.74rem;color:rgba(255,255,255,.6);">—</div>
+        </div>
       </div>
       <div style="display:flex;gap:10px;">
         <button class="btn-handoff" style="flex:1;" onclick="confirmAssign()">Assign CPA</button>
@@ -732,9 +740,23 @@ function openAssignModal(clientId, clientName) {
   assignClientId=clientId;
   document.getElementById('assign-client-name').textContent='Assign CPA — '+clientName;
   document.getElementById('assign-msg').textContent='';
+  document.getElementById('cpa-preview-card').style.display='none';
   const sel=document.getElementById('assign-cpa-select');
-  sel.innerHTML=allCPAs.length?'<option value="">Choose specialist...</option>'+allCPAs.map(c=>`<option value="${c.id}">${(c.firstName||'')+' '+(c.lastName||'')} — ${c.credentials||'CPA'}</option>`).join(''):'<option value="">No CPAs added yet</option>';
+  sel.innerHTML=allCPAs.length?'<option value="">Choose specialist...</option>'+allCPAs.map(c=>`<option value="${c.id}">${((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email} — ${c.credentials||'CPA'}</option>`).join(''):'<option value="">No CPAs added yet</option>';
   document.getElementById('assign-modal').classList.add('open');
+}
+
+function updateCPAPreview(cpaId) {
+  const card = document.getElementById('cpa-preview-card');
+  if(!cpaId){card.style.display='none';return;}
+  const cpa = allCPAs.find(c=>c.id===cpaId);
+  if(!cpa){card.style.display='none';return;}
+  const name = ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
+  const clientCount = allClients.filter(c=>c.assignedCPA?.uid===cpaId).length;
+  document.getElementById('cpa-preview-avatar').textContent = name[0].toUpperCase();
+  document.getElementById('cpa-preview-name').textContent = name;
+  document.getElementById('cpa-preview-meta').textContent = `${cpa.credentials||'CPA'} · ${cpa.email||''} · ${clientCount} client${clientCount!==1?'s':''} assigned`;
+  card.style.display='flex';
 }
 function closeAssignModal(){document.getElementById('assign-modal').classList.remove('open');}
 
