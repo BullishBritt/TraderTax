@@ -168,19 +168,70 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
   .sb-label{display:none;}
 }
 </style>
+
+<style id="tt-nav-css">
+:root{--green:#3dba7e;--green-dk:#2ea86c;--navy:#0a1628;--body:#374151;--border:rgba(0,0,0,.07);--border2:#d1d5db;}
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.tt-logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.tt-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.4px;}
+.tt-logo-txt .nv{color:var(--navy);}.tt-logo-txt .gr{color:var(--green);}
+.tt-nav-links{display:flex;align-items:center;gap:22px;list-style:none;margin:0;padding:0;}
+.tt-nav-links a{font-size:.875rem;font-weight:500;color:var(--body);text-decoration:none;transition:color .2s;}
+.tt-nav-links a:hover{color:var(--navy);}
+.tt-nav-login{font-size:.875rem!important;font-weight:600!important;color:var(--navy)!important;border:1.5px solid var(--border2)!important;padding:7px 14px!important;border-radius:8px!important;}
+.tt-nav-login:hover{background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important;}
+.tt-nav-cta{background:var(--green)!important;color:#fff!important;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem!important;padding:9px 16px!important;border-radius:8px!important;white-space:nowrap;}
+.tt-nav-cta:hover{background:var(--green-dk)!important;}
+.tt-ham{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.tt-ham span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
+.tt-mob{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:16px 5%;flex-direction:column;gap:4px;z-index:199;}
+.tt-mob.open{display:flex;}
+.tt-mob a{font-size:.95rem;font-weight:500;color:var(--body);padding:.4rem 0;border-bottom:1px solid var(--border);text-decoration:none;}
+.tt-mob a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
+@media(max-width:860px){.tt-nav-links{display:none;}.tt-ham{display:flex;}}
+</style>
 </head>
 <body>
 
+<!-- NAV -->
 <nav>
-  <a href="index.html" class="logo">Trader<span>Tax</span></a>
-  <div class="nav-right">
-    <a href="pricing.html">Pricing</a>
-    <a href="calculator.html" style="color:var(--green);font-weight:600;">🧮 Calculator</a>
-    <a href="login.html" class="nav-cta">Log In</a>
-  </div>
+  <a href="index.html" class="tt-logo">
+    <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+      <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+      <path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" stroke-linejoin="miter" fill="none"/>
+      <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span class="tt-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></span>
+  </a>
+  <ul class="tt-nav-links">
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html">Pricing</a></li>
+    <li><a href="calculator.html">🧮 Calculator</a></li>
+    <li><a href="faq.html">FAQ</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="partners.html">Partners</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="login.html" class="tt-nav-login">Log In</a></li>
+    <li><a href="signup.html" class="tt-nav-login" style="background:var(--navy);color:#fff!important;border-color:var(--navy);">Sign Up</a></li>
+    <li><a href="snapshot.html" class="tt-nav-cta">Get My Snapshot →</a></li>
+  </ul>
+  <button class="tt-ham" onclick="document.querySelector('.tt-mob').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
-
-<!-- STEPS BAR -->
+<div class="tt-mob">
+  <a href="services.html">Services</a>
+  <a href="pricing.html">Pricing</a>
+  <a href="calculator.html" style="color:#3dba7e;font-weight:600;">🧮 Calculator</a>
+  <a href="faq.html">FAQ</a>
+  <a href="blog.html">Blog</a>
+  <a href="partners.html">Partners</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html">Log In</a>
+  <a href="signup.html">Sign Up</a>
+  <a href="snapshot.html" style="background:#3dba7e;color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:10px;border-radius:8px;text-align:center;">Get My Snapshot →</a>
+</div><!-- STEPS BAR -->
 <div class="steps-bar">
   <div class="steps-inner">
     <div class="sb-step active" id="sb1"><div class="sb-num">1</div><span class="sb-label">Your Situation</span></div>
