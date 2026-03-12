@@ -406,11 +406,17 @@ async function loadUser(user){
     const s=await getDoc(doc(db,'users',user.uid));
     if(s.exists()){
       userData=s.data();
+      // Always keep email fresh in Firestore so admin lookup works
+      if(!userData.email) await setDoc(doc(db,'users',user.uid),{email:user.email,role:'client'},{merge:true});
       document.getElementById('pf-first').value=userData.firstName||'';
       document.getElementById('pf-last').value=userData.lastName||'';
       document.getElementById('pf-phone').value=userData.phone||'';
       document.getElementById('pf-state').value=userData.state||'';
       if(userData.createdAt){const d=new Date(userData.createdAt);document.getElementById('stat-since').textContent=d.toLocaleDateString('en-US',{month:'short',year:'numeric'});}
+    }
+    } else {
+      // First time — create user doc with email so admin can look them up
+      await setDoc(doc(db,'users',user.uid),{email:user.email,role:'client',createdAt:new Date().toISOString()},{merge:true});
     }
     let snaps=userData.snapshots||[];
     if(userData.snapshot&&userData.snapshotLinked){
