@@ -23,6 +23,8 @@
   window._saveLead = async (data) => {
     try {
       const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
+      // Manual referral code takes priority
+      if (data.referralCode) affPayload.affiliateCode = data.referralCode;
       await addDoc(collection(db,"calculator_leads"),{...data, ...affPayload, createdAt:serverTimestamp()});
       sendLeadEmail('Calculator Lead', data.name || '', data.email, data.phone || '', data.tradingStyle || '', '');
       console.log("Lead saved");
@@ -39,8 +41,6 @@
 body{background:var(--bg);font-family:'DM Sans',sans-serif;color:var(--navy);min-height:100vh;}
 a{text-decoration:none;color:inherit;}
 input,select,button{font-family:'DM Sans',sans-serif;}
-
-/* NAV */
 nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;position:sticky;top:0;z-index:100;}
 .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;}
 .logo span{color:var(--green);}
@@ -55,8 +55,6 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .mob a{padding:12px 0;border-bottom:1px solid var(--border);font-size:.9rem;display:block;color:var(--body);}
 .mob.open{display:flex;}
 @media(max-width:680px){.nav-links{display:none;}.hamburger{display:block;}}
-
-/* HERO */
 .hero{background:var(--navy);padding:60px 5% 52px;text-align:center;}
 .eyebrow{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
 .hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.5rem);color:#fff;line-height:1.12;margin-bottom:12px;}
@@ -64,34 +62,22 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .hero p{font-size:.9rem;color:rgba(255,255,255,.6);max-width:500px;margin:0 auto 16px;line-height:1.8;}
 .hero-pills{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;}
 .pill{font-size:.7rem;color:rgba(255,255,255,.5);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);padding:4px 12px;border-radius:99px;}
-
-/* ESTIMATE BANNER — shown prominently at top */
 .est-banner{background:var(--amber-bg);border-bottom:2px solid var(--amber-border);padding:11px 5%;text-align:center;font-size:.8rem;color:#92400e;line-height:1.5;}
 .est-banner strong{color:#78350f;}
-
-/* PAGE */
 .page{max-width:820px;margin:0 auto;padding:32px 20px 80px;}
-
-/* PROGRESS */
 .prog-wrap{margin-bottom:26px;}
 .prog-meta{display:flex;justify-content:space-between;font-size:.72rem;color:var(--muted);margin-bottom:6px;}
 .prog-bar{height:5px;background:var(--border);border-radius:99px;overflow:hidden;}
 .prog-fill{height:100%;background:var(--green);border-radius:99px;transition:width .4s;}
-
-/* STEP */
 .step{display:none;}
 .step.active{display:block;}
 .step-hd{margin-bottom:20px;}
 .step-n{font-size:.63rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
 .step-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.18rem;margin-bottom:4px;}
 .step-sub{font-size:.82rem;color:var(--muted);line-height:1.65;}
-
-/* INLINE WARNING */
 .warn{background:var(--amber-bg);border:1.5px solid var(--amber-border);border-radius:10px;padding:12px 14px;font-size:.78rem;color:#92400e;line-height:1.6;margin-bottom:14px;display:none;}
 .warn.show{display:block;}
 .warn strong{color:#78350f;}
-
-/* FORM */
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-bottom:14px;}
 .ff{grid-column:1/-1;}
 .field{display:flex;flex-direction:column;gap:5px;}
@@ -102,8 +88,6 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .pw{position:relative;}
 .pw::before{content:'$';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:.88rem;pointer-events:none;}
 .pw input{padding-left:22px;}
-
-/* TILES */
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:9px;margin-bottom:16px;}
 .tile{border:1.5px solid var(--border);border-radius:11px;padding:13px 10px;cursor:pointer;transition:all .15s;background:var(--surface);text-align:center;user-select:none;}
 .tile:hover{border-color:var(--navy);}
@@ -111,14 +95,10 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .tile-icon{font-size:1.2rem;margin-bottom:5px;}
 .tile-lbl{font-size:.75rem;font-weight:700;color:var(--navy);}
 .tile-sub{font-size:.62rem;color:var(--muted);margin-top:2px;}
-
-/* RADIOS */
 .radios{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;}
 .ropt{border:1.5px solid var(--border);border-radius:9px;padding:9px 15px;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s;background:var(--surface);user-select:none;}
 .ropt:hover{border-color:var(--navy);}
 .ropt.on{border-color:var(--navy);background:var(--navy);color:#fff;}
-
-/* NAV BTNS */
 .snav{display:flex;align-items:center;justify-content:space-between;margin-top:22px;}
 .btn-back{background:none;border:1.5px solid var(--border);color:var(--muted);border-radius:9px;padding:10px 18px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .15s;}
 .btn-back:hover{border-color:var(--navy);color:var(--navy);}
@@ -127,12 +107,8 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .btn-next:disabled{opacity:.3;cursor:not-allowed;}
 .btn-go{background:var(--green)!important;}
 .btn-go:hover{background:var(--green-dk)!important;}
-
-/* INFO BOX */
 .ibox{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:11px 13px;font-size:.75rem;color:var(--muted);line-height:1.6;margin-top:10px;}
 .ibox strong{color:var(--navy);}
-
-/* LEAD GATE */
 .gate{background:var(--surface);border:1.5px solid var(--border);border-radius:15px;padding:30px;text-align:center;max-width:440px;margin:0 auto;}
 .gate-icon{font-size:2rem;margin-bottom:10px;}
 .gate-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:7px;}
@@ -147,15 +123,11 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .gate-btn:hover{background:var(--green-dk);}
 .gate-btn:disabled{opacity:.4;cursor:not-allowed;}
 .gate-legal{font-size:.67rem;color:var(--muted);line-height:1.6;margin-top:8px;}
-
-/* RESULTS */
 .res-est-notice{background:var(--amber-bg);border:1.5px solid var(--amber-border);border-radius:11px;padding:14px 16px;font-size:.8rem;color:#92400e;line-height:1.65;margin-bottom:18px;}
 .res-est-notice strong{color:#78350f;}
-
 .res-hd{background:var(--navy);border-radius:14px;padding:24px;color:#fff;text-align:center;margin-bottom:16px;}
 .res-hd h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:5px;}
 .res-hd p{font-size:.78rem;color:rgba(255,255,255,.5);line-height:1.6;}
-
 .cards{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:16px;}
 .card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:17px;}
 .card.danger{border-color:#fca5a5;background:#fff5f5;}
@@ -165,8 +137,6 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .card.danger .card-amt{color:var(--red);}
 .card.savings .card-amt{color:var(--green-dk);}
 .card-sub{font-size:.68rem;color:var(--muted);margin-top:3px;line-height:1.4;}
-
-/* BREAKDOWN TABLE */
 .bk{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
 .bk-hd{padding:12px 17px;background:var(--bg);border-bottom:1px solid var(--border);font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;color:var(--navy);display:flex;align-items:center;gap:7px;}
 .bk-row{display:flex;align-items:center;justify-content:space-between;padding:10px 17px;border-bottom:1px solid var(--bg);gap:10px;}
@@ -182,8 +152,6 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .bk-total{background:var(--navy);}
 .bk-total .bk-lbl{color:rgba(255,255,255,.8);font-weight:700;}
 .bk-total .bk-val{color:#fff;}
-
-/* HOW WE CALCULATED */
 .how{background:var(--bg);border:1px solid var(--border);border-radius:12px;margin-bottom:14px;overflow:hidden;}
 .how-hd{padding:12px 17px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;}
 .how-body{display:none;padding:0 17px 16px;}
@@ -192,8 +160,6 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .how-step::before{content:'→';position:absolute;left:0;color:var(--green);}
 .how-step strong{color:var(--navy);}
 .how-step code{background:var(--border);padding:1px 5px;border-radius:4px;font-family:monospace;font-size:.75rem;}
-
-/* SAVINGS */
 .sav{background:var(--green-lt);border:1.5px solid var(--green);border-radius:12px;padding:18px;margin-bottom:14px;}
 .sav-title{font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;color:var(--navy);margin-bottom:3px;}
 .sav-sub{font-size:.74rem;color:var(--muted);margin-bottom:13px;}
@@ -204,12 +170,8 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .sav-name{font-weight:700;color:var(--navy);}
 .sav-desc{font-size:.7rem;color:var(--muted);margin-top:2px;line-height:1.5;}
 .sav-amt{font-family:'Syne',sans-serif;font-weight:800;color:var(--green-dk);font-size:.82rem;flex-shrink:0;margin-left:auto;}
-
-/* DISCLAIMER */
 .disc{background:var(--amber-bg);border:1px solid var(--amber-border);border-radius:10px;padding:13px 15px;font-size:.73rem;color:#92400e;line-height:1.7;margin-bottom:16px;}
 .disc strong{color:#78350f;}
-
-/* CTA */
 .res-cta{background:var(--navy);border-radius:13px;padding:26px;text-align:center;color:#fff;}
 .res-cta h3{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;margin-bottom:7px;}
 .res-cta p{font-size:.8rem;color:rgba(255,255,255,.6);margin-bottom:17px;line-height:1.7;}
@@ -217,15 +179,12 @@ nav{height:64px;background:var(--surface);border-bottom:1px solid var(--border);
 .cta-g{background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:800;padding:12px 20px;border-radius:9px;font-size:.85rem;}
 .cta-g:hover{background:var(--green-dk);}
 .cta-o{background:rgba(255,255,255,.08);color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:12px 20px;border-radius:9px;font-size:.85rem;border:1px solid rgba(255,255,255,.15);}
-
 .spin{width:15px;height:15px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:inline-block;vertical-align:middle;margin-right:5px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
 footer{background:var(--navy);color:rgba(255,255,255,.4);text-align:center;padding:24px 5%;font-size:.75rem;line-height:1.8;}
 footer a{color:rgba(255,255,255,.4);}
 footer a:hover{color:#fff;}
 .fl{display:flex;justify-content:center;gap:18px;flex-wrap:wrap;margin-bottom:6px;}
-
 @media(max-width:560px){
   .fg{grid-template-columns:1fr;}
   .cards{grid-template-columns:1fr;}
@@ -233,22 +192,16 @@ footer a:hover{color:#fff;}
   .gate{padding:22px 16px;}
 }
 </style>
-    <!-- EmailJS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-      emailjs.init("dL1qGwo32XBoAeMPB");
-      function sendLeadEmail(source, name, email, phone, traderType, message) {
-        emailjs.send("service_9p67iy9", "template_vtt9a58", {
-          source: source,
-          name: name || "Unknown",
-          email: email || "Unknown",
-          phone: phone || "",
-          trader_type: traderType || "",
-          message: message || ""
-        }).catch(function(err) { console.log("EmailJS error:", err); });
-      }
-    </script>
-
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript">
+  emailjs.init("dL1qGwo32XBoAeMPB");
+  function sendLeadEmail(source, name, email, phone, traderType, message) {
+    emailjs.send("service_9p67iy9", "template_vtt9a58", {
+      source: source, name: name || "Unknown", email: email || "Unknown",
+      phone: phone || "", trader_type: traderType || "", message: message || ""
+    }).catch(function(err) { console.log("EmailJS error:", err); });
+  }
+</script>
 <style id="tt-nav-css">
 :root{--green:#3dba7e;--green-dk:#2ea86c;--navy:#0a1628;--body:#374151;--border:rgba(0,0,0,.07);--border2:#d1d5db;}
 nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
@@ -270,33 +223,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .tt-mob a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
 @media(max-width:860px){.tt-nav-links{display:none;}.tt-ham{display:flex;}}
 </style>
-<style id="tt-overflow-fix">
-html, body { overflow-x: hidden; max-width: 100%; }
-* { box-sizing: border-box; }
-</style>
+<style id="tt-overflow-fix">html,body{overflow-x:hidden;max-width:100%;}*{box-sizing:border-box;}</style>
 <style id="tt-nav-responsive">
-nav { overflow: hidden; }
-html, body { overflow-x: hidden; }
-* { box-sizing: border-box; }
-/* Hide less important nav links at medium screens */
-@media(max-width:1100px) {
-  .tt-nav-links li:nth-child(4),
-  .tt-nav-links li:nth-child(5),
-  .tt-nav-links li:nth-child(6) { display: none; }
-}
-@media(max-width:960px) {
-  .tt-nav-links li:nth-child(3),
-  .tt-nav-links li:nth-child(7) { display: none; }
-}
-@media(max-width:860px) {
-  .tt-nav-links { display: none !important; }
-  .tt-ham { display: flex !important; }
-}
+nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
+@media(max-width:1100px){.tt-nav-links li:nth-child(4),.tt-nav-links li:nth-child(5),.tt-nav-links li:nth-child(6){display:none;}}
+@media(max-width:960px){.tt-nav-links li:nth-child(3),.tt-nav-links li:nth-child(7){display:none;}}
+@media(max-width:860px){.tt-nav-links{display:none!important;}.tt-ham{display:flex!important;}}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <a href="index.html" class="tt-logo">
     <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
@@ -336,7 +272,6 @@ html, body { overflow-x: hidden; }
   <a href="snapshot.html" style="background:#3dba7e;color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:10px;border-radius:8px;text-align:center;">Get My Snapshot →</a>
 </div>
 
-<!-- PROMINENT ESTIMATE BANNER -->
 <div class="est-banner" style="position:sticky;top:64px;z-index:90;">
   ⚠️ <strong>This is an estimation tool only.</strong> Results are based on simplified assumptions and 2025 tax rules. Your actual tax liability depends on your complete financial picture, deductions, credits, and specific circumstances. <strong>This is not tax advice.</strong> Always consult a licensed tax professional before filing.
 </div>
@@ -355,7 +290,6 @@ html, body { overflow-x: hidden; }
 </div>
 
 <div class="page">
-
   <div class="prog-wrap">
     <div class="prog-meta">
       <span id="prog-label">Step 1 of 4 — Your Income</span>
@@ -364,18 +298,16 @@ html, body { overflow-x: hidden; }
     <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:25%"></div></div>
   </div>
 
-  <!-- ======= STEP 1: INCOME ======= -->
+  <!-- STEP 1: INCOME -->
   <div class="step active" id="step1">
     <div class="step-hd">
       <div class="step-n">Step 1 of 4</div>
       <div class="step-title">Your 2025 Income</div>
       <div class="step-sub">Include all income sources. W-2 wages and trading income stack together in the federal brackets — this matters a lot for your estimate.</div>
     </div>
-
     <div class="warn" id="w2-warn">
       ⚠️ <strong>Heads up — bracket stacking applies.</strong> Your W-2 income fills the lower brackets first. Your trading income then gets taxed at whatever bracket you're already in. Someone earning $75K salary + $40K prop payouts often pays nearly double the federal rate on their trading income vs someone with no W-2.
     </div>
-
     <div class="fg">
       <div class="field ff">
         <label>W-2 / Salary Income (gross, before withholding)</label>
@@ -408,13 +340,9 @@ html, body { overflow-x: hidden; }
         <span class="hint">Platform fees, eval costs, education, home office. Reduces SE taxable income.</span>
       </div>
     </div>
-
-    <div class="ibox">
-      💡 <strong>Prop firm payouts are always SE income</strong> — even if you lost money on evaluations, even if you got no 1099. The IRS sees the bank deposit. SE tax (15.3%) applies on top of income tax.
-    </div>
-
-        <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-<div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
+    <div class="ibox">💡 <strong>Prop firm payouts are always SE income</strong> — even if you lost money on evaluations, even if you got no 1099. The IRS sees the bank deposit. SE tax (15.3%) applies on top of income tax.</div>
+    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
+    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
       ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
     </div>
     <div class="snav">
@@ -423,75 +351,43 @@ html, body { overflow-x: hidden; }
     </div>
   </div>
 
-  <!-- ======= STEP 2: PROFILE ======= -->
+  <!-- STEP 2: PROFILE -->
   <div class="step" id="step2">
     <div class="step-hd">
       <div class="step-n">Step 2 of 4</div>
       <div class="step-title">Your Trading Profile</div>
       <div class="step-sub">Instrument type, filing status, and entity structure all change the calculation.</div>
     </div>
-
     <div class="step-n" style="margin-bottom:8px;">What do you trade? (select all)</div>
     <div class="tiles" id="trade-tiles">
-      <div class="tile" onclick="togTile(this,'stocks')">
-        <div class="tile-icon">📊</div>
-        <div class="tile-lbl">Stocks / ETFs</div>
-        <div class="tile-sub">Short/long-term rates</div>
-      </div>
-      <div class="tile" onclick="togTile(this,'options')">
-        <div class="tile-icon">⚡</div>
-        <div class="tile-lbl">Options</div>
-        <div class="tile-sub">Ordinary income rate</div>
-      </div>
-      <div class="tile" onclick="togTile(this,'futures')">
-        <div class="tile-icon">🔢</div>
-        <div class="tile-lbl">Futures</div>
-        <div class="tile-sub">Sec 1256 — 60/40</div>
-      </div>
-      <div class="tile" onclick="togTile(this,'forex')">
-        <div class="tile-icon">💱</div>
-        <div class="tile-lbl">Forex</div>
-        <div class="tile-sub">Sec 988 ordinary</div>
-      </div>
-      <div class="tile" onclick="togTile(this,'crypto')">
-        <div class="tile-icon">₿</div>
-        <div class="tile-lbl">Crypto</div>
-        <div class="tile-sub">Every trade taxable</div>
-      </div>
-      <div class="tile" onclick="togTile(this,'prop')">
-        <div class="tile-icon">🏢</div>
-        <div class="tile-lbl">Prop Firm</div>
-        <div class="tile-sub">SE tax on payouts</div>
-      </div>
+      <div class="tile" onclick="togTile(this,'stocks')"><div class="tile-icon">📊</div><div class="tile-lbl">Stocks / ETFs</div><div class="tile-sub">Short/long-term rates</div></div>
+      <div class="tile" onclick="togTile(this,'options')"><div class="tile-icon">⚡</div><div class="tile-lbl">Options</div><div class="tile-sub">Ordinary income rate</div></div>
+      <div class="tile" onclick="togTile(this,'futures')"><div class="tile-icon">🔢</div><div class="tile-lbl">Futures</div><div class="tile-sub">Sec 1256 — 60/40</div></div>
+      <div class="tile" onclick="togTile(this,'forex')"><div class="tile-icon">💱</div><div class="tile-lbl">Forex</div><div class="tile-sub">Sec 988 ordinary</div></div>
+      <div class="tile" onclick="togTile(this,'crypto')"><div class="tile-icon">₿</div><div class="tile-lbl">Crypto</div><div class="tile-sub">Every trade taxable</div></div>
+      <div class="tile" onclick="togTile(this,'prop')"><div class="tile-icon">🏢</div><div class="tile-lbl">Prop Firm</div><div class="tile-sub">SE tax on payouts</div></div>
     </div>
-
     <div class="step-n" style="margin-bottom:8px;">Filing Status</div>
     <div class="radios" id="r-filing">
       <div class="ropt on" onclick="selR(this,'filing')">Single</div>
       <div class="ropt" onclick="selR(this,'filing')">Married Filing Jointly</div>
       <div class="ropt" onclick="selR(this,'filing')">Head of Household</div>
     </div>
-
     <div class="step-n" style="margin-bottom:8px;">Holding Period (most trades)</div>
     <div class="radios" id="r-hold">
       <div class="ropt on" onclick="selR(this,'hold')">Mostly short-term (&lt;1yr)</div>
       <div class="ropt" onclick="selR(this,'hold')">Mix of short &amp; long</div>
       <div class="ropt" onclick="selR(this,'hold')">Mostly long-term (1yr+)</div>
     </div>
-
     <div class="step-n" style="margin-bottom:8px;">Business Entity</div>
     <div class="radios" id="r-entity">
       <div class="ropt on" onclick="selR(this,'entity')">No Entity</div>
       <div class="ropt" onclick="selR(this,'entity')">LLC (disregarded)</div>
       <div class="ropt" onclick="selR(this,'entity')">S-Corp</div>
     </div>
-
-    <div class="ibox">
-      🏢 <strong>S-Corp note:</strong> An S-Corp doesn't eliminate SE tax — it reduces it by splitting income between salary (SE tax applies) and distributions (no SE tax). This estimate assumes no S-Corp salary split. An actual S-Corp analysis requires a licensed professional.
-    </div>
-
-        <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-<div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
+    <div class="ibox">🏢 <strong>S-Corp note:</strong> An S-Corp doesn't eliminate SE tax — it reduces it by splitting income between salary (SE tax applies) and distributions (no SE tax). This estimate assumes no S-Corp salary split. An actual S-Corp analysis requires a licensed professional.</div>
+    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
+    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
       ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
     </div>
     <div class="snav">
@@ -500,14 +396,13 @@ html, body { overflow-x: hidden; }
     </div>
   </div>
 
-  <!-- ======= STEP 3: STATE ======= -->
+  <!-- STEP 3: STATE -->
   <div class="step" id="step3">
     <div class="step-hd">
       <div class="step-n">Step 3 of 4</div>
       <div class="step-title">State of Residence</div>
       <div class="step-sub">State tax is a major part of your total bill — from 0% in Texas and Florida to over 13% in California.</div>
     </div>
-
     <div class="fg">
       <div class="field ff">
         <label>Your State</label>
@@ -565,11 +460,9 @@ html, body { overflow-x: hidden; }
         </select>
       </div>
     </div>
-
     <div class="ibox" id="state-info">🤠 <strong>Texas:</strong> No state income tax. Your only taxes are federal and SE tax — no state burden at all.</div>
-
-        <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-<div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
+    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
+    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
       ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
     </div>
     <div class="snav">
@@ -578,7 +471,7 @@ html, body { overflow-x: hidden; }
     </div>
   </div>
 
-  <!-- ======= STEP 4: LEAD GATE ======= -->
+  <!-- STEP 4: LEAD GATE -->
   <div class="step" id="step4">
     <div class="gate">
       <div class="gate-icon">🔒</div>
@@ -598,157 +491,65 @@ html, body { overflow-x: hidden; }
         <label>Phone (optional)</label>
         <input type="tel" id="gate-phone" placeholder="(555) 000-0000"/>
       </div>
+      <!-- Referral code — small, subtle, optional -->
+      <div class="gfield" style="margin-top:2px;">
+        <label style="color:#9ca3af;font-size:.62rem;">Referral code <span style="font-weight:400;">(optional)</span></label>
+        <input type="text" id="gate-refcode" placeholder="e.g. APEX10" autocomplete="off" style="max-width:160px;font-size:.82rem;padding:8px 11px;border-radius:8px;"/>
+        <div style="font-size:.62rem;color:#9ca3af;margin-top:3px;">Were you referred? Enter their code so they get credit.</div>
+      </div>
       <button class="gate-btn" id="gate-btn" onclick="unlock()" disabled>Show My Estimate →</button>
       <div class="gate-legal">No spam. No sales calls unless you ask. We store your inputs to generate your estimate and may follow up with tax tips. Unsubscribe anytime.</div>
     </div>
   </div>
 
-  <!-- ======= RESULTS ======= -->
+  <!-- RESULTS -->
   <div class="step" id="step-results">
-
-    <!-- BIG ESTIMATE NOTICE AT TOP OF RESULTS -->
     <div class="res-est-notice">
       ⚠️ <strong>These are estimates only — not your actual tax bill.</strong> This tool uses simplified 2025 bracket math, standardized deductions, and flat state rates. It does not account for: itemized deductions, tax credits, AMT, carry-forward losses, multiple state returns, marriage penalty, or dozens of other factors that affect real returns. <strong>Treat this as a rough ballpark, not a filing number.</strong> A licensed tax professional will produce a materially different result.
     </div>
-
     <div class="res-hd">
       <h2>📊 Your 2025 Tax Estimate</h2>
       <p id="res-sub">Based on your inputs — rough estimate only</p>
     </div>
-
     <div class="cards">
-      <div class="card danger">
-        <div class="card-lbl">Estimated Total Tax</div>
-        <div class="card-amt" id="r-total">—</div>
-        <div class="card-sub">Federal + SE + State (combined rough estimate)</div>
-      </div>
-      <div class="card savings">
-        <div class="card-lbl">Potential Savings w/ TraderTax</div>
-        <div class="card-amt" id="r-savings">—</div>
-        <div class="card-sub">Through deductions, elections &amp; entity strategy</div>
-      </div>
-      <div class="card">
-        <div class="card-lbl">Estimated Effective Rate</div>
-        <div class="card-amt" id="r-rate">—</div>
-        <div class="card-sub">Of total gross income (rough estimate)</div>
-      </div>
-      <div class="card">
-        <div class="card-lbl">Estimated After-Tax Income</div>
-        <div class="card-amt" id="r-after">—</div>
-        <div class="card-sub">Rough take-home after all taxes</div>
-      </div>
+      <div class="card danger"><div class="card-lbl">Estimated Total Tax</div><div class="card-amt" id="r-total">—</div><div class="card-sub">Federal + SE + State (combined rough estimate)</div></div>
+      <div class="card savings"><div class="card-lbl">Potential Savings w/ TraderTax</div><div class="card-amt" id="r-savings">—</div><div class="card-sub">Through deductions, elections &amp; entity strategy</div></div>
+      <div class="card"><div class="card-lbl">Estimated Effective Rate</div><div class="card-amt" id="r-rate">—</div><div class="card-sub">Of total gross income (rough estimate)</div></div>
+      <div class="card"><div class="card-lbl">Estimated After-Tax Income</div><div class="card-amt" id="r-after">—</div><div class="card-sub">Rough take-home after all taxes</div></div>
     </div>
-
-    <!-- INCOME BREAKDOWN -->
     <div class="bk">
       <div class="bk-hd">📋 Income Breakdown</div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">W-2 / Salary Income</div><div class="bk-sub">Employer wages — fills lower brackets first</div></div>
-        <div class="bk-val" id="br-w2">$0</div>
-      </div>
-      <div class="bk-row" id="br-pnl-row">
-        <div class="bk-l"><div class="bk-lbl">Trading P&L (stocks/options/forex)</div><div class="bk-sub" id="br-pnl-sub">Short-term = ordinary rate</div></div>
-        <div class="bk-val" id="br-pnl">$0</div>
-      </div>
-      <div class="bk-row" id="br-futures-row">
-        <div class="bk-l"><div class="bk-lbl">Futures P&L</div><div class="bk-sub">Sec 1256: 60% taxed at LT rate, 40% at ST rate</div></div>
-        <div class="bk-val" id="br-futures">$0</div>
-      </div>
-      <div class="bk-row" id="br-prop-row">
-        <div class="bk-l"><div class="bk-lbl">Prop Firm Payouts</div><div class="bk-sub">Self-employment income — SE tax applies</div></div>
-        <div class="bk-val" id="br-prop">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Deductible Expenses</div><div class="bk-sub">Platform fees, evals, education, home office</div></div>
-        <div class="bk-val green" id="br-exp">-$0</div>
-      </div>
-      <div class="bk-row bk-total">
-        <div class="bk-l"><div class="bk-lbl">Total Gross Income (estimated)</div></div>
-        <div class="bk-val" id="br-gross">$0</div>
-      </div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">W-2 / Salary Income</div><div class="bk-sub">Employer wages — fills lower brackets first</div></div><div class="bk-val" id="br-w2">$0</div></div>
+      <div class="bk-row" id="br-pnl-row"><div class="bk-l"><div class="bk-lbl">Trading P&L (stocks/options/forex)</div><div class="bk-sub" id="br-pnl-sub">Short-term = ordinary rate</div></div><div class="bk-val" id="br-pnl">$0</div></div>
+      <div class="bk-row" id="br-futures-row"><div class="bk-l"><div class="bk-lbl">Futures P&L</div><div class="bk-sub">Sec 1256: 60% taxed at LT rate, 40% at ST rate</div></div><div class="bk-val" id="br-futures">$0</div></div>
+      <div class="bk-row" id="br-prop-row"><div class="bk-l"><div class="bk-lbl">Prop Firm Payouts</div><div class="bk-sub">Self-employment income — SE tax applies</div></div><div class="bk-val" id="br-prop">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Deductible Expenses</div><div class="bk-sub">Platform fees, evals, education, home office</div></div><div class="bk-val green" id="br-exp">-$0</div></div>
+      <div class="bk-row bk-total"><div class="bk-l"><div class="bk-lbl">Total Gross Income (estimated)</div></div><div class="bk-val" id="br-gross">$0</div></div>
     </div>
-
-    <!-- FEDERAL TAX BREAKDOWN -->
     <div class="bk">
       <div class="bk-hd">🏛️ Federal Tax Calculation (Estimated)</div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Adjusted Gross Income (AGI)</div><div class="bk-sub">After SE deduction (½ of SE tax deducted from income)</div></div>
-        <div class="bk-val" id="br-agi">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Standard Deduction</div><div class="bk-sub" id="br-std-sub">2025 standard deduction (we assume you take this)</div></div>
-        <div class="bk-val green" id="br-std">-$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Taxable Income</div><div class="bk-sub">What federal brackets actually apply to</div></div>
-        <div class="bk-val" id="br-taxable">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l">
-          <div class="bk-lbl">Federal Income Tax</div>
-          <div class="bk-sub" id="br-fed-sub">2025 brackets applied to taxable income</div>
-        </div>
-        <div class="bk-val red" id="br-fed">$0</div>
-      </div>
-      <div class="bk-row" id="br-niit-row" style="display:none">
-        <div class="bk-l"><div class="bk-lbl">Net Investment Income Tax (NIIT)</div><div class="bk-sub">3.8% on investment income above $200K single / $250K MFJ</div></div>
-        <div class="bk-val red" id="br-niit">$0</div>
-      </div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Adjusted Gross Income (AGI)</div><div class="bk-sub">After SE deduction (½ of SE tax deducted from income)</div></div><div class="bk-val" id="br-agi">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Standard Deduction</div><div class="bk-sub" id="br-std-sub">2025 standard deduction (we assume you take this)</div></div><div class="bk-val green" id="br-std">-$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Taxable Income</div><div class="bk-sub">What federal brackets actually apply to</div></div><div class="bk-val" id="br-taxable">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Federal Income Tax</div><div class="bk-sub" id="br-fed-sub">2025 brackets applied to taxable income</div></div><div class="bk-val red" id="br-fed">$0</div></div>
+      <div class="bk-row" id="br-niit-row" style="display:none"><div class="bk-l"><div class="bk-lbl">Net Investment Income Tax (NIIT)</div><div class="bk-sub">3.8% on investment income above $200K single / $250K MFJ</div></div><div class="bk-val red" id="br-niit">$0</div></div>
     </div>
-
-    <!-- SE TAX BREAKDOWN -->
     <div class="bk" id="se-section">
       <div class="bk-hd">💼 Self-Employment Tax Calculation (Estimated)</div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Total SE Income</div><div class="bk-sub">Prop firm payouts + other 1099 income − deductible expenses</div></div>
-        <div class="bk-val" id="br-se-income">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">SE Tax Base (× 92.35%)</div><div class="bk-sub">IRS allows you to exclude 7.65% (employer share) before calculating</div></div>
-        <div class="bk-val" id="br-se-base">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l">
-          <div class="bk-lbl">Social Security Tax (12.4%)</div>
-          <div class="bk-sub" id="br-ss-sub">On SE base up to $176,100 SS wage base (2025)</div>
-        </div>
-        <div class="bk-val red" id="br-ss">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Medicare Tax (2.9%)</div><div class="bk-sub">No wage cap on Medicare portion</div></div>
-        <div class="bk-val red" id="br-med">$0</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">SE Deduction (½ of SE tax)</div><div class="bk-sub">This amount is deducted from your AGI — reduces income tax slightly</div></div>
-        <div class="bk-val green" id="br-se-ded">$0</div>
-      </div>
-      <div class="bk-row bk-total">
-        <div class="bk-l"><div class="bk-lbl">Total SE Tax</div></div>
-        <div class="bk-val" id="br-se-total">$0</div>
-      </div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Total SE Income</div><div class="bk-sub">Prop firm payouts + other 1099 income − deductible expenses</div></div><div class="bk-val" id="br-se-income">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Tax Base (× 92.35%)</div><div class="bk-sub">IRS allows you to exclude 7.65% (employer share) before calculating</div></div><div class="bk-val" id="br-se-base">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Social Security Tax (12.4%)</div><div class="bk-sub" id="br-ss-sub">On SE base up to $176,100 SS wage base (2025)</div></div><div class="bk-val red" id="br-ss">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Medicare Tax (2.9%)</div><div class="bk-sub">No wage cap on Medicare portion</div></div><div class="bk-val red" id="br-med">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Deduction (½ of SE tax)</div><div class="bk-sub">This amount is deducted from your AGI — reduces income tax slightly</div></div><div class="bk-val green" id="br-se-ded">$0</div></div>
+      <div class="bk-row bk-total"><div class="bk-l"><div class="bk-lbl">Total SE Tax</div></div><div class="bk-val" id="br-se-total">$0</div></div>
     </div>
-
-    <!-- SS COORDINATION NOTE -->
     <div class="ibox" id="ss-coord-note" style="display:none;margin-bottom:14px;"></div>
-
-    <!-- STATE TAX -->
     <div class="bk">
       <div class="bk-hd">🗺️ State Tax (Estimated)</div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">State</div></div>
-        <div class="bk-val" id="br-state-name">Texas</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Rate Applied</div><div class="bk-sub">Simplified flat rate estimate — actual state brackets may vary</div></div>
-        <div class="bk-val" id="br-state-rate">0%</div>
-      </div>
-      <div class="bk-row">
-        <div class="bk-l"><div class="bk-lbl">Estimated State Tax</div></div>
-        <div class="bk-val red" id="br-state-tax">$0</div>
-      </div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">State</div></div><div class="bk-val" id="br-state-name">Texas</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Rate Applied</div><div class="bk-sub">Simplified flat rate estimate — actual state brackets may vary</div></div><div class="bk-val" id="br-state-rate">0%</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Estimated State Tax</div></div><div class="bk-val red" id="br-state-tax">$0</div></div>
     </div>
-
-    <!-- HOW WE CALCULATED THIS -->
     <div class="how">
       <div class="bk-hd how-hd" onclick="document.getElementById('how-body').classList.toggle('open')">
         🔍 How We Calculated This (click to expand) <span>▼</span>
@@ -760,19 +561,14 @@ html, body { overflow-x: hidden; }
         </div>
       </div>
     </div>
-
-    <!-- SAVINGS -->
     <div class="sav" id="sav-section">
       <div class="sav-title">💰 Where Your Savings Could Come From</div>
       <div class="sav-sub">Rough estimates based on typical TraderTax strategies — actual savings depend on your specific situation.</div>
       <div id="sav-items"></div>
     </div>
-
-    <!-- DISCLAIMER -->
     <div class="disc">
       ⚠️ <strong>Important:</strong> This estimate is for informational purposes only and does not constitute tax advice. It uses simplified 2025 federal tax brackets, assumes you take the standard deduction, applies a flat state rate estimate, and does not account for your complete financial situation. <strong>Do not use this number to make financial or tax filing decisions.</strong> TraderTax is a platform — tax services are provided by independent licensed CPAs and Enrolled Agents who will produce an accurate, personalized calculation.
     </div>
-
     <div class="res-cta">
       <h3>Want the real number — not an estimate?</h3>
       <p>A TraderTax licensed professional will review your actual situation, find every deduction, and file your return accurately. Starting from $197, no call required.</p>
@@ -781,9 +577,8 @@ html, body { overflow-x: hidden; }
         <a href="snapshot.html" class="cta-o">Get My Free Tax Snapshot</a>
       </div>
     </div>
-
-  </div><!-- /results -->
-</div><!-- /page -->
+  </div>
+</div>
 
 <footer style="background:#0a1628;border-top:1px solid rgba(255,255,255,.07);padding:52px 5% 28px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;">
   <div style="max-width:1100px;margin:0 auto;">
@@ -793,7 +588,7 @@ html, body { overflow-x: hidden; }
           <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
           <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;"><span style="color:#fff;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
         </a>
-        <p style="font-size:.85rem;line-height:1.7;margin-bottom:8px;">Taxes Built for Traders. Independent, licensed tax professionals who understand prop firms, futures, options, and crypto taxation.</p>
+        <p style="font-size:.85rem;line-height:1.7;margin-bottom:8px;">Taxes Built for Traders.</p>
         <p style="font-size:.75rem;color:rgba(255,255,255,.3);">hello@tradertax.net</p>
       </div>
       <div>
@@ -801,7 +596,6 @@ html, body { overflow-x: hidden; }
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
           <li><a href="services.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">All Services</a></li>
           <li><a href="prop-firm-taxes.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Prop Firm Taxes</a></li>
-          <li><a href="mark-to-market.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Mark-to-Market</a></li>
           <li><a href="calculator.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Tax Calculator</a></li>
           <li><a href="pricing.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Pricing</a></li>
         </ul>
@@ -811,7 +605,6 @@ html, body { overflow-x: hidden; }
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
           <li><a href="blog.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Blog</a></li>
           <li><a href="faq.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">FAQ</a></li>
-          <li><a href="ultimate-guide.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Tax Guide</a></li>
           <li><a href="snapshot.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Tax Snapshot</a></li>
         </ul>
       </div>
@@ -819,439 +612,328 @@ html, body { overflow-x: hidden; }
         <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Company</h4>
         <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
           <li><a href="about.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">About</a></li>
-          <li><a href="partners.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Partners</a></li>
           <li><a href="contact.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Contact</a></li>
           <li><a href="privacy.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Privacy Policy</a></li>
           <li><a href="terms.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Terms of Service</a></li>
         </ul>
       </div>
     </div>
-    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
-      <div style="font-size:.75rem;color:rgba(255,255,255,.3);">&copy; 2025 TraderTax. All rights reserved. Not a licensed CPA firm &mdash; we partner with licensed CPAs to deliver services.</div>
-      <div style="display:flex;gap:16px;"><a href="privacy.html" style="font-size:.75rem;color:rgba(255,255,255,.4);text-decoration:none;">Privacy</a><a href="terms.html" style="font-size:.75rem;color:rgba(255,255,255,.4);text-decoration:none;">Terms</a></div>
-    </div>
+    <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:20px;font-size:.75rem;color:rgba(255,255,255,.3);">&copy; 2025 TraderTax. All rights reserved. Not a licensed CPA firm — we partner with licensed CPAs to deliver services.</div>
     <div style="margin-top:16px;font-size:.7rem;color:rgba(255,255,255,.25);line-height:1.7;text-align:center;">TraderTax is a tax preparation referral platform, not a licensed CPA firm. Tax services are performed by independent licensed CPAs and Enrolled Agents. Content is for informational purposes only.</div>
   </div>
 </footer>
 
 <script>
-// ===== STATE =====
 const S = {
-  w2:0, pnl:0, futuresPnl:0, prop:0, otherSe:0, expenses:0,
-  trades:[], filing:'Single', hold:'Mostly short-term (<1yr)', entity:'No Entity',
-  stateCode:'TX', stateRate:0, stateName:'Texas',
-  email:'', phone:''
+  w2:0,pnl:0,futuresPnl:0,prop:0,otherSe:0,expenses:0,
+  trades:[],filing:'Single',hold:'Mostly short-term (<1yr)',entity:'No Entity',
+  stateCode:'TX',stateRate:0,stateName:'Texas',
+  email:'',phone:''
 };
 
-// ===== 2025 FEDERAL BRACKETS =====
 const BRACKETS = {
-  'Single':          [[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]],
-  'Married Filing Jointly': [[23850,.10],[96950,.12],[206700,.22],[394600,.24],[501050,.32],[751600,.35],[Infinity,.37]],
-  'Head of Household':      [[17000,.10],[64850,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]]
+  'Single':[[11925,.10],[48475,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]],
+  'Married Filing Jointly':[[23850,.10],[96950,.12],[206700,.22],[394600,.24],[501050,.32],[751600,.35],[Infinity,.37]],
+  'Head of Household':[[17000,.10],[64850,.12],[103350,.22],[197300,.24],[250525,.32],[626350,.35],[Infinity,.37]]
 };
-const STD_DED = {'Single':15000,'Married Filing Jointly':30000,'Head of Household':22500};
-const LTCG_BRACKETS = {
-  'Single':         [[48350,0],[533400,.15],[Infinity,.20]],
+const STD_DED={'Single':15000,'Married Filing Jointly':30000,'Head of Household':22500};
+const LTCG_BRACKETS={
+  'Single':[[48350,0],[533400,.15],[Infinity,.20]],
   'Married Filing Jointly':[[96700,0],[600050,.15],[Infinity,.20]],
-  'Head of Household':    [[64750,0],[566700,.15],[Infinity,.20]]
+  'Head of Household':[[64750,0],[566700,.15],[Infinity,.20]]
 };
-const NIIT_THRESHOLD = {'Single':200000,'Married Filing Jointly':250000,'Head of Household':200000};
-const SS_WAGE_BASE_2025 = 176100;
+const NIIT_THRESHOLD={'Single':200000,'Married Filing Jointly':250000,'Head of Household':200000};
+const SS_WAGE_BASE_2025=176100;
 
-// ===== TAX MATH =====
-function applyBrackets(income, brackets) {
-  if (income <= 0) return 0;
-  let tax = 0, prev = 0;
-  for (const [limit, rate] of brackets) {
-    if (income <= prev) break;
-    tax += (Math.min(income, limit) - prev) * rate;
-    prev = limit;
+function applyBrackets(income,brackets){
+  if(income<=0)return 0;
+  let tax=0,prev=0;
+  for(const[limit,rate]of brackets){
+    if(income<=prev)break;
+    tax+=(Math.min(income,limit)-prev)*rate;
+    prev=limit;
   }
   return tax;
 }
 
-// Marginal rate at a given income level
-function marginalRate(income, filing) {
-  const std = STD_DED[filing] || 15000;
-  const taxable = Math.max(0, income - std);
-  const brackets = BRACKETS[filing];
-  let prev = 0;
-  for (const [limit, rate] of brackets) {
-    if (taxable <= prev) return rate; // edge case
-    if (taxable <= limit) return rate;
-    prev = limit;
+function marginalRate(income,filing){
+  const std=STD_DED[filing]||15000;
+  const taxable=Math.max(0,income-std);
+  const brackets=BRACKETS[filing];
+  let prev=0;
+  for(const[limit,rate]of brackets){
+    if(taxable<=prev)return rate;
+    if(taxable<=limit)return rate;
+    prev=limit;
   }
   return 0.37;
 }
 
-function calcFederalTax(ordinaryIncome, ltcgIncome, filing) {
-  // Ordinary income tax
-  const std = STD_DED[filing] || 15000;
-  const taxableOrdinary = Math.max(0, ordinaryIncome - std);
-  const ordTax = applyBrackets(taxableOrdinary, BRACKETS[filing]);
-
-  // LTCG layered on top of ordinary income
-  // LTCG is taxed at preferential rates but stacked on top of ordinary income
-  let ltcgTax = 0;
-  if (ltcgIncome > 0) {
-    const totalTaxable = taxableOrdinary + ltcgIncome;
-    const ltcgBrackets = LTCG_BRACKETS[filing];
-    // Tax on combined minus tax on ordinary at LTCG rates
-    ltcgTax = applyBrackets(totalTaxable, ltcgBrackets) - applyBrackets(taxableOrdinary, ltcgBrackets);
+function calcFederalTax(ordinaryIncome,ltcgIncome,filing){
+  const std=STD_DED[filing]||15000;
+  const taxableOrdinary=Math.max(0,ordinaryIncome-std);
+  const ordTax=applyBrackets(taxableOrdinary,BRACKETS[filing]);
+  let ltcgTax=0;
+  if(ltcgIncome>0){
+    const totalTaxable=taxableOrdinary+ltcgIncome;
+    const ltcgBrackets=LTCG_BRACKETS[filing];
+    ltcgTax=applyBrackets(totalTaxable,ltcgBrackets)-applyBrackets(taxableOrdinary,ltcgBrackets);
   }
-
-  return { ordTax: Math.round(ordTax), ltcgTax: Math.round(ltcgTax) };
+  return{ordTax:Math.round(ordTax),ltcgTax:Math.round(ltcgTax)};
 }
 
-function calcSeTax(seIncome, w2Income) {
-  if (seIncome <= 0) return { ss:0, medicare:0, total:0, deduction:0 };
-  const seBase = seIncome * 0.9235;
-  // SS wage base coordination: if W-2 already paid SS, SE SS is reduced
-  const w2SsAlready = Math.min(w2Income, SS_WAGE_BASE_2025);
-  const seSSSubject = Math.max(0, Math.min(seBase, SS_WAGE_BASE_2025 - w2SsAlready));
-  const ss = seSSSubject * 0.124;
-  const medicare = seBase * 0.029;
-  const total = ss + medicare;
-  const deduction = total / 2;
-  return {
-    ss: Math.round(ss),
-    medicare: Math.round(medicare),
-    total: Math.round(total),
-    deduction: Math.round(deduction),
-    seBase: Math.round(seBase),
-    w2SsAlready: Math.round(w2SsAlready),
-    seSSSubject: Math.round(seSSSubject)
-  };
+function calcSeTax(seIncome,w2Income){
+  if(seIncome<=0)return{ss:0,medicare:0,total:0,deduction:0};
+  const seBase=seIncome*0.9235;
+  const w2SsAlready=Math.min(w2Income,SS_WAGE_BASE_2025);
+  const seSSSubject=Math.max(0,Math.min(seBase,SS_WAGE_BASE_2025-w2SsAlready));
+  const ss=seSSSubject*0.124;
+  const medicare=seBase*0.029;
+  const total=ss+medicare;
+  const deduction=total/2;
+  return{ss:Math.round(ss),medicare:Math.round(medicare),total:Math.round(total),deduction:Math.round(deduction),seBase:Math.round(seBase),w2SsAlready:Math.round(w2SsAlready),seSSSubject:Math.round(seSSSubject)};
 }
 
-// ===== MAIN CALCULATION =====
-function calculate() {
-  const filing = S.filing;
-  const w2 = Math.max(0, S.w2);
-  const pnl = S.pnl; // can be negative
-  const futuresPnl = S.futuresPnl; // can be negative
-  const prop = Math.max(0, S.prop);
-  const otherSe = Math.max(0, S.otherSe);
-  const expenses = Math.max(0, S.expenses);
-  const stateRate = S.stateRate;
-  const hold = S.hold;
-
-  // --- SE income ---
-  const grossSe = prop + otherSe;
-  const netSe = Math.max(0, grossSe - expenses); // expenses reduce SE income
-
-  // --- SE tax (before knowing full income) ---
-  const se = calcSeTax(netSe, w2);
-
-  // --- How trading P&L is categorized ---
-  // Stocks/options: if mostly short-term → ordinary. If mostly long-term → LTCG.
-  let ordinaryPnl = 0, ltcgPnl = 0;
-  if (pnl > 0) {
-    if (hold === 'Mostly long-term (1yr+)') {
-      ltcgPnl = pnl;
-    } else if (hold === 'Mix of short & long') {
-      ltcgPnl = pnl * 0.4;
-      ordinaryPnl = pnl * 0.6;
-    } else {
-      ordinaryPnl = pnl; // all short-term
-    }
-  } else {
-    // Losses — always reduce ordinary income in our simplified model
-    ordinaryPnl = pnl;
+function calculate(){
+  const filing=S.filing;
+  const w2=Math.max(0,S.w2);
+  const pnl=S.pnl;
+  const futuresPnl=S.futuresPnl;
+  const prop=Math.max(0,S.prop);
+  const otherSe=Math.max(0,S.otherSe);
+  const expenses=Math.max(0,S.expenses);
+  const stateRate=S.stateRate;
+  const hold=S.hold;
+  const grossSe=prop+otherSe;
+  const netSe=Math.max(0,grossSe-expenses);
+  const se=calcSeTax(netSe,w2);
+  let ordinaryPnl=0,ltcgPnl=0;
+  if(pnl>0){
+    if(hold==='Mostly long-term (1yr+)'){ltcgPnl=pnl;}
+    else if(hold==='Mix of short & long'){ltcgPnl=pnl*0.4;ordinaryPnl=pnl*0.6;}
+    else{ordinaryPnl=pnl;}
+  }else{ordinaryPnl=pnl;}
+  let futuresOrdinary=0,futuresLtcg=0;
+  if(futuresPnl>0){futuresOrdinary=futuresPnl*0.40;futuresLtcg=futuresPnl*0.60;}
+  else if(futuresPnl<0){futuresOrdinary=futuresPnl*0.40;futuresLtcg=futuresPnl*0.60;}
+  const totalOrdinary=w2+ordinaryPnl+futuresOrdinary+netSe-se.deduction;
+  const totalLtcg=ltcgPnl+futuresLtcg;
+  const grossIncome=w2+pnl+futuresPnl+prop+otherSe-expenses;
+  const{ordTax,ltcgTax}=calcFederalTax(Math.max(0,totalOrdinary),Math.max(0,totalLtcg),filing);
+  const fedTax=ordTax+ltcgTax;
+  const niitThreshold=NIIT_THRESHOLD[filing]||200000;
+  const investmentIncome=Math.max(0,pnl)+Math.max(0,futuresPnl);
+  const niit=(grossIncome>niitThreshold&&investmentIncome>0)?Math.round(Math.min(investmentIncome,grossIncome-niitThreshold)*0.038):0;
+  const stateTax=Math.round(Math.max(0,grossIncome)*stateRate);
+  const totalTax=Math.max(0,fedTax+se.total+niit+stateTax);
+  const afterTax=grossIncome-totalTax;
+  const effRate=grossIncome>0?(totalTax/grossIncome*100).toFixed(1):'0.0';
+  const mRate=marginalRate(Math.max(0,totalOrdinary),filing);
+  const savings=[];
+  if(expenses<500&&(prop>0||S.trades.includes('stocks'))){
+    const est=Math.round(2500*mRate);
+    savings.push({icon:'🖥️',name:'Unclaimed Deductions',desc:'Most traders miss $1,500–$4,000 in platform fees, eval costs, education, and home office.',amt:est});
   }
-
-  // Futures 60/40 split
-  let futuresOrdinary = 0, futuresLtcg = 0;
-  if (futuresPnl > 0) {
-    futuresOrdinary = futuresPnl * 0.40;
-    futuresLtcg = futuresPnl * 0.60;
-  } else if (futuresPnl < 0) {
-    // Loss: 60% long-term loss, 40% short-term loss
-    futuresOrdinary = futuresPnl * 0.40;
-    futuresLtcg = futuresPnl * 0.60;
+  if(prop>60000&&S.entity==='No Entity'){
+    const scSave=Math.round(prop*0.07);
+    savings.push({icon:'🏢',name:'S-Corp Structure',desc:`With ${fmt(prop)} in prop payouts, an S-Corp salary split could reduce SE tax significantly.`,amt:scSave});
   }
-
-  // --- Total ordinary income (before deductions) ---
-  const totalOrdinary = w2 + ordinaryPnl + futuresOrdinary + netSe - se.deduction;
-  const totalLtcg = ltcgPnl + futuresLtcg;
-
-  const grossIncome = w2 + pnl + futuresPnl + prop + otherSe - expenses;
-
-  // --- Federal tax ---
-  const { ordTax, ltcgTax } = calcFederalTax(Math.max(0, totalOrdinary), Math.max(0, totalLtcg), filing);
-  const fedTax = ordTax + ltcgTax;
-
-  // --- NIIT: 3.8% on net investment income if total income > threshold ---
-  const niitThreshold = NIIT_THRESHOLD[filing] || 200000;
-  const investmentIncome = Math.max(0, pnl) + Math.max(0, futuresPnl); // prop firm is SE, not investment income
-  const niit = (grossIncome > niitThreshold && investmentIncome > 0)
-    ? Math.round(Math.min(investmentIncome, grossIncome - niitThreshold) * 0.038)
-    : 0;
-
-  // --- State tax ---
-  const stateTax = Math.round(Math.max(0, grossIncome) * stateRate);
-
-  // --- Totals ---
-  const totalTax = Math.max(0, fedTax + se.total + niit + stateTax);
-  const afterTax = grossIncome - totalTax;
-  const effRate = grossIncome > 0 ? (totalTax / grossIncome * 100).toFixed(1) : '0.0';
-  const mRate = marginalRate(Math.max(0, totalOrdinary), filing);
-
-  // --- Savings opportunities ---
-  const savings = [];
-  if (expenses < 500 && (prop > 0 || S.trades.includes('stocks'))) {
-    const est = Math.round(2500 * mRate);
-    savings.push({icon:'🖥️', name:'Unclaimed Deductions', desc:'Most traders miss $1,500–$4,000 in platform fees, eval costs, education, and home office. Each dollar reduces your taxable income.', amt:est});
+  if(S.trades.includes('futures')&&futuresPnl>5000){
+    savings.push({icon:'📊',name:'Section 1256 Already Applies',desc:'Your futures gains already get 60/40 treatment. MTM election could provide additional flexibility.',amt:Math.round(futuresPnl*0.03)});
   }
-  if (prop > 60000 && S.entity === 'No Entity') {
-    const scSave = Math.round(prop * 0.07);
-    savings.push({icon:'🏢', name:'S-Corp Structure', desc:`With ${fmt(prop)} in prop payouts, an S-Corp salary split could reduce SE tax by routing some income as distributions (not subject to SE tax). Requires payroll setup.`, amt:scSave});
-  }
-  if (S.trades.includes('futures') && futuresPnl > 5000) {
-    savings.push({icon:'📊', name:'Section 1256 Already Applies', desc:'Your futures gains already get 60/40 treatment. A Mark-to-Market election could provide additional flexibility for qualifying active traders.', amt:Math.round(futuresPnl * 0.03)});
-  }
-  if (niit > 0) {
-    savings.push({icon:'💡', name:'NIIT Planning', desc:'You may be subject to the 3.8% Net Investment Income Tax. Entity structuring and retirement contributions can help manage this.', amt:Math.round(niit * 0.5)});
-  }
-  if (savings.length === 0) {
-    savings.push({icon:'🔍', name:'Professional Review', desc:'A TraderTax CPA review typically finds $800–$3,000 in missed opportunities even for traders who think they\'re fully optimized.', amt:Math.round(totalTax * 0.08)});
-  }
-  const totalSavings = savings.reduce((a,s) => a+s.amt, 0);
-
-  // --- How we calculated ---
-  const howSteps = [
-    `<strong>SE Tax first:</strong> Prop firm payouts (${fmt(prop)}) + other 1099 (${fmt(otherSe)}) − expenses (${fmt(expenses)}) = <code>${fmt(netSe)} net SE income</code>. SE base = ${fmt(netSe)} × 92.35% = <code>${fmt(se.seBase)}</code>. SS tax = base up to $176,100 wage base × 12.4%. Medicare = full base × 2.9%.`,
-    `<strong>W-2 SS coordination:</strong> Your W-2 (${fmt(w2)}) already paid SS tax on ${fmt(Math.min(w2, SS_WAGE_BASE_2025))}. SE SS only applies to the remaining wage base headroom.`,
-    `<strong>Futures 60/40 split:</strong> ${fmt(futuresPnl)} futures P&L → 40% (${fmt(Math.round(futuresPnl*.4))}) taxed at ordinary rate + 60% (${fmt(Math.round(futuresPnl*.6))}) taxed at long-term capital gains rate.`,
-    `<strong>Ordinary income stack:</strong> W-2 ${fmt(w2)} + ordinary trading ${fmt(Math.round(ordinaryPnl + futuresOrdinary))} + SE income ${fmt(netSe)} − SE deduction ${fmt(se.deduction)} = <code>${fmt(Math.round(totalOrdinary))} ordinary taxable income (before std deduction)</code>.`,
-    `<strong>Standard deduction:</strong> ${fmt(STD_DED[filing])} for ${filing} (2025). Subtracted before applying brackets.`,
-    `<strong>Federal brackets (${filing}):</strong> Applied 2025 progressive brackets to taxable ordinary income. LTCG income of ${fmt(Math.round(totalLtcg))} taxed at preferential rates (0/15/20%) layered on top.`,
-    niit > 0 ? `<strong>NIIT:</strong> Total income exceeds ${fmt(niitThreshold)} threshold. 3.8% applied to net investment income (not SE income).` : `<strong>NIIT:</strong> Not applicable — total income below ${fmt(niitThreshold)} threshold for ${filing}.`,
+  if(niit>0){savings.push({icon:'💡',name:'NIIT Planning',desc:'You may be subject to the 3.8% Net Investment Income Tax. Entity structuring and retirement contributions can help.',amt:Math.round(niit*0.5)});}
+  if(savings.length===0){savings.push({icon:'🔍',name:'Professional Review',desc:"A TraderTax CPA review typically finds $800–$3,000 in missed opportunities.",amt:Math.round(totalTax*0.08)});}
+  const totalSavings=savings.reduce((a,s)=>a+s.amt,0);
+  const howSteps=[
+    `<strong>SE Tax first:</strong> Prop firm payouts (${fmt(prop)}) + other 1099 (${fmt(otherSe)}) − expenses (${fmt(expenses)}) = <code>${fmt(netSe)} net SE income</code>. SE base = ${fmt(netSe)} × 92.35% = <code>${fmt(se.seBase)}</code>.`,
+    `<strong>W-2 SS coordination:</strong> Your W-2 (${fmt(w2)}) already paid SS tax on ${fmt(Math.min(w2,SS_WAGE_BASE_2025))}. SE SS only applies to the remaining wage base headroom.`,
+    `<strong>Futures 60/40 split:</strong> ${fmt(futuresPnl)} futures P&L → 40% ordinary + 60% long-term capital gains rate.`,
+    `<strong>Ordinary income stack:</strong> W-2 ${fmt(w2)} + ordinary trading + SE income − SE deduction = <code>${fmt(Math.round(totalOrdinary))} ordinary taxable income (before std deduction)</code>.`,
+    `<strong>Standard deduction:</strong> ${fmt(STD_DED[filing])} for ${filing} (2025).`,
+    `<strong>Federal brackets (${filing}):</strong> Applied 2025 progressive brackets. LTCG income of ${fmt(Math.round(totalLtcg))} taxed at preferential rates.`,
+    niit>0?`<strong>NIIT:</strong> Total income exceeds ${fmt(niitThreshold)} threshold. 3.8% applied to net investment income.`:`<strong>NIIT:</strong> Not applicable — total income below ${fmt(niitThreshold)} threshold.`,
     `<strong>State tax:</strong> ${S.stateName} flat rate estimate of ${(stateRate*100).toFixed(2)}% applied to gross income of ${fmt(Math.max(0,grossIncome))}.`
   ];
-
-  return { w2, pnl, futuresPnl, prop, otherSe, expenses, netSe, se, ordTax, ltcgTax, fedTax, niit, stateTax, totalTax, afterTax, effRate, mRate, grossIncome, totalOrdinary, totalLtcg, savings, totalSavings, howSteps, stateRate };
+  return{w2,pnl,futuresPnl,prop,otherSe,expenses,netSe,se,ordTax,ltcgTax,fedTax,niit,stateTax,totalTax,afterTax,effRate,mRate,grossIncome,totalOrdinary,totalLtcg,savings,totalSavings,howSteps,stateRate};
 }
 
-// ===== RENDER RESULTS =====
-function renderResults() {
-  const r = calculate();
-
-  // Summary cards
-  set('r-total', fmt(r.totalTax));
-  set('r-savings', '~' + fmt(r.totalSavings));
-  set('r-rate', '~' + r.effRate + '%');
-  set('r-after', fmt(r.afterTax));
-
-  const stateName = S.stateName;
-  const sel = document.getElementById('state-sel');
-  const stateDisplay = sel.options[sel.selectedIndex].text.split(' —')[0];
-  set('res-sub', `${S.filing} · ${stateDisplay} · rough estimate only`);
-
-  // Income breakdown
-  set('br-w2', fmt(r.w2));
-  set('br-pnl', fmt(r.pnl));
-  set('br-pnl-sub', r.hold === 'Mostly long-term (1yr+)' ? 'Long-term rate applied (held 1yr+)' : r.hold === 'Mix of short & long' ? '60% short-term, 40% long-term estimated' : 'Short-term = ordinary income rate');
-  set('br-futures', fmt(r.futuresPnl));
-  set('br-prop', fmt(r.prop));
-  set('br-exp', r.expenses > 0 ? '-' + fmt(r.expenses) : '$0');
-  set('br-gross', fmt(Math.max(0, r.grossIncome)));
-
-  // Federal
-  set('br-agi', fmt(Math.round(r.totalOrdinary + Math.max(0, r.totalLtcg))));
-  set('br-std', '-' + fmt(STD_DED[S.filing]));
-  set('br-std-sub', `${S.filing} standard deduction (2025) — we assume you take this`);
-  const taxableOrd = Math.max(0, r.totalOrdinary - STD_DED[S.filing]);
-  set('br-taxable', fmt(Math.round(taxableOrd + Math.max(0, r.totalLtcg))));
-  set('br-fed', fmt(r.fedTax));
-  set('br-fed-sub', `2025 brackets · marginal rate: ${Math.round(r.mRate*100)}% · LTCG: ${fmt(r.ltcgTax)} at preferential rate`);
-
-  // NIIT
-  if (r.niit > 0) {
-    document.getElementById('br-niit-row').style.display = 'flex';
-    set('br-niit', fmt(r.niit));
+function renderResults(){
+  const r=calculate();
+  set('r-total',fmt(r.totalTax));
+  set('r-savings','~'+fmt(r.totalSavings));
+  set('r-rate','~'+r.effRate+'%');
+  set('r-after',fmt(r.afterTax));
+  const sel=document.getElementById('state-sel');
+  const stateDisplay=sel.options[sel.selectedIndex].text.split(' —')[0];
+  set('res-sub',`${S.filing} · ${stateDisplay} · rough estimate only`);
+  set('br-w2',fmt(r.w2));
+  set('br-pnl',fmt(r.pnl));
+  set('br-pnl-sub',r.hold==='Mostly long-term (1yr+)'?'Long-term rate applied':r.hold==='Mix of short & long'?'60% short-term, 40% long-term':'Short-term = ordinary income rate');
+  set('br-futures',fmt(r.futuresPnl));
+  set('br-prop',fmt(r.prop));
+  set('br-exp',r.expenses>0?'-'+fmt(r.expenses):'$0');
+  set('br-gross',fmt(Math.max(0,r.grossIncome)));
+  set('br-agi',fmt(Math.round(r.totalOrdinary+Math.max(0,r.totalLtcg))));
+  set('br-std','-'+fmt(STD_DED[S.filing]));
+  set('br-std-sub',`${S.filing} standard deduction (2025) — we assume you take this`);
+  const taxableOrd=Math.max(0,r.totalOrdinary-STD_DED[S.filing]);
+  set('br-taxable',fmt(Math.round(taxableOrd+Math.max(0,r.totalLtcg))));
+  set('br-fed',fmt(r.fedTax));
+  set('br-fed-sub',`2025 brackets · marginal rate: ${Math.round(r.mRate*100)}% · LTCG: ${fmt(r.ltcgTax)} at preferential rate`);
+  if(r.niit>0){document.getElementById('br-niit-row').style.display='flex';set('br-niit',fmt(r.niit));}
+  if(r.netSe>0){
+    document.getElementById('se-section').style.display='block';
+    set('br-se-income',fmt(r.netSe));set('br-se-base',fmt(r.se.seBase));
+    set('br-ss',fmt(r.se.ss));
+    set('br-ss-sub',`SS base: ${fmt(r.se.seSSSubject)} (after W-2 coordination — W-2 already covered ${fmt(r.se.w2SsAlready)} of the $176,100 cap)`);
+    set('br-med',fmt(r.se.medicare));
+    set('br-se-ded','-'+fmt(r.se.deduction)+' (deducted from AGI)');
+    set('br-se-total',fmt(r.se.total));
+  }else{document.getElementById('se-section').style.display='none';}
+  if(r.w2>=SS_WAGE_BASE_2025){
+    const note=document.getElementById('ss-coord-note');
+    note.style.display='block';
+    note.innerHTML=`💡 <strong>SS Wage Base Note:</strong> Your W-2 income (${fmt(r.w2)}) meets or exceeds the 2025 SS wage base of $176,100. Your prop firm payouts owe no Social Security tax — only Medicare (2.9%). This saves you approximately ${fmt(Math.round(Math.min(r.netSe*.9235,SS_WAGE_BASE_2025)*.124))}.`;
   }
-
-  // SE tax
-  if (r.netSe > 0) {
-    document.getElementById('se-section').style.display = 'block';
-    set('br-se-income', fmt(r.netSe));
-    set('br-se-base', fmt(r.se.seBase));
-    set('br-ss', fmt(r.se.ss));
-    set('br-ss-sub', `SS base: ${fmt(r.se.seSSSubject)} (after W-2 coordination — W-2 already covered ${fmt(r.se.w2SsAlready)} of the $176,100 cap)`);
-    set('br-med', fmt(r.se.medicare));
-    set('br-se-ded', '-' + fmt(r.se.deduction) + ' (deducted from AGI)');
-    set('br-se-total', fmt(r.se.total));
-  } else {
-    document.getElementById('se-section').style.display = 'none';
-  }
-
-  // SS coordination note
-  if (r.w2 >= SS_WAGE_BASE_2025) {
-    const note = document.getElementById('ss-coord-note');
-    note.style.display = 'block';
-    note.innerHTML = `💡 <strong>SS Wage Base Note:</strong> Your W-2 income (${fmt(r.w2)}) meets or exceeds the 2025 Social Security wage base of $176,100. Your prop firm payouts owe no Social Security tax — only Medicare (2.9%). This saves you approximately ${fmt(Math.round(Math.min(r.netSe * .9235, SS_WAGE_BASE_2025) * .124))}.`;
-  }
-
-  // State
-  set('br-state-name', stateDisplay);
-  set('br-state-rate', r.stateRate === 0 ? '0% (no income tax)' : (r.stateRate*100).toFixed(2) + '% flat estimate');
-  set('br-state-tax', r.stateRate === 0 ? '$0 🎉' : fmt(r.stateTax));
-
-  // How we calculated
-  document.getElementById('how-steps').innerHTML = r.howSteps.map(s =>
-    `<div class="how-step">${s}</div>`).join('');
-
-  // Savings
-  document.getElementById('sav-items').innerHTML = r.savings.map(s =>
-    `<div class="sav-item">
-      <span class="sav-icon">${s.icon}</span>
-      <div class="sav-body"><div class="sav-name">${s.name}</div><div class="sav-desc">${s.desc}</div></div>
-      <div class="sav-amt">~${fmt(s.amt)}</div>
-    </div>`).join('');
+  set('br-state-name',stateDisplay);
+  set('br-state-rate',r.stateRate===0?'0% (no income tax)':(r.stateRate*100).toFixed(2)+'% flat estimate');
+  set('br-state-tax',r.stateRate===0?'$0 🎉':fmt(r.stateTax));
+  document.getElementById('how-steps').innerHTML=r.howSteps.map(s=>`<div class="how-step">${s}</div>`).join('');
+  document.getElementById('sav-items').innerHTML=r.savings.map(s=>`<div class="sav-item"><span class="sav-icon">${s.icon}</span><div class="sav-body"><div class="sav-name">${s.name}</div><div class="sav-desc">${s.desc}</div></div><div class="sav-amt">~${fmt(s.amt)}</div></div>`).join('');
 }
 
-// ===== NAVIGATION =====
-function go(n) {
-  if (n >= 2) {
-    S.w2 = parseFloat(document.getElementById('w2').value) || 0;
-    S.pnl = parseFloat(document.getElementById('pnl').value) || 0;
-    S.futuresPnl = parseFloat(document.getElementById('futures-pnl').value) || 0;
-    S.prop = parseFloat(document.getElementById('prop').value) || 0;
-    S.otherSe = parseFloat(document.getElementById('other-se').value) || 0;
-    S.expenses = parseFloat(document.getElementById('expenses').value) || 0;
+function go(n){
+  if(n>=2){
+    S.w2=parseFloat(document.getElementById('w2').value)||0;
+    S.pnl=parseFloat(document.getElementById('pnl').value)||0;
+    S.futuresPnl=parseFloat(document.getElementById('futures-pnl').value)||0;
+    S.prop=parseFloat(document.getElementById('prop').value)||0;
+    S.otherSe=parseFloat(document.getElementById('other-se').value)||0;
+    S.expenses=parseFloat(document.getElementById('expenses').value)||0;
   }
-  if (n === 'results') {
-    const sv = document.getElementById('state-sel').value.split(':');
-    S.stateCode = sv[0];
-    S.stateRate = parseFloat(sv[1]) || 0;
-    S.stateName = document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
+  if(n==='results'){
+    const sv=document.getElementById('state-sel').value.split(':');
+    S.stateCode=sv[0];S.stateRate=parseFloat(sv[1])||0;
+    S.stateName=document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
   }
-
-  document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-  if (n === 'results') {
+  document.querySelectorAll('.step').forEach(s=>s.classList.remove('active'));
+  if(n==='results'){
     document.getElementById('step-results').classList.add('active');
-    renderResults();
-    updateProg(5, 'Your Estimate');
-  } else {
-    document.getElementById('step' + n).classList.add('active');
-    const labels = ['','Your Income','Trading Profile','Your State','Unlock Results'];
-    updateProg(n, labels[n]);
+    renderResults();updateProg(5,'Your Estimate');
+  }else{
+    document.getElementById('step'+n).classList.add('active');
+    const labels=['','Your Income','Trading Profile','Your State','Unlock Results'];
+    updateProg(n,labels[n]);
   }
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
-function updateProg(n, label) {
-  const pct = n >= 5 ? 100 : Math.round((n/4)*100);
-  document.getElementById('prog-fill').style.width = pct + '%';
-  document.getElementById('prog-label').textContent = n >= 5 ? 'Complete — Your Estimate' : `Step ${n} of 4 — ${label}`;
-  document.getElementById('prog-pct').textContent = '~' + pct + '%';
+function updateProg(n,label){
+  const pct=n>=5?100:Math.round((n/4)*100);
+  document.getElementById('prog-fill').style.width=pct+'%';
+  document.getElementById('prog-label').textContent=n>=5?'Complete — Your Estimate':`Step ${n} of 4 — ${label}`;
+  document.getElementById('prog-pct').textContent='~'+pct+'%';
 }
 
-// ===== LEAD GATE =====
-function chkGate() {
-  const v = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('gate-email').value);
-  document.getElementById('gate-btn').disabled = !v;
+function chkGate(){
+  const v=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('gate-email').value);
+  document.getElementById('gate-btn').disabled=!v;
 }
 
-function unlock() {
-  S.email = document.getElementById('gate-email').value;
-  S.phone = document.getElementById('gate-phone').value || '';
+function unlock(){
+  S.email=document.getElementById('gate-email').value;
+  S.phone=document.getElementById('gate-phone').value||'';
 
-  const btn = document.getElementById('gate-btn');
-  btn.innerHTML = '<span class="spin"></span>Calculating...';
-  btn.disabled = true;
+  // Referral code: manual entry takes priority over URL tracking
+  const manualRefCode=(document.getElementById('gate-refcode')&&document.getElementById('gate-refcode').value.trim())||'';
 
-  // Save to Firestore
-  const sv = document.getElementById('state-sel').value.split(':');
-  S.stateCode = sv[0]; S.stateRate = parseFloat(sv[1])||0;
-  S.stateName = document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
+  const btn=document.getElementById('gate-btn');
+  btn.innerHTML='<span class="spin"></span>Calculating...';
+  btn.disabled=true;
 
-  if (window._saveLead) {
+  const sv=document.getElementById('state-sel').value.split(':');
+  S.stateCode=sv[0];S.stateRate=parseFloat(sv[1])||0;
+  S.stateName=document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
+
+  if(window._saveLead){
     window._saveLead({
-      email: S.email, phone: S.phone, source: 'Calculator Lead',
-      w2: S.w2, pnl: S.pnl, futuresPnl: S.futuresPnl, prop: S.prop,
-      otherSe: S.otherSe, expenses: S.expenses,
-      trades: S.trades.join(','), filing: S.filing,
-      hold: S.hold, entity: S.entity,
-      stateCode: S.stateCode, stateName: S.stateName,
-      estimatedTax: Math.round(calculate().totalTax)
+      email:S.email,phone:S.phone,source:'Calculator Lead',
+      referralCode:manualRefCode,
+      w2:S.w2,pnl:S.pnl,futuresPnl:S.futuresPnl,prop:S.prop,
+      otherSe:S.otherSe,expenses:S.expenses,
+      trades:S.trades.join(','),filing:S.filing,
+      hold:S.hold,entity:S.entity,
+      stateCode:S.stateCode,stateName:S.stateName,
+      estimatedTax:Math.round(calculate().totalTax)
     });
   }
 
-  // Also ping Google Sheet
   fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec',{
-    method:'POST', mode:'no-cors',
-    body:JSON.stringify({
-      timestamp:new Date().toISOString(),
-      email:S.email, phone:S.phone, source:'Calculator Lead',
-      state:S.stateCode, filing:S.filing, trades:S.trades.join(','),
-      w2:S.w2, prop:S.prop, pnl:S.pnl, futuresPnl:S.futuresPnl,
-      estimatedTax:Math.round(calculate().totalTax)
-    })
+    method:'POST',mode:'no-cors',
+    body:JSON.stringify({timestamp:new Date().toISOString(),email:S.email,phone:S.phone,source:'Calculator Lead',referralCode:manualRefCode,state:S.stateCode,filing:S.filing,trades:S.trades.join(','),w2:S.w2,prop:S.prop,pnl:S.pnl,futuresPnl:S.futuresPnl,estimatedTax:Math.round(calculate().totalTax)})
   }).catch(()=>{});
 
-  setTimeout(() => go('results'), 900);
+  setTimeout(()=>go('results'),900);
 }
 
-// ===== UI HELPERS =====
-function chk1() {
-  const hasAny = ['w2','pnl','futures-pnl','prop','other-se']
-    .some(id => (parseFloat(document.getElementById(id).value)||0) !== 0);
-  document.getElementById('next1').disabled = !hasAny;
+function chk1(){
+  const hasAny=['w2','pnl','futures-pnl','prop','other-se'].some(id=>(parseFloat(document.getElementById(id).value)||0)!==0);
+  document.getElementById('next1').disabled=!hasAny;
 }
 
-function onW2() {
+function onW2(){
   chk1();
-  const w2 = parseFloat(document.getElementById('w2').value) || 0;
-  const warn = document.getElementById('w2-warn');
-  if (w2 > 0) warn.classList.add('show'); else warn.classList.remove('show');
+  const w2=parseFloat(document.getElementById('w2').value)||0;
+  const warn=document.getElementById('w2-warn');
+  if(w2>0)warn.classList.add('show');else warn.classList.remove('show');
 }
 
-function togTile(el, type) {
+function togTile(el,type){
   el.classList.toggle('on');
-  const i = S.trades.indexOf(type);
-  i > -1 ? S.trades.splice(i,1) : S.trades.push(type);
+  const i=S.trades.indexOf(type);
+  i>-1?S.trades.splice(i,1):S.trades.push(type);
 }
 
-function selR(el, group) {
-  el.closest('.radios').querySelectorAll('.ropt').forEach(o => o.classList.remove('on'));
+function selR(el,group){
+  el.closest('.radios').querySelectorAll('.ropt').forEach(o=>o.classList.remove('on'));
   el.classList.add('on');
-  if (group==='filing') S.filing = el.textContent;
-  if (group==='hold') S.hold = el.textContent;
-  if (group==='entity') S.entity = el.textContent;
+  if(group==='filing')S.filing=el.textContent;
+  if(group==='hold')S.hold=el.textContent;
+  if(group==='entity')S.entity=el.textContent;
 }
 
-function updateStateInfo() {
-  const sel = document.getElementById('state-sel');
-  const sv = sel.value.split(':');
-  const rate = parseFloat(sv[1]) || 0;
-  const name = sel.options[sel.selectedIndex].text.split(' —')[0];
-  const info = document.getElementById('state-info');
-  if (rate === 0) {
-    info.innerHTML = `🎉 <strong>${name}:</strong> No state income tax — zero state burden on your trading income.`;
-  } else {
-    info.innerHTML = `🗺️ <strong>${name}:</strong> Approximately ${(rate*100).toFixed(2)}% flat rate applied to your gross income. Note: actual state tax uses brackets and may differ.`;
-  }
+function updateStateInfo(){
+  const sel=document.getElementById('state-sel');
+  const sv=sel.value.split(':');
+  const rate=parseFloat(sv[1])||0;
+  const name=sel.options[sel.selectedIndex].text.split(' —')[0];
+  const info=document.getElementById('state-info');
+  if(rate===0){info.innerHTML=`🎉 <strong>${name}:</strong> No state income tax — zero state burden on your trading income.`;}
+  else{info.innerHTML=`🗺️ <strong>${name}:</strong> Approximately ${(rate*100).toFixed(2)}% flat rate applied to your gross income.`;}
 }
 
-function set(id, val) {
-  const el = document.getElementById(id);
-  if (el) el.textContent = val;
-}
+function set(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
+function fmt(n){if(isNaN(n))return'$0';const abs=Math.abs(Math.round(n));return(n<0?'-$':'$')+abs.toLocaleString();}
 
-function fmt(n) {
-  if (isNaN(n)) return '$0';
-  const abs = Math.abs(Math.round(n));
-  return (n < 0 ? '-$' : '$') + abs.toLocaleString();
-}
-
-// Init
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('next1').disabled = true;
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('next1').disabled=true;
   updateStateInfo();
 });
+
+// Pre-fill referral code from affiliate tracker after it loads
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    try {
+      var stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
+      var affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
+      if (affCode) {
+        var el = document.getElementById('gate-refcode');
+        if (el && !el.value) el.value = affCode;
+      }
+    } catch(e) {}
+  }, 400);
+});
 </script>
-  <script src="affiliate-tracker.js"></script>
+<script src="affiliate-tracker.js"></script>
 </body>
 </html>
