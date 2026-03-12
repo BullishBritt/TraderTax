@@ -477,14 +477,15 @@ let clientFilter = 'all';
 /* ── AUTH ── */
 auth.onAuthStateChanged(async user => {
   if (user) {
+    const adminEmails = ['hello@tradertax.net','brittainalfaro@gmail.com','brittain0404@yahoo.com'];
     const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
     const role = snap?.data()?.role;
-    if (role !== 'cpa' && role !== 'admin') {
+    if (role !== 'cpa' && role !== 'admin' && !adminEmails.includes(user.email)) {
       auth.signOut();
       return;
     }
     currentUser = user;
-    cpaData = snap.data() || {};
+    cpaData = snap?.data() || {};
     showApp(user);
   }
 });
