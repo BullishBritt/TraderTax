@@ -1076,184 +1076,108 @@ window.openClientProfile = async function(clientId) {
   modal.classList.add('open');
   body.innerHTML = '<div class="loading"><span class="spin"></span>Loading profile...</div>';
 
-  const client = allClients.find(c => c.id === clientId) || {};
-  const name = ((client.firstName||'') + ' ' + (client.lastName||'')).trim() || client.email || 'Client';
-  title.textContent = name + ' — Profile';
-
-  const [docsSnap, notesSnap, returnsSnap] = await Promise.all([
+  const [userDoc, docsSnap, notesSnap, returnsSnap] = await Promise.all([
+    db.collection('users').doc(clientId).get().catch(()=>null),
     db.collection('client_documents').where('uid','==',clientId).get().catch(()=>({docs:[]})),
     db.collection('cpa_notes').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
     db.collection('tax_returns').where('clientUid','==',clientId).get().catch(()=>({docs:[]}))
   ]);
 
-  const docs = docsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.seconds||0)-(a.uploadedAt?.seconds||0));
+  const client = userDoc?.exists ? {id:clientId,...userDoc.data()} : (allClients.find(c=>c.id===clientId)||{id:clientId});
+  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.displayName||client.email||'Client';
+  title.textContent = 'Client Profile';
+
+  const clientDocs = docsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.seconds||0)-(a.uploadedAt?.seconds||0));
   const notes = notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
   const returns = returnsSnap.docs.map(d=>({id:d.id,...d.data()}));
-  const taxReturn = returns[0] || {};
+  const taxReturn = returns[0]||{};
   const cpa = allCPAs.find(c=>c.id===client.assignedCPA?.uid);
+  const returnFiles = returns.filter(r=>r.returnFileUrl||r.fileUrl).map(r=>({
+    fileName:r.fileName||'Tax Return '+r.taxYear,
+    url:r.returnFileUrl||r.fileUrl,
+    category:'CPA — Tax Return Upload',
+    uploadedAt:r.updatedAt||r.createdAt,
+    _cpa:true
+  }));
+  const allDocs = [...clientDocs,...returnFiles];
 
-  const fmt = v => v ? '$'+Number(v).toLocaleString() : '—';
-  const fmtDate = ts => {
-    if(!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : new Date(ts);
-    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const fmt = v => v?'$'+Number(v).toLocaleString():'—';
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  const stColors = {received:'#6b7280',assigned:'#1d4ed8',review:'#d97706',completed:'#2ea86c',filed:'#059669'};
+  const st = client.returnStatus||'received';
+
+  const docRow = d => {
+    const docUrl = d.url||d.fileUrl||null;
+    const isImg = docUrl&&/\.(jpg|jpeg|png|gif|webp)/i.test(docUrl);
+    const viewBtn = docUrl
+      ? `<button onclick="openDocPreview('${docUrl.replace(/'/g,"\\'")}','${(d.fileName||d.name||'Doc').replace(/'/g,"\\'")}');event.stopPropagation();" style="font-size:.75rem;font-weight:700;color:var(--green-dk);background:none;border:1.5px solid var(--green);border-radius:7px;padding:5px 14px;cursor:pointer;">${isImg?'🖼 View':'📄 View'}</button>`
+      : '<span style="font-size:.74rem;color:var(--muted);">No link</span>';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Document'}</div>
+        <div style="font-size:.72rem;color:var(--muted);">${d.category||'General'} · ${fmtDate(d.uploadedAt)} ${d._cpa?'<span style="background:#f0fdf7;color:#2ea86c;padding:1px 7px;border-radius:99px;font-weight:700;font-size:.68rem;margin-left:4px;">CPA</span>':''}</div>
+      </div>${viewBtn}</div>`;
   };
-  const stColors = {received:'var(--muted)',assigned:'var(--blue)',review:'var(--amber)',completed:'var(--green)',filed:'var(--green-dk)'};
-  const st = client.returnStatus || 'received';
 
   body.innerHTML = `
     <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
-      <div style="width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
-      <div style="flex:1;">
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">${name}</div>
-        <div style="font-size:.78rem;color:rgba(255,255,255,.6);">${client.email||'—'} ${client.phone?'· '+client.phone:''}</div>
+      <div style="width:50px;height:50px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;flex-shrink:0;">${(name[0]||'?').toUpperCase()}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;">${name}</div>
+        <div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-top:2px;">${client.email||'No email on file'}</div>
+        ${client.phone?`<div style="font-size:.78rem;color:rgba(255,255,255,.55);">${client.phone}</div>`:''}
       </div>
-      <div style="text-align:right;">
-        <span style="background:${stColors[st]||'var(--muted)'};color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">${st}</span>
-        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">Tax Year ${client.taxYear||2025}</div>
-      </div>
+      <span style="background:${stColors[st]||'#6b7280'};color:#fff;padding:5px 14px;border-radius:99px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;">${st}</span>
     </div>
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
       <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
         <div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Assigned CPA</div>
-        <div style="font-weight:600;color:var(--navy);">${cpa ? ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim() : '—'}</div>
-        <div style="font-size:.76rem;color:var(--muted);">${cpa?.email||''}</div>
+        <div style="font-weight:600;color:var(--navy);">${cpa?((cpa.firstName||'')+' '+(cpa.lastName||'')).trim():'—'}</div>
+        <div style="font-size:.76rem;color:var(--muted);">${cpa?.credentials||cpa?.email||''}</div>
       </div>
       <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
         <div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Return Status</div>
-        <div style="font-weight:600;color:var(--navy);">${taxReturn.status ? taxReturn.status.charAt(0).toUpperCase()+taxReturn.status.slice(1) : '—'}</div>
-        <div style="font-size:.76rem;color:var(--muted);">Updated ${fmtDate(taxReturn.updatedAt)}</div>
+        <div style="font-weight:600;color:var(--navy);">${taxReturn.status?taxReturn.status.charAt(0).toUpperCase()+taxReturn.status.slice(1):'—'}</div>
+        <div style="font-size:.76rem;color:var(--muted);">Tax Year ${client.taxYear||2025}</div>
       </div>
     </div>
 
-    ${client.calcResults ? `
+    ${client.calcResults?`
     <div style="margin-bottom:20px;">
       <div class="modal-sec-title">💰 Income & Tax Estimate</div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
-        ${[['W-2 Income',fmt(client.calcResults.w2)],['Prop Firm',fmt(client.calcResults.prop)],['Futures P&L',fmt(client.calcResults.futuresPnl)],['Est. Tax',fmt(client.calcResults.estimatedTax)],['State',client.calcResults.state||'—'],['Filing',client.calcResults.filing||'—']].map(([k,v])=>`
-        <div style="background:var(--bg);border-radius:9px;padding:12px 14px;"><div style="font-size:.62rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">${k}</div><div style="font-weight:700;color:var(--navy);font-size:.92rem;">${v}</div></div>`).join('')}
+        ${[['W-2',fmt(client.calcResults.w2)],['Prop Firm',fmt(client.calcResults.prop)],['Futures P&L',fmt(client.calcResults.futuresPnl)],['Est. Tax',fmt(client.calcResults.estimatedTax)],['State',client.calcResults.state||'—'],['Filing',client.calcResults.filing||'—']].map(([k,v])=>`
+        <div style="background:var(--bg);border-radius:9px;padding:11px 13px;"><div style="font-size:.6rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:2px;">${k}</div><div style="font-weight:700;color:var(--navy);font-size:.9rem;">${v}</div></div>`).join('')}
       </div>
-    </div>` : ''}
+    </div>`:''}
 
     <div style="margin-bottom:20px;">
-      <div class="modal-sec-title">📁 Uploaded Documents (${docs.length})</div>
-      ${docs.length ? docs.map(d=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
-          <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Document'}</div><div style="font-size:.72rem;color:var(--muted);">${d.category||'General'} · ${fmtDate(d.uploadedAt)}</div></div>
-          ${d.url||d.fileUrl ? `<a href="${d.url||d.fileUrl}" target="_blank" style="font-size:.75rem;font-weight:700;color:var(--green-dk);text-decoration:none;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;">View</a>` : '<span style="font-size:.75rem;color:var(--muted);">No link</span>'}
-        </div>`).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No documents uploaded yet.</div>'}
+      <div class="modal-sec-title">📁 All Documents (${allDocs.length})</div>
+      ${allDocs.length?allDocs.map(d=>docRow(d)).join(''):'<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No documents uploaded yet.</div>'}
     </div>
 
     <div style="margin-bottom:20px;">
       <div class="modal-sec-title">📝 CPA Notes (${notes.length})</div>
-      ${notes.length ? notes.map(n=>`
+      ${notes.length?notes.map(n=>`
         <div style="background:var(--bg);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
-          <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">${fmtDate(n.createdAt)} · ${n.cpaName||'CPA'}</div>
-          <div style="font-size:.86rem;color:var(--navy);">${n.note||n.content||''}</div>
-        </div>`).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:5px;">${fmtDate(n.createdAt)} · ${n.cpaName||'CPA'}</div>
+          <div style="font-size:.86rem;color:var(--navy);line-height:1.5;">${n.note||n.content||''}</div>
+        </div>`).join(''):'<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
     </div>
 
-    ${taxReturn.timeline?.length ? `
+    ${taxReturn.timeline?.length?`
     <div style="margin-bottom:20px;">
       <div class="modal-sec-title">📅 Return Timeline</div>
-      ${taxReturn.timeline.map(t=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.74rem;color:var(--muted);white-space:nowrap;">${new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div style="font-size:.82rem;color:var(--navy);">${t.note}</div></div>`).join('')}
-    </div>` : ''}
+      ${taxReturn.timeline.map(t=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.74rem;color:var(--muted);white-space:nowrap;min-width:60px;">${new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div style="font-size:.82rem;color:var(--navy);">${t.note}</div></div>`).join('')}
+    </div>`:''}
 
-    <div style="display:flex;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
-      <button onclick="closeClientProfile();openAssignModal('${clientId}','${name.replace(/'/g,'')}')" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:1.5px solid var(--border);border-radius:9px;background:none;cursor:pointer;color:var(--navy);">${client.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button>
-      <a href="mailto:${client.email}" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);cursor:pointer;color:#fff;text-align:center;text-decoration:none;">Email Client</a>
+    <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <button onclick="closeClientProfile();openAssignModal('${clientId}','${name.replace(/'/g,'')}')" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:1.5px solid var(--border);border-radius:9px;background:none;cursor:pointer;color:var(--navy);">${client.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button>
+      <a href="mailto:${client.email||''}" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;display:block;">Email Client</a>
     </div>
   `;
 };
-</script>
-<script>
-let allSnapshots = [];
-let allCalcLeads = [];
-let docFilterMode = 'all';
-
-async function loadAllDocuments() {
-  try {
-    const [clientDocsSnap, taxReturnsSnap, snapshotLeadsSnap, calcLeadsSnap, allUsersSnap] = await Promise.all([
-      db.collection('client_documents').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('tax_returns').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('leads').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('calculator_leads').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('users').limit(500).get().catch(()=>({docs:[]}))
-    ]);
-
-    // Build uid→email map from all users
-    const uidEmailMap = {};
-    allUsersSnap.docs.forEach(d=>{ uidEmailMap[d.id]=d.data().email||''; });
-
-    const clientDocs = clientDocsSnap.docs.map(d=>({id:d.id,...d.data(),url:d.data().fileUrl||d.data().url||null,clientEmail:uidEmailMap[d.data().uid]||d.data().clientEmail||'',_type:'client'}));
-    const returnDocs = taxReturnsSnap.docs
-      .filter(d=>d.data().returnFileUrl||d.data().fileUrl)
-      .map(d=>({id:d.id,...d.data(),
-        fileName:d.data().fileName||'Tax Return '+d.data().taxYear,
-        url:d.data().returnFileUrl||d.data().fileUrl,
-        category:'Tax Return',_type:'return'
-      }));
-
-    allDocs = [...clientDocs,...returnDocs].sort((a,b)=>(b.uploadedAt?.seconds||b.createdAt?.seconds||0)-(a.uploadedAt?.seconds||a.createdAt?.seconds||0));
-
-    // Only actual snapshot submissions (source = Snapshot)
-    allSnapshots = snapshotLeadsSnap.docs.map(d=>({id:d.id,...d.data()}))
-      .filter(d=>d.source==='Snapshot'||d.source==='Calc + Snapshot')
-      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-
-    // Calculator leads
-    allCalcLeads = calcLeadsSnap.docs.map(d=>({id:d.id,...d.data()}))
-      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-
-    document.getElementById('ds-total').textContent = allDocs.length;
-    document.getElementById('ds-client').textContent = clientDocs.length;
-    document.getElementById('ds-cpa').textContent = returnDocs.length;
-    document.getElementById('ds-snapshots').textContent = allSnapshots.length;
-    document.getElementById('tn-documents').textContent = allDocs.length;
-
-    renderDocs();
-    renderSnapshots();
-    renderCalcLeads();
-  } catch(e) { console.error('loadAllDocuments error:', e); }
-}
-
-function setDocFilter(f) {
-  docFilterMode = f;
-  ['all','client','return','snapshot'].forEach(id => {
-    document.getElementById('df-'+id)?.classList.toggle('on', id===f);
-  });
-  renderDocs();
-}
-
-function openDocPreview(url, fileName) {
-  const isImage = /\.(jpg|jpeg|png|gif|webp)/i.test(url);
-  const isPDF = /\.pdf/i.test(url);
-  const existing = document.getElementById('doc-preview-modal');
-  if(existing) existing.remove();
-  const modal = document.createElement('div');
-  modal.id = 'doc-preview-modal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
-  modal.onclick = e => { if(e.target===modal) modal.remove(); };
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:16px;max-width:860px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e5e8ef;">
-        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#0a1628;">${fileName||'Document'}</div>
-        <div style="display:flex;gap:10px;align-items:center;">
-          <a href="${url}" target="_blank" style="font-size:.78rem;font-weight:700;color:#2ea86c;text-decoration:none;padding:6px 14px;border:1.5px solid #3dba7e;border-radius:8px;">Open in New Tab</a>
-          <button onclick="document.getElementById('doc-preview-modal').remove()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280;">✕</button>
-        </div>
-      </div>
-      <div style="flex:1;overflow:auto;padding:20px;display:flex;align-items:center;justify-content:center;background:#f7f8fb;">
-        ${isImage ? `<img src="${url}" style="max-width:100%;max-height:70vh;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);" />` :
-          isPDF ? `<iframe src="${url}" style="width:100%;height:70vh;border:none;border-radius:8px;"></iframe>` :
-          `<div style="text-align:center;"><div style="font-size:3rem;margin-bottom:16px;">📄</div><div style="font-size:.9rem;color:#6b7280;margin-bottom:16px;">Preview not available.</div><a href="${url}" target="_blank" style="font-weight:700;color:#2ea86c;">Download File →</a></div>`}
-      </div>
-    </div>`;
-  document.body.appendChild(modal);
-}
-
-function renderDocs() {
   const search = (document.getElementById('doc-search')?.value||'').toLowerCase();
   let docs = allDocs.filter(d => {
     if(docFilterMode==='client' && d._type!=='client') return false;
