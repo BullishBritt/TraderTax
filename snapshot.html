@@ -24,6 +24,7 @@ firebase.initializeApp({
   appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
 });
 const db = firebase.firestore();
+const auth = firebase.auth();
 </script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -675,6 +676,32 @@ Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
       timestamp: new Date().toISOString()
     }));
   } catch(e) { /* silent fail */ }
+
+  // If user is logged in, save snapshot to their dashboard profile
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      const snapEntry = {
+        year: new Date().getFullYear(),
+        traderType: profile.who || 'Trader',
+        summary: aiSummary.situation_summary || '',
+        date: new Date().toISOString(),
+        priceRange: `${aiSummary.price_low} – ${aiSummary.price_high}`,
+        keyIssues: aiSummary.key_issues || [],
+        deductions: aiSummary.top_deductions || [],
+        recommendedService: aiSummary.recommended_service || '',
+        urgency: aiSummary.urgency_flag || 'medium',
+        instruments: profile.instruments,
+        income: profile.income,
+      };
+      await db.collection('users').doc(user.uid).set({
+        snapshots: firebase.firestore.FieldValue.arrayUnion(snapEntry),
+        snapshot: snapEntry,
+        snapshotLinked: true,
+        updatedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+  } catch(e) { console.log('Snapshot save to profile:', e); }
 
   // Final loading step done
   await new Promise(r => setTimeout(r, 600));
