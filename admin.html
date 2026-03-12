@@ -410,6 +410,22 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
           <div id="snaps-body"><div class="loading"><span class="spin"></span>Loading snapshots…</div></div>
         </div>
       </div>
+      <!-- Calculator Submissions section -->
+      <div style="margin-top:32px;">
+        <div class="page-title" style="font-size:1.05rem;margin-bottom:4px;">🧮 Calculator Submissions</div>
+        <div class="page-sub" style="margin-bottom:16px;">Tax estimates run by visitors — every lead who used the calculator.</div>
+        <div class="table-wrap">
+          <div class="table-head" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+            <div class="th">Email / State</div>
+            <div class="th">W-2</div>
+            <div class="th">Prop Firm</div>
+            <div class="th">Futures P&L</div>
+            <div class="th">Est. Tax</div>
+            <div class="th">Date</div>
+          </div>
+          <div id="calc-leads-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+        </div>
+      </div>
     </div>
 
     <div class="content-section" id="section-activity">
@@ -1152,37 +1168,39 @@ window.openClientProfile = async function(clientId) {
 };
 </script>
 <script>
-let allDocs = [];
 let allSnapshots = [];
+let allCalcLeads = [];
 let docFilterMode = 'all';
 
 async function loadAllDocuments() {
   try {
-    // Load client_documents and tax_returns in parallel
-    const [clientDocsSnap, taxReturnsSnap, leadsSnap] = await Promise.all([
+    const [clientDocsSnap, taxReturnsSnap, snapshotLeadsSnap, calcLeadsSnap] = await Promise.all([
       db.collection('client_documents').limit(500).get().catch(()=>({docs:[]})),
       db.collection('tax_returns').limit(500).get().catch(()=>({docs:[]})),
-      db.collection('leads').limit(500).get().catch(()=>({docs:[]}))
+      db.collection('leads').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('calculator_leads').limit(500).get().catch(()=>({docs:[]}))
     ]);
 
     const clientDocs = clientDocsSnap.docs.map(d=>({id:d.id,...d.data(),_type:'client'}));
     const returnDocs = taxReturnsSnap.docs
-      .filter(d=>d.data().returnFileUrl || d.data().fileUrl)
+      .filter(d=>d.data().returnFileUrl||d.data().fileUrl)
       .map(d=>({id:d.id,...d.data(),
-        fileName: d.data().fileName || 'Tax Return '+d.data().taxYear,
-        url: d.data().returnFileUrl || d.data().fileUrl,
-        category:'Tax Return',
-        _type:'return'
+        fileName:d.data().fileName||'Tax Return '+d.data().taxYear,
+        url:d.data().returnFileUrl||d.data().fileUrl,
+        category:'Tax Return',_type:'return'
       }));
 
-    allDocs = [...clientDocs, ...returnDocs].sort((a,b)=>(b.uploadedAt?.seconds||b.createdAt?.seconds||0)-(a.uploadedAt?.seconds||a.createdAt?.seconds||0));
+    allDocs = [...clientDocs,...returnDocs].sort((a,b)=>(b.uploadedAt?.seconds||b.createdAt?.seconds||0)-(a.uploadedAt?.seconds||a.createdAt?.seconds||0));
 
-    // Load snapshots from leads collection
-    allSnapshots = leadsSnap.docs.map(d=>({id:d.id,...d.data()}))
-      .filter(d=>d.trades||d.entity||d.prop)
+    // Only actual snapshot submissions (source = Snapshot)
+    allSnapshots = snapshotLeadsSnap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(d=>d.source==='Snapshot'||d.source==='Calc + Snapshot')
       .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
 
-    // Update stats
+    // Calculator leads
+    allCalcLeads = calcLeadsSnap.docs.map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
     document.getElementById('ds-total').textContent = allDocs.length;
     document.getElementById('ds-client').textContent = clientDocs.length;
     document.getElementById('ds-cpa').textContent = returnDocs.length;
@@ -1191,6 +1209,7 @@ async function loadAllDocuments() {
 
     renderDocs();
     renderSnapshots();
+    renderCalcLeads();
   } catch(e) { console.error('loadAllDocuments error:', e); }
 }
 
@@ -1200,6 +1219,33 @@ function setDocFilter(f) {
     document.getElementById('df-'+id)?.classList.toggle('on', id===f);
   });
   renderDocs();
+}
+
+function openDocPreview(url, fileName) {
+  const isImage = /\.(jpg|jpeg|png|gif|webp)/i.test(url);
+  const isPDF = /\.pdf/i.test(url);
+  const existing = document.getElementById('doc-preview-modal');
+  if(existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'doc-preview-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick = e => { if(e.target===modal) modal.remove(); };
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:16px;max-width:860px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e5e8ef;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#0a1628;">${fileName||'Document'}</div>
+        <div style="display:flex;gap:10px;align-items:center;">
+          <a href="${url}" target="_blank" style="font-size:.78rem;font-weight:700;color:#2ea86c;text-decoration:none;padding:6px 14px;border:1.5px solid #3dba7e;border-radius:8px;">Open in New Tab</a>
+          <button onclick="document.getElementById('doc-preview-modal').remove()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280;">✕</button>
+        </div>
+      </div>
+      <div style="flex:1;overflow:auto;padding:20px;display:flex;align-items:center;justify-content:center;background:#f7f8fb;">
+        ${isImage ? `<img src="${url}" style="max-width:100%;max-height:70vh;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.15);" />` :
+          isPDF ? `<iframe src="${url}" style="width:100%;height:70vh;border:none;border-radius:8px;"></iframe>` :
+          `<div style="text-align:center;"><div style="font-size:3rem;margin-bottom:16px;">📄</div><div style="font-size:.9rem;color:#6b7280;margin-bottom:16px;">Preview not available.</div><a href="${url}" target="_blank" style="font-weight:700;color:#2ea86c;">Download File →</a></div>`}
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
 }
 
 function renderDocs() {
@@ -1214,70 +1260,63 @@ function renderDocs() {
     return true;
   });
 
-  if(!docs.length) {
-    document.getElementById('docs-body').innerHTML = '<div class="empty"><div class="empty-icon">📁</div>No documents found.</div>';
-    return;
-  }
+  if(!docs.length) { document.getElementById('docs-body').innerHTML='<div class="empty"><div class="empty-icon">📁</div>No documents found.</div>'; return; }
 
-  const fmtDate = ts => {
-    if(!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : new Date(ts.seconds ? ts.seconds*1000 : ts);
-    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  };
-
-  // Build a client lookup by uid
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
   const clientLookup = {};
-  allClients.forEach(c => { clientLookup[c.id] = ((c.firstName||'')+' '+(c.lastName||'')).trim() || c.email; });
-
+  allClients.forEach(c=>{ clientLookup[c.id]=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email; });
   const typeColors = {client:'var(--blue-lt)',return:'var(--green-lt)'};
-  const typeLabels = {client:'Client','return':'CPA Return'};
+  const typeLabels = {client:'Client Doc',return:'CPA Return'};
 
   document.getElementById('docs-body').innerHTML = docs.map(d => {
-    const clientName = d.uid ? (clientLookup[d.uid]||d.clientEmail||d.uid) : (d.clientEmail||'—');
+    const clientName = d.uid?(clientLookup[d.uid]||d.clientEmail||d.uid):(d.clientEmail||'—');
     const uploaded = fmtDate(d.uploadedAt||d.createdAt);
     const category = d.category||d.documentType||'General';
     const typeBadge = `<span style="background:${typeColors[d._type]||'var(--bg)'};color:var(--navy);padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:700;">${typeLabels[d._type]||d._type}</span>`;
+    const isImg = d.url && /\.(jpg|jpeg|png|gif|webp)/i.test(d.url);
+    const viewBtn = d.url
+      ? `<button onclick="openDocPreview('${d.url.replace(/'/g,"\\'")}','${(d.fileName||d.name||'Document').replace(/'/g,"\\'")}')" style="font-size:.75rem;font-weight:700;color:var(--green-dk);background:none;border:1.5px solid var(--green);border-radius:7px;padding:5px 12px;cursor:pointer;">${isImg?'🖼 View':'📄 View'}</button>`
+      : '<span style="font-size:.74rem;color:var(--muted);">No link</span>';
     return `<div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 100px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;">
-      <div>
-        <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Untitled'}</div>
-        <div style="margin-top:3px;">${typeBadge}</div>
-      </div>
+      <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Untitled'}</div><div style="margin-top:3px;">${typeBadge}</div></div>
       <div style="font-size:.82rem;color:var(--body);">${clientName}</div>
       <div style="font-size:.8rem;color:var(--muted);">${category}</div>
       <div style="font-size:.78rem;color:var(--muted);">${uploaded}</div>
-      <div>${d.url ? `<a href="${d.url}" target="_blank" style="font-size:.75rem;font-weight:700;color:var(--green-dk);text-decoration:none;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;">View</a>` : '<span style="font-size:.74rem;color:var(--muted);">No link</span>'}</div>
+      <div>${viewBtn}</div>
     </div>`;
   }).join('');
 }
 
 function renderSnapshots() {
   const search = (document.getElementById('snap-search')?.value||'').toLowerCase();
-  let snaps = allSnapshots.filter(s => {
-    if(!search) return true;
-    return ((s.email||'')+(s.trades||'')+(s.entity||'')+(s.prop||'')).toLowerCase().includes(search);
-  });
-
-  if(!snaps.length) {
-    document.getElementById('snaps-body').innerHTML = '<div class="empty"><div class="empty-icon">📋</div>No snapshots yet.</div>';
-    return;
-  }
-
-  const fmtDate = ts => {
-    if(!ts) return '—';
-    const d = ts.toDate ? ts.toDate() : new Date(ts.seconds ? ts.seconds*1000 : ts);
-    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  };
-
+  let snaps = allSnapshots.filter(s => !search || ((s.email||'')+(s.trades||'')+(s.entity||'')+(s.prop||'')).toLowerCase().includes(search));
+  if(!snaps.length) { document.getElementById('snaps-body').innerHTML='<div class="empty"><div class="empty-icon">📋</div>No snapshots yet.</div>'; return; }
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
   document.getElementById('snaps-body').innerHTML = snaps.map(s => `
-    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;" onclick="openLead('${s.id}')" title="Click to view full lead">
-      <div>
-        <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${s.email||'Unknown'}</div>
-        <div style="font-size:.72rem;color:var(--muted);">${s.phone||''}</div>
-      </div>
-      <div style="font-size:.8rem;color:var(--body);">${s.prop?'$'+Number(s.prop).toLocaleString():'—'}</div>
-      <div style="font-size:.8rem;color:var(--body);">${s.trades||'—'}</div>
-      <div style="font-size:.8rem;color:var(--body);">${s.entity||'—'}</div>
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="openLead('${s.id}')">
+      <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${s.email||'Unknown'}</div><div style="font-size:.72rem;color:var(--muted);">${s.phone||''}</div></div>
+      <div style="font-size:.8rem;">${s.prop?'$'+Number(s.prop).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${s.trades||'—'}</div>
+      <div style="font-size:.8rem;">${s.entity||'—'}</div>
       <div style="font-size:.78rem;color:var(--muted);">${fmtDate(s.createdAt)}</div>
     </div>`).join('');
 }
+
+function renderCalcLeads() {
+  const el = document.getElementById('calc-leads-body');
+  if(!el) return;
+  if(!allCalcLeads.length) { el.innerHTML='<div class="empty"><div class="empty-icon">🧮</div>No calculator submissions yet.</div>'; return; }
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  el.innerHTML = allCalcLeads.map(c => `
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${c.email||'Unknown'}</div><div style="font-size:.72rem;color:var(--muted);">${c.state||''} · ${c.filing||''}</div></div>
+      <div style="font-size:.8rem;">${c.w2?'$'+Number(c.w2).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${c.prop?'$'+Number(c.prop).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${c.futuresPnl?'$'+Number(c.futuresPnl).toLocaleString():'—'}</div>
+      <div style="font-weight:700;font-size:.84rem;color:var(--green-dk);">${c.estimatedTax?'$'+Number(c.estimatedTax).toLocaleString():'—'}</div>
+      <div style="font-size:.78rem;color:var(--muted);">${fmtDate(c.createdAt)}</div>
+    </div>`).join('');
+}
 </script>
+</body>
+</html>
