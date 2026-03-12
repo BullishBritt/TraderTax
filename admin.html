@@ -430,6 +430,12 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
   </div>
 </div>
 
+<div class="modal-bg" id="client-profile-modal" onclick="if(event.target===this)closeClientProfile()" style="z-index:1100;">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-hd"><h2 id="cp-title">Client Profile</h2><button class="modal-close" onclick="closeClientProfile()">✕</button></div>
+    <div class="modal-body" id="cp-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+  </div>
+</div>
 <div class="modal-bg" id="assign-modal" onclick="if(event.target===this)closeAssignModal()">
   <div class="modal">
     <div class="modal-hd"><h2 id="assign-client-name">Assign CPA</h2><button class="modal-close" onclick="closeAssignModal()">✕</button></div>
@@ -617,7 +623,7 @@ function renderClients() {
     const st=c.returnStatus||'received';
     const cpaName=c.assignedCPA?.name||'—';
     const joined=c.createdAt?new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'—';
-    return `<div class="t-row clients-grid"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div><span class="status-badge ${stCls[st]||'received'}">${stLabels[st]||st}</span></div><div class="cell-muted">${c.taxYear||2025}</div><div class="cell-muted">${cpaName}</div><div><button onclick="openAssignModal('${c.id}','${name.replace(/'/g,'')}')" style="padding:5px 12px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;color:var(--navy);">${c.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button></div><div class="cell-muted">${joined}</div></div>`;
+    return `<div class="t-row clients-grid" style="cursor:pointer;" onclick="openClientProfile('${c.id}')"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div><span class="status-badge ${stCls[st]||'received'}">${stLabels[st]||st}</span></div><div class="cell-muted">${c.taxYear||2025}</div><div class="cell-muted">${cpaName}</div><div><button onclick="event.stopPropagation();openAssignModal('${c.id}','${name.replace(/'/g,'')}')" style="padding:5px 12px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;color:var(--navy);">${c.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button></div><div class="cell-muted">${joined}</div></div>`;
   }).join('');
 }
 
@@ -988,3 +994,104 @@ function showToast(msg,cls='') {
 <script src="affiliate-tracker.js"></script>
 </body>
 </html>
+<script>
+function closeClientProfile(){document.getElementById('client-profile-modal').classList.remove('open');}
+
+window.openClientProfile = async function(clientId) {
+  const modal = document.getElementById('client-profile-modal');
+  const body = document.getElementById('cp-body');
+  const title = document.getElementById('cp-title');
+  modal.classList.add('open');
+  body.innerHTML = '<div class="loading"><span class="spin"></span>Loading profile...</div>';
+
+  const client = allClients.find(c => c.id === clientId) || {};
+  const name = ((client.firstName||'') + ' ' + (client.lastName||'')).trim() || client.email || 'Client';
+  title.textContent = name + ' — Profile';
+
+  const [docsSnap, notesSnap, returnsSnap] = await Promise.all([
+    db.collection('client_documents').where('uid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('cpa_notes').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('tax_returns').where('clientUid','==',clientId).get().catch(()=>({docs:[]}))
+  ]);
+
+  const docs = docsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.seconds||0)-(a.uploadedAt?.seconds||0));
+  const notes = notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const returns = returnsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const taxReturn = returns[0] || {};
+  const cpa = allCPAs.find(c=>c.id===client.assignedCPA?.uid);
+
+  const fmt = v => v ? '$'+Number(v).toLocaleString() : '—';
+  const fmtDate = ts => {
+    if(!ts) return '—';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  };
+  const stColors = {received:'var(--muted)',assigned:'var(--blue)',review:'var(--amber)',completed:'var(--green)',filed:'var(--green-dk)'};
+  const st = client.returnStatus || 'received';
+
+  body.innerHTML = `
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
+      <div style="flex:1;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">${name}</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.6);">${client.email||'—'} ${client.phone?'· '+client.phone:''}</div>
+      </div>
+      <div style="text-align:right;">
+        <span style="background:${stColors[st]||'var(--muted)'};color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;">${st}</span>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">Tax Year ${client.taxYear||2025}</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Assigned CPA</div>
+        <div style="font-weight:600;color:var(--navy);">${cpa ? ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim() : '—'}</div>
+        <div style="font-size:.76rem;color:var(--muted);">${cpa?.email||''}</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;">
+        <div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Return Status</div>
+        <div style="font-weight:600;color:var(--navy);">${taxReturn.status ? taxReturn.status.charAt(0).toUpperCase()+taxReturn.status.slice(1) : '—'}</div>
+        <div style="font-size:.76rem;color:var(--muted);">Updated ${fmtDate(taxReturn.updatedAt)}</div>
+      </div>
+    </div>
+
+    ${client.calcResults ? `
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">💰 Income & Tax Estimate</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">
+        ${[['W-2 Income',fmt(client.calcResults.w2)],['Prop Firm',fmt(client.calcResults.prop)],['Futures P&L',fmt(client.calcResults.futuresPnl)],['Est. Tax',fmt(client.calcResults.estimatedTax)],['State',client.calcResults.state||'—'],['Filing',client.calcResults.filing||'—']].map(([k,v])=>`
+        <div style="background:var(--bg);border-radius:9px;padding:12px 14px;"><div style="font-size:.62rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">${k}</div><div style="font-weight:700;color:var(--navy);font-size:.92rem;">${v}</div></div>`).join('')}
+      </div>
+    </div>` : ''}
+
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📁 Uploaded Documents (${docs.length})</div>
+      ${docs.length ? docs.map(d=>`
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Document'}</div><div style="font-size:.72rem;color:var(--muted);">${d.category||'General'} · ${fmtDate(d.uploadedAt)}</div></div>
+          ${d.url ? `<a href="${d.url}" target="_blank" style="font-size:.75rem;font-weight:700;color:var(--green-dk);text-decoration:none;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;">View</a>` : '<span style="font-size:.75rem;color:var(--muted);">No link</span>'}
+        </div>`).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No documents uploaded yet.</div>'}
+    </div>
+
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📝 CPA Notes (${notes.length})</div>
+      ${notes.length ? notes.map(n=>`
+        <div style="background:var(--bg);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
+          <div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">${fmtDate(n.createdAt)} · ${n.cpaName||'CPA'}</div>
+          <div style="font-size:.86rem;color:var(--navy);">${n.note||n.content||''}</div>
+        </div>`).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
+    </div>
+
+    ${taxReturn.timeline?.length ? `
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📅 Return Timeline</div>
+      ${taxReturn.timeline.map(t=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.74rem;color:var(--muted);white-space:nowrap;">${new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div style="font-size:.82rem;color:var(--navy);">${t.note}</div></div>`).join('')}
+    </div>` : ''}
+
+    <div style="display:flex;gap:10px;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+      <button onclick="closeClientProfile();openAssignModal('${clientId}','${name.replace(/'/g,'')}')" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:1.5px solid var(--border);border-radius:9px;background:none;cursor:pointer;color:var(--navy);">${client.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button>
+      <a href="mailto:${client.email}" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);cursor:pointer;color:#fff;text-align:center;text-decoration:none;">Email Client</a>
+    </div>
+  `;
+};
+</script>
