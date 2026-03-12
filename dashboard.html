@@ -418,6 +418,12 @@ async function loadUser(user){
       if(!snaps.find(s=>s.date===ls.date))snaps=[ls,...snaps];
     }
     renderSnapshots(snaps);
+    // Show calc results in overview if available
+    if(userData.calcResults){
+      const cr=userData.calcResults;
+      const el=document.getElementById('stat-status');
+      if(el&&cr.estimatedTax){el.textContent='~$'+cr.estimatedTax.toLocaleString();document.getElementById('stat-status-sub').textContent='Estimated tax liability';}
+    }
   }catch(e){console.error(e);}
 }
 async function loadDocuments(user){
