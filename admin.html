@@ -1198,8 +1198,11 @@ window.openClientProfile = async function(clientId) {
   modal.classList.add('open');
   body.innerHTML='<div class="loading"><span class="spin"></span>Loading profile...</div>';
 
-  const client=allClients.find(c=>c.id===clientId)||{};
-  const name=((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||'Client';
+  const clientFromList = allClients.find(c=>c.id===clientId)||null;
+  // Also fetch directly from users collection in case not loaded in allClients
+  const userDoc = clientFromList ? null : await db.collection('users').doc(clientId).get().catch(()=>null);
+  const client = clientFromList || (userDoc?.exists ? {id:clientId,...userDoc.data()} : {id:clientId,email:uidEmailLookup[clientId]||''});
+  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||clientId||'Client';
   title.textContent=name+' — Profile';
 
   const [docsSnap,notesSnap,returnsSnap]=await Promise.all([
@@ -1309,7 +1312,7 @@ function renderDocs(){
   const typeColors={client:'var(--blue-lt)',return:'var(--green-lt)'};
   const typeLabels={client:'Client Doc',return:'CPA Return'};
   document.getElementById('docs-body').innerHTML=docs.map(d=>{
-    const clientName=d.uid?(clientLookup[d.uid]||d.clientEmail||d.uid):(d.clientEmail||d.email||'—');
+    const clientName=d.clientEmail||(d.uid?(clientLookup[d.uid]||uidEmailLookup[d.uid]||d.uid):'—');
     const uploaded=fmtDate(d.uploadedAt||d.createdAt);
     const category=d.category||d.documentType||'General';
     const typeBadge=`<span style="background:${typeColors[d._type]||'var(--bg)'};color:var(--navy);padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:700;">${typeLabels[d._type]||d._type}</span>`;
