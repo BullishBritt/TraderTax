@@ -768,48 +768,50 @@ async function confirmAssign() {
   const cpa=allCPAs.find(c=>c.id===cpaId);
   if(!cpa){msg.textContent='CPA not found.';return;}
   msg.textContent='Saving...';msg.style.color='var(--muted)';
-  try {
-    const cpaName=((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
-    const clientEmail=uidEmailLookup[assignClientId]||'';
+  const cpaName=((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
+  const clientEmail=uidEmailLookup[assignClientId]||'';
 
-    // Write assignment to users doc
+  // STEP 1: users doc
+  msg.textContent='Step 1: Saving...';msg.style.color='var(--muted)';
+  try {
     await db.collection('users').doc(assignClientId).set({
-      assignedCPA:{uid:cpaId,name:cpaName},
-      role:'client',
-      taxYear:parseInt(taxYear),
-      returnStatus:'assigned',
+      assignedCPA:{uid:cpaId,name:cpaName},role:'client',
+      taxYear:parseInt(taxYear),returnStatus:'assigned',
       updatedAt:new Date().toISOString(),
       ...(clientEmail?{email:clientEmail}:{})
     },{merge:true});
+  } catch(e){ msg.textContent='❌ Step 1 failed (users): '+e.message;msg.style.color='var(--red)';console.error(e);return; }
 
-    // Create tax return record — simple add, no compound index needed
+  // STEP 2: tax_returns record
+  msg.textContent='Step 2: Creating return...';
+  try {
     await db.collection('tax_returns').add({
-      clientUid:assignClientId,
-      clientEmail:clientEmail,
-      cpaUid:cpaId,
-      cpaName:cpaName,
-      taxYear:parseInt(taxYear),
-      status:'assigned',
+      clientUid:assignClientId,clientEmail,cpaUid:cpaId,cpaName,
+      taxYear:parseInt(taxYear),status:'assigned',
       createdAt:firebase.firestore.FieldValue.serverTimestamp(),
       updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
       timeline:[{date:new Date().toISOString(),note:'Assigned to '+cpaName+'.'}]
     });
+  } catch(e){ msg.textContent='❌ Step 2 failed (tax_returns): '+e.message;msg.style.color='var(--red)';console.error(e);return; }
 
-    // Update local cache
-    const c=allClients.find(cl=>cl.id===assignClientId);
-    if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
+  // SUCCESS
+  const c=allClients.find(cl=>cl.id===assignClientId);
+  if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
+  msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
+  msg.style.color='var(--green-dk)';
+  showToast('✓ Assigned to '+cpaName,'green-t');
+  loadClients(); loadCPAs();
+  setTimeout(()=>closeAssignModal(),2500);
 
-    msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
-    msg.style.color='var(--green-dk)';
-    showToast('✓ Assigned to '+cpaName,'green-t');
-    loadClients();
-    loadCPAs();
-    setTimeout(()=>closeAssignModal(),2500);
-  } catch(e){
-    console.error('Assign error full:',e);
-    msg.textContent='Error: '+e.message;
-    msg.style.color='var(--red)';
-  }
+  // Success
+  const c=allClients.find(cl=>cl.id===assignClientId);
+  if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
+  msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
+  msg.style.color='var(--green-dk)';
+  showToast('✓ Assigned to '+cpaName,'green-t');
+  loadClients();
+  loadCPAs();
+  setTimeout(()=>closeAssignModal(),2500);
 }
 
 
