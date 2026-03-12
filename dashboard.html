@@ -323,7 +323,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="page-sub">Get help from our team. We respond within 24 hours — usually faster.</div>
       <div class="support-grid">
         <div class="sup-card" onclick="focusNewMessage()"><div class="sup-card-icon">💬</div><div class="sup-card-title">Message Our Team</div><div class="sup-card-sub">Ask about your return, documents, or account</div></div>
-        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d7a4a2a7a7b8a5a397a3a5b6b3b2a5a3b6aff9b9b2a3">[email&#160;protected]</a></div></div>
+        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub">support@tradertax.net</div></div>
         <div class="sup-card" onclick="window.location.href='contact.html'"><div class="sup-card-icon">📞</div><div class="sup-card-title">Book a Call</div><div class="sup-card-sub">Schedule with your specialist</div></div>
       </div>
       <div class="chat-layout">
@@ -378,7 +378,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getDocs,updateDoc,arrayUnion,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -471,7 +471,7 @@ function uploadFiles(files){
     async()=>{
       try {
         const url=await getDownloadURL(task.snapshot.ref);
-        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
+        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,clientEmail:currentUser.email,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
         const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='✓';
         setTimeout(()=>{const e=document.getElementById(pid);if(e)e.remove();},2000);
         loadDocuments(currentUser);
@@ -565,4 +565,8 @@ function renderSnapshots(snapshots){
 window.saveProfile=async function(){const msg=document.getElementById('profile-msg');try{await setDoc(doc(db,'users',currentUser.uid),{...userData,firstName:document.getElementById('pf-first').value.trim(),lastName:document.getElementById('pf-last').value.trim(),phone:document.getElementById('pf-phone').value.trim(),state:document.getElementById('pf-state').value.trim(),updatedAt:new Date().toISOString()},{merge:true});msg.textContent='✓ Saved';msg.style.color='var(--green)';}catch(e){msg.textContent='Error saving.';msg.style.color='#dc2626';}setTimeout(()=>msg.textContent='',3000);};
 window.sendPasswordReset=async function(){try{await sendPasswordResetEmail(auth,currentUser.email);document.getElementById('pw-reset-msg').textContent='✓ Reset email sent';}catch(e){document.getElementById('pw-reset-msg').textContent='Error sending reset email.';}};
 window.handleLogout=async function(){await signOut(auth);window.location.href='index.html';};
-window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'
+window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');};
+</script>
+  <script src="affiliate-tracker.js"></script>
+</body>
+</html>
