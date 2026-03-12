@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Support Desk | TraderTax</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;
+  --bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;
+  --red:#ef4444;--red-lt:#fff5f5;--amber:#d97706;--amber-lt:#fffbeb;
+}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{overflow-x:hidden;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--navy);}
+
+/* ── LOGIN ── */
+#login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:20px;}
+.login-box{background:var(--surface);border-radius:18px;padding:40px 36px;width:360px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
+.login-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.4px;}
+.login-logo-txt .nv{color:var(--navy);}.login-logo-txt .gr{color:var(--green);}
+.login-sub{font-size:.82rem;color:var(--muted);margin-bottom:10px;}
+.login-tag{display:inline-block;background:var(--green-lt);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:3px 12px;font-size:.7rem;font-weight:700;color:var(--green-dk);margin-bottom:24px;}
+.lg-field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;text-align:left;}
+.lg-field label{font-size:.67rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.lg-field input{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.9rem;color:var(--navy);outline:none;width:100%;font-family:'DM Sans',sans-serif;transition:border-color .2s;}
+.lg-field input:focus{border-color:var(--navy);}
+.lg-btn{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:4px;transition:background .2s;}
+.lg-btn:hover{background:#0d1f3c;}
+.lg-err{font-size:.75rem;color:var(--red);margin-top:10px;display:none;}
+.lg-err.show{display:block;}
+
+/* ── APP ── */
+#app{display:none;height:100vh;flex-direction:column;}
+
+/* ── TOP BAR ── */
+.topbar{height:60px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0;}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;letter-spacing:-.3px;}
+.topbar-logo-txt .nv{color:var(--navy);}.topbar-logo-txt .gr{color:var(--green);}
+.topbar-tag{background:var(--green-lt);color:var(--green-dk);font-size:.65rem;font-weight:700;padding:3px 10px;border-radius:99px;border:1px solid rgba(61,186,126,.3);margin-left:4px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.user-pill{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:5px 12px 5px 7px;font-size:.8rem;font-weight:500;}
+.avatar{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green-dk));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:.65rem;color:#fff;flex-shrink:0;}
+.logout-btn{font-size:.78rem;color:var(--muted);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;transition:color .15s;}
+.logout-btn:hover{color:var(--navy);}
+
+/* ── STATS BAR ── */
+.stats-bar{display:flex;gap:12px;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0;flex-wrap:wrap;}
+.stat-chip{display:flex;align-items:center;gap:8px;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 16px;}
+.sc-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:var(--navy);}
+.sc-val.amber{color:var(--amber);}
+.sc-val.green{color:var(--green);}
+.sc-lbl{font-size:.72rem;color:var(--muted);font-weight:500;line-height:1.3;}
+
+/* ── MAIN LAYOUT ── */
+.desk-layout{display:grid;grid-template-columns:320px 1fr;flex:1;min-height:0;overflow:hidden;}
+
+/* ── TICKET LIST ── */
+.ticket-panel{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+.ticket-panel-head{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ticket-panel-head h2{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;flex:1;}
+.filter-tabs{display:flex;gap:4px;}
+.ftab{padding:5px 10px;border-radius:7px;font-size:.73rem;font-weight:600;cursor:pointer;border:1px solid var(--border);background:none;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif;}
+.ftab:hover{border-color:var(--navy);color:var(--navy);}
+.ftab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+.ftab.active.amber-f{background:var(--amber);border-color:var(--amber);}
+.ticket-search{padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.ticket-search input{width:100%;padding:8px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;background:var(--bg);transition:border-color .2s;}
+.ticket-search input:focus{border-color:var(--navy);}
+.ticket-list{overflow-y:auto;flex:1;}
+.ticket-item{padding:14px 18px;border-bottom:1px solid var(--bg);cursor:pointer;transition:background .1s;position:relative;}
+.ticket-item:hover{background:var(--bg);}
+.ticket-item.active{background:var(--green-lt);border-left:3px solid var(--green);}
+.ticket-item.urgent{border-left:3px solid var(--red);}
+.ticket-item.urgent.active{background:#fff5f5;}
+.ti-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:3px;gap:8px;}
+.ti-email{font-size:.84rem;font-weight:700;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.ti-date{font-size:.67rem;color:var(--muted);flex-shrink:0;}
+.ti-subject{font-size:.78rem;color:var(--muted);margin-bottom:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ti-bottom{display:flex;align-items:center;gap:6px;}
+.ti-badge{font-size:.62rem;font-weight:700;border-radius:99px;padding:2px 8px;}
+.ti-badge.open{background:var(--amber-lt);color:var(--amber);}
+.ti-badge.resolved{background:var(--green-lt);color:var(--green-dk);}
+.ti-badge.urgent{background:var(--red-lt);color:var(--red);}
+.ti-preview{font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;}
+.ti-unread{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0;}
+
+/* ── CHAT PANE ── */
+.chat-pane{display:flex;flex-direction:column;overflow:hidden;background:var(--bg);}
+
+/* No ticket selected */
+.chat-empty{flex:1;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;text-align:center;padding:40px;}
+.chat-empty-icon{font-size:3rem;margin-bottom:6px;}
+.chat-empty h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);}
+.chat-empty p{font-size:.84rem;color:var(--muted);max-width:260px;line-height:1.5;}
+
+/* Chat header */
+.chat-head{padding:16px 22px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-shrink:0;}
+.chat-head-info{flex:1;min-width:0;}
+.ch-email{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:3px;}
+.ch-subject{font-size:.8rem;color:var(--muted);}
+.ch-meta{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.ch-meta-chip{font-size:.7rem;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;}
+.chat-head-actions{display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap;}
+.action-btn{padding:7px 14px;border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--navy);transition:all .2s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.action-btn:hover{border-color:var(--navy);}
+.action-btn.green{background:var(--green-lt);border-color:rgba(61,186,126,.3);color:var(--green-dk);}
+.action-btn.green:hover{background:var(--green);color:#fff;border-color:var(--green);}
+.action-btn.red{background:var(--red-lt);border-color:rgba(239,68,68,.2);color:var(--red);}
+.action-btn.red:hover{background:var(--red);color:#fff;border-color:var(--red);}
+
+/* Messages */
+.chat-msgs{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;}
+.msg{max-width:72%;display:flex;flex-direction:column;gap:4px;}
+.msg.client{align-self:flex-start;align-items:flex-start;}
+.msg.team{align-self:flex-end;align-items:flex-end;}
+.msg-name{font-size:.7rem;font-weight:700;color:var(--green);}
+.msg-name.team-label{color:var(--navy);}
+.msg-bubble{padding:11px 15px;border-radius:12px;font-size:.87rem;line-height:1.55;word-break:break-word;}
+.msg.client .msg-bubble{background:var(--surface);border:1px solid var(--border);border-radius:12px 12px 12px 3px;color:var(--navy);}
+.msg.team .msg-bubble{background:var(--navy);color:#fff;border-radius:12px 12px 3px 12px;}
+.msg-time{font-size:.67rem;color:var(--muted);}
+
+/* System messages */
+.msg-system{align-self:center;background:var(--bg);border:1px solid var(--border);border-radius:99px;padding:5px 14px;font-size:.72rem;color:var(--muted);text-align:center;margin:4px 0;}
+
+/* Quick replies */
+.quick-replies{padding:10px 22px;display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0;border-top:1px solid var(--border);background:var(--surface);}
+.qr-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);display:flex;align-items:center;margin-right:2px;}
+.quick-reply-btn{padding:6px 12px;border:1.5px solid var(--border);border-radius:99px;font-size:.74rem;font-weight:600;color:var(--muted);background:none;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.quick-reply-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* Input area */
+.chat-input-area{padding:14px 22px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;}
+.input-wrap{display:flex;gap:10px;align-items:flex-end;}
+.chat-textarea{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:11px;padding:11px 14px;font-size:.87rem;font-family:'DM Sans',sans-serif;color:var(--navy);resize:none;outline:none;transition:border-color .2s;line-height:1.5;min-height:44px;max-height:120px;}
+.chat-textarea:focus{border-color:var(--navy);}
+.send-btn{padding:0 20px;height:44px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.send-btn:hover{background:#0d1f3c;}
+.send-btn:disabled{opacity:.5;cursor:default;}
+
+/* TOAST */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--navy);color:#fff;padding:11px 18px;border-radius:10px;font-size:.83rem;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.green{background:var(--green-dk);}
+
+/* SPINNER */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+@media(max-width:800px){
+  .desk-layout{grid-template-columns:1fr;}
+  .ticket-panel{height:260px;border-right:none;border-bottom:1px solid var(--border);}
+  .stats-bar .stat-chip{flex:1;min-width:100px;}
+}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<!-- ── LOGIN ── -->
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none">
+        <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+        <path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/>
+        <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
+      </svg>
+      <div class="login-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></div>
+    </div>
+    <div class="login-sub">Sign in to Support Desk</div>
+    <div class="login-tag">Support Team</div>
+    <div class="lg-field"><label>Email</label><input type="email" id="lg-email" placeholder="your@tradertax.net" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <button class="lg-btn" onclick="lgIn()">Sign In</button>
+    <div class="lg-err" id="lg-err">Incorrect credentials or access not authorized.</div>
+    <div style="margin-top:16px;font-size:.74rem;color:var(--muted);">Need access? Contact <a href="mailto:hello@tradertax.net" style="color:var(--green);font-weight:600;">hello@tradertax.net</a></div>
+  </div>
+</div>
+
+<!-- ── APP ── -->
+<div id="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+        <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+        <path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/>
+        <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/>
+      </svg>
+      <span class="topbar-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></span>
+      <span class="topbar-tag">Support Desk</span>
+    </div>
+    <div class="topbar-right">
+      <div class="user-pill">
+        <div class="avatar" id="nav-avatar">?</div>
+        <span id="nav-name">Loading...</span>
+      </div>
+      <button class="logout-btn" onclick="handleLogout()">Log out</button>
+    </div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-chip">
+      <div><div class="sc-val amber" id="stat-open">—</div><div class="sc-lbl">Open Tickets</div></div>
+    </div>
+    <div class="stat-chip">
+      <div><div class="sc-val" id="stat-total">—</div><div class="sc-lbl">Total Today</div></div>
+    </div>
+    <div class="stat-chip">
+      <div><div class="sc-val green" id="stat-resolved">—</div><div class="sc-lbl">Resolved</div></div>
+    </div>
+    <div class="stat-chip" style="margin-left:auto;">
+      <div style="font-size:.78rem;color:var(--muted);font-weight:500;">Auto-refreshes every 60s</div>
+    </div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div class="desk-layout">
+
+    <!-- TICKET LIST -->
+    <div class="ticket-panel">
+      <div class="ticket-panel-head">
+        <h2>Tickets</h2>
+        <div class="filter-tabs">
+          <button class="ftab active amber-f" id="ftab-open" onclick="setFilter('open',this)">Open</button>
+          <button class="ftab" id="ftab-all" onclick="setFilter('all',this)">All</button>
+          <button class="ftab" id="ftab-resolved" onclick="setFilter('resolved',this)">Done</button>
+        </div>
+      </div>
+      <div class="ticket-search">
+        <input type="text" id="ticket-search" placeholder="🔍  Search by email or subject..." oninput="renderTickets()"/>
+      </div>
+      <div class="ticket-list" id="ticket-list">
+        <div style="padding:20px;text-align:center;color:var(--muted);font-size:.82rem;"><span class="spin"></span>Loading tickets...</div>
+      </div>
+    </div>
+
+    <!-- CHAT PANE -->
+    <div class="chat-pane" id="chat-pane">
+      <div class="chat-empty" id="chat-empty">
+        <div class="chat-empty-icon">💬</div>
+        <h3>Select a ticket</h3>
+        <p>Click any ticket on the left to open the conversation and reply.</p>
+      </div>
+      <!-- Active chat (hidden until ticket selected) -->
+      <div id="chat-active" style="display:none;flex-direction:column;height:100%;overflow:hidden;">
+        <div class="chat-head">
+          <div class="chat-head-info">
+            <div class="ch-email" id="ch-email">—</div>
+            <div class="ch-subject" id="ch-subject">—</div>
+            <div class="ch-meta">
+              <span class="ch-meta-chip" id="ch-opened">—</span>
+              <span class="ch-meta-chip" id="ch-status-chip">Open</span>
+              <span class="ch-meta-chip" id="ch-count-chip">0 messages</span>
+            </div>
+          </div>
+          <div class="chat-head-actions">
+            <button class="action-btn green" onclick="resolveTicket()" id="resolve-btn">✓ Resolve</button>
+            <button class="action-btn red" onclick="flagUrgent()" id="urgent-btn">⚠ Urgent</button>
+            <button class="action-btn" onclick="emailClient()" title="Open email to client">✉ Email</button>
+          </div>
+        </div>
+        <div class="chat-msgs" id="chat-msgs"></div>
+        <div class="quick-replies">
+          <span class="qr-label">Quick reply:</span>
+          <button class="quick-reply-btn" onclick="insertQuickReply('Thanks for reaching out! I\'m looking into this now and will follow up within a few hours.')">Looking into it</button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('Great news — your return is progressing well. Your specialist will have an update shortly.')">Return update</button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('Could you clarify which tax year this question is about?')">Which tax year?</button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('Please upload any missing documents to your Document Vault and your specialist will be notified.')">Upload docs reminder</button>
+          <button class="quick-reply-btn" onclick="insertQuickReply('Your invoice is available in your Billing tab. Click Pay Now to complete your payment.')">Payment reminder</button>
+        </div>
+        <div class="chat-input-area">
+          <div class="input-wrap">
+            <textarea class="chat-textarea" id="reply-input" placeholder="Type your reply... (Enter to send, Shift+Enter for new line)" rows="1"
+              oninput="autoResize(this)"
+              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendReply();}"></textarea>
+            <button class="send-btn" id="send-btn" onclick="sendReply()">Send →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+// ── SUPPORT EMAILS — add your team here ──
+const SUPPORT_EMAILS = [
+  'support@tradertax.net',
+  'hello@tradertax.net',
+  'brittainalfaro@gmail.com',
+  'brittain0404@yahoo.com'
+  // Add more: 'newteammember@tradertax.net'
+];
+
+let currentUser = null;
+let allTickets = [];
+let activeFilter = 'open';
+let activeTicketId = null;
+
+/* ── AUTH ── */
+auth.onAuthStateChanged(async user => {
+  if (user && SUPPORT_EMAILS.includes(user.email)) {
+    currentUser = user;
+    showApp(user);
+  }
+});
+
+async function lgIn() {
+  const email = document.getElementById('lg-email').value.trim();
+  const pw = document.getElementById('lg-pw').value;
+  const err = document.getElementById('lg-err');
+  err.classList.remove('show');
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pw);
+    if (!SUPPORT_EMAILS.includes(cred.user.email)) {
+      await auth.signOut();
+      err.textContent = 'Access not authorized. Contact hello@tradertax.net to be added.';
+      err.classList.add('show');
+      return;
+    }
+    // showApp called by onAuthStateChanged
+  } catch(e) {
+    err.textContent = 'Incorrect email or password.';
+    err.classList.add('show');
+  }
+}
+
+function showApp(user) {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  const name = user.displayName || user.email.split('@')[0];
+  const ini = name.split(/\s+/).map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  document.getElementById('nav-avatar').textContent = ini;
+  document.getElementById('nav-name').textContent = name;
+  loadTickets();
+  // Auto-refresh every 60s
+  setInterval(loadTickets, 60000);
+}
+
+function handleLogout() { auth.signOut(); location.reload(); }
+
+/* ── LOAD TICKETS ── */
+async function loadTickets() {
+  try {
+    const snap = await db.collection('support_tickets')
+      .orderBy('createdAt', 'desc')
+      .limit(300)
+      .get();
+    allTickets = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    updateStats();
+    renderTickets();
+    // Refresh active ticket if open
+    if (activeTicketId) {
+      const t = allTickets.find(t => t.id === activeTicketId);
+      if (t) renderChat(t);
+    }
+  } catch(e) { console.error('Tickets:', e); }
+}
+
+function updateStats() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayTickets = allTickets.filter(t => {
+    const dt = t.createdAt?.toDate ? t.createdAt.toDate() : new Date(t.createdAt || 0);
+    return dt >= today;
+  });
+  document.getElementById('stat-open').textContent = allTickets.filter(t => t.status !== 'resolved').length;
+  document.getElementById('stat-total').textContent = todayTickets.length;
+  document.getElementById('stat-resolved').textContent = allTickets.filter(t => t.status === 'resolved').length;
+}
+
+/* ── RENDER TICKET LIST ── */
+function setFilter(f, btn) {
+  activeFilter = f;
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  renderTickets();
+}
+
+function renderTickets() {
+  const search = (document.getElementById('ticket-search')?.value || '').toLowerCase();
+  let tickets = allTickets.filter(t => {
+    if (activeFilter === 'open' && t.status === 'resolved') return false;
+    if (activeFilter === 'resolved' && t.status !== 'resolved') return false;
+    if (search) {
+      const hay = ((t.clientEmail || '') + (t.subject || '')).toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  if (!tickets.length) {
+    document.getElementById('ticket-list').innerHTML = `<div style="padding:28px 20px;text-align:center;color:var(--muted);font-size:.83rem;">${activeFilter==='open'?'No open tickets 🎉':'No tickets match this filter.'}</div>`;
+    return;
+  }
+
+  const list = document.getElementById('ticket-list');
+  list.innerHTML = tickets.map(t => {
+    const isResolved = t.status === 'resolved';
+    const isUrgent = t.priority === 'urgent';
+    const isActive = t.id === activeTicketId;
+    const msgs = t.messages || [];
+    const lastMsg = msgs[msgs.length - 1];
+    const preview = lastMsg?.body?.slice(0, 55) || t.subject || '';
+    const dt = t.createdAt?.toDate ? t.createdAt.toDate() : new Date();
+    const dtStr = isToday(dt) ? dt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) : dt.toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const hasUnread = !isResolved && lastMsg && !lastMsg.fromSupport;
+
+    return `<div class="ticket-item${isActive?' active':''}${isUrgent?' urgent':''}" onclick="selectTicket('${t.id}')">
+      <div class="ti-top">
+        <div class="ti-email">${t.clientEmail || 'Unknown'}</div>
+        <div class="ti-date">${dtStr}</div>
+      </div>
+      <div class="ti-subject">${t.subject || 'Support Request'}</div>
+      <div class="ti-bottom">
+        ${isUrgent ? '<span class="ti-badge urgent">⚠ Urgent</span>' : isResolved ? '<span class="ti-badge resolved">✓ Done</span>' : '<span class="ti-badge open">● Open</span>'}
+        <span class="ti-preview">${preview}</span>
+        ${hasUnread ? '<span class="ti-unread"></span>' : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function isToday(dt) {
+  const now = new Date();
+  return dt.toDateString() === now.toDateString();
+}
+
+/* ── SELECT TICKET ── */
+function selectTicket(ticketId) {
+  const ticket = allTickets.find(t => t.id === ticketId);
+  if (!ticket) return;
+  activeTicketId = ticketId;
+  renderTickets(); // Re-render to update active state
+  renderChat(ticket);
+}
+
+function renderChat(ticket) {
+  // Show chat UI
+  document.getElementById('chat-empty').style.display = 'none';
+  const chatActive = document.getElementById('chat-active');
+  chatActive.style.display = 'flex';
+
+  // Header
+  document.getElementById('ch-email').textContent = ticket.clientEmail || 'Client';
+  document.getElementById('ch-subject').textContent = ticket.subject || 'Support Request';
+  const dt = ticket.createdAt?.toDate ? ticket.createdAt.toDate() : new Date();
+  document.getElementById('ch-opened').textContent = 'Opened ' + dt.toLocaleDateString('en-US', {month:'short',day:'numeric',year:'numeric'});
+  const isResolved = ticket.status === 'resolved';
+  document.getElementById('ch-status-chip').textContent = isResolved ? '✓ Resolved' : ticket.priority === 'urgent' ? '⚠ Urgent' : '● Open';
+  document.getElementById('ch-status-chip').style.color = isResolved ? 'var(--green-dk)' : ticket.priority === 'urgent' ? 'var(--red)' : 'var(--amber)';
+  const msgs = ticket.messages || [];
+  document.getElementById('ch-count-chip').textContent = msgs.length + ' message' + (msgs.length !== 1 ? 's' : '');
+
+  // Action buttons
+  const resolveBtn = document.getElementById('resolve-btn');
+  if (isResolved) {
+    resolveBtn.textContent = '↩ Reopen';
+    resolveBtn.className = 'action-btn';
+  } else {
+    resolveBtn.textContent = '✓ Resolve';
+    resolveBtn.className = 'action-btn green';
+  }
+
+  // Messages
+  const msgsEl = document.getElementById('chat-msgs');
+  msgsEl.innerHTML = '';
+
+  // Opening system message
+  const openMsg = document.createElement('div');
+  openMsg.className = 'msg-system';
+  openMsg.textContent = 'Ticket opened — ' + dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'});
+  msgsEl.appendChild(openMsg);
+
+  msgs.forEach(m => {
+    const div = document.createElement('div');
+    div.className = 'msg ' + (m.fromSupport ? 'team' : 'client');
+    const sentDt = m.sentAt ? new Date(m.sentAt) : new Date();
+    const timeStr = sentDt.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}) + (isToday(sentDt) ? '' : ' · ' + sentDt.toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+    div.innerHTML = `
+      <div class="msg-name${m.fromSupport?' team-label':''}">${m.fromSupport ? 'TraderTax Support' : (ticket.clientEmail||'Client')}</div>
+      <div class="msg-bubble">${m.body.replace(/\n/g,'<br/>')}</div>
+      <div class="msg-time">${timeStr}</div>`;
+    msgsEl.appendChild(div);
+  });
+
+  if (isResolved) {
+    const closeMsg = document.createElement('div');
+    closeMsg.className = 'msg-system';
+    closeMsg.textContent = '✓ Ticket resolved';
+    msgsEl.appendChild(closeMsg);
+  }
+
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  // Focus reply input
+  const replyInput = document.getElementById('reply-input');
+  replyInput.dataset.ticketId = ticket.id;
+  replyInput.disabled = false;
+  document.getElementById('send-btn').disabled = false;
+  replyInput.value = '';
+  replyInput.style.height = 'auto';
+}
+
+/* ── SEND REPLY ── */
+async function sendReply() {
+  const input = document.getElementById('reply-input');
+  const body = input.value.trim();
+  if (!body || !activeTicketId) return;
+
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+  input.value = '';
+  input.style.height = 'auto';
+
+  // Optimistic render
+  const msgsEl = document.getElementById('chat-msgs');
+  const div = document.createElement('div');
+  div.className = 'msg team';
+  div.innerHTML = `<div class="msg-name team-label">TraderTax Support</div><div class="msg-bubble">${body.replace(/\n/g,'<br/>')}</div><div class="msg-time">Just now</div>`;
+  msgsEl.appendChild(div);
+  msgsEl.scrollTop = msgsEl.scrollHeight;
+
+  try {
+    await db.collection('support_tickets').doc(activeTicketId).update({
+      messages: firebase.firestore.FieldValue.arrayUnion({
+        body,
+        fromSupport: true,
+        sentBy: currentUser.email,
+        sentAt: new Date().toISOString()
+      }),
+      status: 'open',
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    const t = allTickets.find(t => t.id === activeTicketId);
+    if (t) {
+      t.messages = t.messages || [];
+      t.messages.push({ body, fromSupport: true, sentBy: currentUser.email, sentAt: new Date().toISOString() });
+      document.getElementById('ch-count-chip').textContent = t.messages.length + ' messages';
+    }
+    showToast('Reply sent', 'green');
+    renderTickets();
+  } catch(e) {
+    showToast('Error sending reply');
+    console.error(e);
+  }
+  sendBtn.disabled = false;
+  input.focus();
+}
+
+/* ── RESOLVE / URGENT ── */
+async function resolveTicket() {
+  if (!activeTicketId) return;
+  const ticket = allTickets.find(t => t.id === activeTicketId);
+  if (!ticket) return;
+  const newStatus = ticket.status === 'resolved' ? 'open' : 'resolved';
+  try {
+    await db.collection('support_tickets').doc(activeTicketId).update({
+      status: newStatus,
+      resolvedAt: newStatus === 'resolved' ? firebase.firestore.FieldValue.serverTimestamp() : null,
+      resolvedBy: newStatus === 'resolved' ? currentUser.email : null
+    });
+    ticket.status = newStatus;
+    showToast(newStatus === 'resolved' ? 'Ticket resolved ✓' : 'Ticket reopened', 'green');
+    renderChat(ticket);
+    renderTickets();
+    updateStats();
+  } catch(e) { showToast('Error updating ticket'); }
+}
+
+async function flagUrgent() {
+  if (!activeTicketId) return;
+  const ticket = allTickets.find(t => t.id === activeTicketId);
+  if (!ticket) return;
+  const newPriority = ticket.priority === 'urgent' ? 'normal' : 'urgent';
+  try {
+    await db.collection('support_tickets').doc(activeTicketId).update({ priority: newPriority });
+    ticket.priority = newPriority;
+    showToast(newPriority === 'urgent' ? '⚠ Flagged as urgent' : 'Urgent flag removed');
+    renderChat(ticket);
+    renderTickets();
+  } catch(e) { showToast('Error'); }
+}
+
+function emailClient() {
+  const ticket = allTickets.find(t => t.id === activeTicketId);
+  if (!ticket?.clientEmail) return;
+  window.open(`mailto:${ticket.clientEmail}?subject=Re: ${encodeURIComponent(ticket.subject||'Your TraderTax Support Request')}`);
+}
+
+/* ── QUICK REPLIES ── */
+function insertQuickReply(text) {
+  const input = document.getElementById('reply-input');
+  input.value = text;
+  input.focus();
+  autoResize(input);
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+/* ── TOAST ── */
+function showToast(msg, cls = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast' + (cls ? ' ' + cls : '');
+  setTimeout(() => t.classList.add('show'), 10);
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
