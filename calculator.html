@@ -10,7 +10,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   const app = initializeApp({
     apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
     authDomain:"taxtrader.firebaseapp.com",
@@ -20,12 +21,32 @@
     appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
   });
   const db = getFirestore(app);
+  const auth = getAuth(app);
   window._saveLead = async (data) => {
     try {
       const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
       // Manual referral code takes priority
       if (data.referralCode) affPayload.affiliateCode = data.referralCode;
       await addDoc(collection(db,"calculator_leads"),{...data, ...affPayload, createdAt:serverTimestamp()});
+
+      // If user is logged in, save calc result to their dashboard profile
+      const user = auth.currentUser;
+      if (user) {
+        const calcEntry = {
+          year: new Date().getFullYear(),
+          traderType: data.trades || 'Trader',
+          date: new Date().toISOString(),
+          estimatedTax: data.estimatedTax || 0,
+          w2Income: data.w2 || 0,
+          propIncome: data.prop || 0,
+          state: data.state || '',
+          source: 'Calculator',
+        };
+        await setDoc(doc(db,'users', user.uid), {
+          calcResults: calcEntry,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+      }
       sendLeadEmail('Calculator Lead', data.name || '', data.email, data.phone || '', data.tradingStyle || '', '');
       console.log("Lead saved");
     } catch(e){ console.warn("Firestore:",e); }
