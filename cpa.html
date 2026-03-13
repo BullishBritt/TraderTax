@@ -504,14 +504,23 @@ let myCpasDocId = null; // The CPA's cpas-collection doc ID (used by admin for a
 auth.onAuthStateChanged(async user => {
   if (user) {
     const adminEmails = ['hello@tradertax.net','brittainalfaro@gmail.com','brittain0404@yahoo.com'];
-    const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
-    const role = snap?.data()?.role;
-    if (role !== 'cpa' && role !== 'admin' && !adminEmails.includes(user.email)) {
-      auth.signOut();
-      return;
+    
+    // Allow admin emails immediately
+    if (adminEmails.includes(user.email)) {
+      currentUser = user;
+      const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
+      cpaData = snap?.exists ? snap.data() : {};
+    } else {
+      // For non-admin emails, check role
+      const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
+      const role = snap?.exists ? snap.data()?.role : null;
+      if (role !== 'cpa' && role !== 'admin') {
+        auth.signOut();
+        return;
+      }
+      currentUser = user;
+      cpaData = snap.data() || {};
     }
-    currentUser = user;
-    cpaData = snap?.data() || {};
 
     // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
     // The admin stores cpaId from the cpas collection, NOT the Firebase Auth UID
