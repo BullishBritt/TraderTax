@@ -503,37 +503,57 @@ let myCpasDocId = null; // The CPA's cpas-collection doc ID (used by admin for a
 /* ── AUTH ── */
 auth.onAuthStateChanged(async user => {
   if (user) {
+    console.log('Auth state changed - user logged in:', user.email);
     const adminEmails = ['hello@tradertax.net','brittainalfaro@gmail.com','brittain0404@yahoo.com'];
     
-    // Allow admin emails immediately
-    if (adminEmails.includes(user.email)) {
-      currentUser = user;
-      const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
-      cpaData = snap?.exists ? snap.data() : {};
-    } else {
-      // For non-admin emails, check role
-      const snap = await db.collection('users').doc(user.uid).get().catch(()=>null);
-      const role = snap?.exists ? snap.data()?.role : null;
-      if (role !== 'cpa' && role !== 'admin') {
-        auth.signOut();
-        return;
-      }
-      currentUser = user;
-      cpaData = snap.data() || {};
-    }
-
-    // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
-    // The admin stores cpaId from the cpas collection, NOT the Firebase Auth UID
     try {
-      const cpasSnap = await db.collection('cpas').where('email','==',user.email).limit(1).get();
-      if (!cpasSnap.empty) {
-        myCpasDocId = cpasSnap.docs[0].id;
-        // Merge cpas doc data into cpaData so we have firstName, lastName, credentials etc.
-        cpaData = { ...cpasSnap.docs[0].data(), ...cpaData };
+      // Allow admin emails immediately
+      if (adminEmails.includes(user.email)) {
+        console.log('Admin email detected, granting access');
+        currentUser = user;
+        const snap = await db.collection('users').doc(user.uid).get().catch(err => {
+          console.warn('Could not fetch user doc:', err);
+          return null;
+        });
+        cpaData = snap?.exists ? snap.data() : {};
+      } else {
+        // For non-admin emails, check role
+        console.log('Non-admin email, checking role');
+        const snap = await db.collection('users').doc(user.uid).get().catch(err => {
+          console.warn('Could not fetch user doc:', err);
+          return null;
+        });
+        const role = snap?.exists ? snap.data()?.role : null;
+        console.log('User role:', role);
+        if (role !== 'cpa' && role !== 'admin') {
+          console.log('Access denied - invalid role');
+          auth.signOut();
+          return;
+        }
+        currentUser = user;
+        cpaData = snap.data() || {};
       }
-    } catch(e) { console.warn('Could not find cpas doc:', e.message); }
 
-    showApp(user);
+      // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
+      try {
+        const cpasSnap = await db.collection('cpas').where('email','==',user.email).limit(1).get();
+        if (!cpasSnap.empty) {
+          myCpasDocId = cpasSnap.docs[0].id;
+          cpaData = { ...cpasSnap.docs[0].data(), ...cpaData };
+          console.log('Found CPA doc ID:', myCpasDocId);
+        } else {
+          console.log('No CPA doc found for', user.email);
+        }
+      } catch(e) { console.warn('Could not find cpas doc:', e.message); }
+
+      console.log('Calling showApp');
+      showApp(user);
+    } catch(e) {
+      console.error('Auth flow error:', e);
+      auth.signOut();
+    }
+  } else {
+    console.log('No user logged in');
   }
 });
 
@@ -542,29 +562,44 @@ async function lgIn() {
   const pw = document.getElementById('lg-pw').value;
   const err = document.getElementById('lg-err');
   err.classList.remove('show');
+  console.log('Attempting login for:', email);
   try {
     await auth.signInWithEmailAndPassword(email, pw);
+    console.log('Login successful');
   } catch(e) {
+    console.error('Login error:', e);
     err.textContent = 'Incorrect email or password.';
     err.classList.add('show');
   }
 }
 
 function showApp(user) {
-  document.getElementById('login-gate').style.display = 'none';
-  document.getElementById('app').style.display = 'grid';
-  const name = cpaData.firstName ? cpaData.firstName + ' ' + (cpaData.lastName||'') : user.email.split('@')[0];
-  const ini = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-  document.getElementById('nav-avatar').textContent = ini;
-  document.getElementById('nav-name').textContent = name;
-  // Profile fields
-  document.getElementById('pf-email').value = user.email;
-  document.getElementById('pf-first').value = cpaData.firstName || '';
-  document.getElementById('pf-last').value = cpaData.lastName || '';
-  document.getElementById('pf-creds').value = cpaData.credentials || '';
-  document.getElementById('pf-specialty').value = cpaData.specialty || '';
-  loadClients();
-  setupCPANotifications(user);
+  console.log('showApp called for:', user.email);
+  console.log('cpaData:', cpaData);
+  
+  try {
+    document.getElementById('login-gate').style.display = 'none';
+    document.getElementById('app').style.display = 'grid';
+    
+    const name = cpaData.firstName ? cpaData.firstName + ' ' + (cpaData.lastName||'') : user.email.split('@')[0];
+    const ini = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    document.getElementById('nav-avatar').textContent = ini;
+    document.getElementById('nav-name').textContent = name;
+    
+    // Profile fields
+    document.getElementById('pf-email').value = user.email;
+    document.getElementById('pf-first').value = cpaData.firstName || '';
+    document.getElementById('pf-last').value = cpaData.lastName || '';
+    document.getElementById('pf-creds').value = cpaData.credentials || '';
+    document.getElementById('pf-specialty').value = cpaData.specialty || '';
+    
+    console.log('Loading clients...');
+    loadClients();
+    setupCPANotifications(user);
+    console.log('App shown successfully');
+  } catch(e) {
+    console.error('Error in showApp:', e);
+  }
 }
 
 /* ── REAL-TIME NOTIFICATIONS ── */
