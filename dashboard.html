@@ -508,6 +508,11 @@ async function loadUser(user){
     } else {
       // First time — create user doc with email so admin can look them up
       await setDoc(doc(db,'users',user.uid),{email:user.email,role:'client',createdAt:new Date().toISOString()},{merge:true});
+      // Also write a lead record so admin sees them in Leads tab
+      await addDoc(collection(db,'leads'),{
+        email:user.email, source:'Signup', createdAt:new Date().toISOString(),
+        priority:'standard', uid:user.uid
+      }).catch(()=>{});
     }
     let snaps=userData.snapshots||[];
     if(userData.snapshot&&userData.snapshotLinked){
