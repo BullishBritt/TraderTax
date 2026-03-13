@@ -229,7 +229,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
     <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
     <button class="lg-btn" onclick="lgIn()">Sign In to Workspace</button>
     <div class="lg-err" id="lg-err">Incorrect credentials or access not authorized.</div>
-    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="/cdn-cgi/l/email-protection#4028252c2c2f003432212425323421386e2e2534" style="color:var(--green);font-weight:600;"><span class="__cf_email__" data-cfemail="f29a979e9e9db286809396978086938adc9c9786">[email&#160;protected]</span></a></div>
+    <div style="margin-top:18px;font-size:.75rem;color:var(--muted);">Don't have an account? Contact <a href="mailto:hello@tradertax.net" style="color:var(--green);font-weight:600;">hello@tradertax.net</a></div>
   </div>
 </div>
 
@@ -485,7 +485,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
   </main>
 </div><!-- end app -->
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const db = firebase.firestore();
 const auth = firebase.auth();
 const storage = firebase.storage();
@@ -818,7 +818,7 @@ window.closeWorkspace = function() {
 window.showWsPanel = function(panel) {
   document.querySelectorAll('.ws-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('ws-'+panel).classList.add('active');
+  document.getElementById(panel).classList.add('active');
   const tab = document.getElementById('wst-'+panel);
   if (tab) tab.classList.add('active');
 };
@@ -1098,4 +1098,12 @@ window.showTab = function(tab) {
 
 /* ── TOAST ── */
 function showToast(msg,type='') {
-  const t=document.getElementByI
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type?' '+type:'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+  <script src="affiliate-tracker.js"></script>
+</body>
+</html>
