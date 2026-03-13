@@ -244,6 +244,10 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
       <span class="topbar-tag">Specialist</span>
     </div>
     <div class="topbar-right">
+      <div id="notif-bell" style="display:none;position:relative;cursor:pointer;" onclick="openNotifPanel()">
+        <div style="font-size:1.3rem;">🔔</div>
+        <div id="notif-badge" style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:#fff;"></div>
+      </div>
       <div class="user-pill">
         <div class="avatar" id="nav-avatar">?</div>
         <span id="nav-name">Loading...</span>
@@ -317,6 +321,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
         <div class="ws-tabs">
           <div class="ws-tab active" onclick="showWsPanel('overview-panel')" id="wst-overview-panel">Overview</div>
           <div class="ws-tab" onclick="showWsPanel('docs-panel')" id="wst-docs-panel">Documents</div>
+          <div class="ws-tab" onclick="showWsPanel('messages-panel');loadClientMessages()" id="wst-messages-panel">💬 Messages <span id="ws-msg-badge" style="display:none;width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block;vertical-align:middle;margin-left:4px;"></span></div>
           <div class="ws-tab" onclick="showWsPanel('notes-panel')" id="wst-notes-panel">My Notes</div>
           <div class="ws-tab" onclick="showWsPanel('upload-return')" id="wst-upload-return">Upload Return</div>
         </div>
@@ -332,6 +337,26 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
           <div class="section-title">Client Info</div>
           <div class="card" id="ws-client-info" style="padding:20px;">
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;" id="ws-info-grid"></div>
+          </div>
+        </div>
+
+        <!-- Messages Panel -->
+        <div class="ws-panel" id="ws-messages-panel">
+          <div style="background:var(--navy);border-radius:12px;overflow:hidden;border:1px solid var(--border);">
+            <div style="background:var(--navy);padding:14px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.08);">
+              <div id="ws-msg-avatar" style="width:34px;height:34px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0;">?</div>
+              <div>
+                <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.88rem;" id="ws-msg-client-name">Client</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);">Secure · Private · Encrypted</div>
+              </div>
+            </div>
+            <div id="ws-msgs-container" style="height:300px;overflow-y:auto;padding:16px;background:var(--bg);display:flex;flex-direction:column;gap:10px;">
+              <div style="text-align:center;color:var(--muted);font-size:.83rem;padding:24px;">Loading messages…</div>
+            </div>
+            <div style="border-top:1px solid var(--border);padding:12px 14px;display:flex;gap:8px;background:var(--surface);">
+              <textarea id="ws-msg-input" placeholder="Message this client…" style="flex:1;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:.87rem;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;resize:none;transition:border-color .2s;height:42px;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendClientMessage();}"></textarea>
+              <button onclick="sendClientMessage()" style="padding:10px 16px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">Send</button>
+            </div>
           </div>
         </div>
 
@@ -517,36 +542,98 @@ function showApp(user) {
   document.getElementById('pf-creds').value = cpaData.credentials || '';
   document.getElementById('pf-specialty').value = cpaData.specialty || '';
   loadClients();
+  setupCPANotifications(user);
 }
+
+/* ── REAL-TIME NOTIFICATIONS ── */
+function setupCPANotifications(user) {
+  db.collection('notifications').doc(user.uid).collection('items')
+    .where('read','==',false)
+    .onSnapshot(snap => {
+      const unread = snap.docs.length;
+      const bell = document.getElementById('notif-bell');
+      const badge = document.getElementById('notif-badge');
+      if (unread > 0) {
+        bell.style.display = 'block';
+        badge.textContent = unread > 9 ? '9+' : unread;
+      } else {
+        bell.style.display = 'none';
+      }
+      // Show toast for new client assignments
+      snap.docChanges().forEach(change => {
+        if (change.type === 'added') {
+          const d = change.doc.data();
+          if (d.type === 'new_client') {
+            showCPAToast('🎉 New Client Assigned!', d.message, d.clientUid);
+            change.doc.ref.update({read:true}).catch(()=>{});
+            // Refresh client list
+            setTimeout(loadClients, 1000);
+          } else if (d.type === 'new_message') {
+            showCPAToast('💬 New Message', d.message, null);
+            change.doc.ref.update({read:true}).catch(()=>{});
+          }
+        }
+      });
+    }, e => console.warn('Notif listener:', e.message));
+}
+
+function showCPAToast(title, msg, clientUid) {
+  const existing = document.getElementById('cpa-notif-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'cpa-notif-toast';
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:16px 20px;border-radius:14px;box-shadow:0 8px 32px rgba(10,22,40,.4);z-index:9999;max-width:300px;';
+  t.innerHTML = `<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.9rem;margin-bottom:5px;">${title}</div><div style="font-size:.8rem;color:rgba(255,255,255,.7);margin-bottom:10px;">${msg}</div>${clientUid?`<button onclick="openClient('${clientUid}');this.closest('#cpa-notif-toast').remove();" style="padding:6px 14px;background:var(--green);color:#fff;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;margin-right:8px;">View Client →</button>`:''}<button onclick="this.closest('#cpa-notif-toast').remove();" style="padding:6px 10px;background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:7px;font-size:.75rem;cursor:pointer;">Dismiss</button>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove && t.remove(), 15000);
+}
+
+window.openNotifPanel = function() {
+  // Mark all read + dismiss bell  
+  if (!currentUser) return;
+  db.collection('notifications').doc(currentUser.uid).collection('items')
+    .where('read','==',false).get()
+    .then(snap => snap.docs.forEach(d => d.ref.update({read:true})))
+    .catch(()=>{});
+};
 
 function handleLogout() { auth.signOut(); location.reload(); }
 
 /* ── CLIENTS ── */
 async function loadClients() {
   try {
-    // Primary: query users by assignedCPA.uid
-    const snap = await db.collection('users')
-      .where('assignedCPA.uid', '==', currentUser.uid)
-      .get().catch(()=>({docs:[]}));
+    // Load from all three sources in parallel
+    const [usersSnap, assignSnap, retSnap] = await Promise.all([
+      db.collection('users').where('assignedCPA.uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('assignments').where('assignedCPA.uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('tax_returns').where('cpaUid','==',currentUser.uid).get().catch(()=>({docs:[]}))
+    ]);
 
-    // Fallback: also check tax_returns for this CPA in case users query fails
-    const retSnap = await db.collection('tax_returns')
-      .where('cpaUid','==',currentUser.uid)
-      .get().catch(()=>({docs:[]}));
-
-    const fromUsers = snap.docs.map(d => ({id: d.id, ...d.data()}));
+    // Build client list — prefer users doc data, supplement with assignments data
+    const clientMap = new Map();
     
-    // For any tax_return clients not already in fromUsers, fetch their user doc
-    const existingIds = new Set(fromUsers.map(c=>c.id));
-    const extraFetches = retSnap.docs
-      .filter(d=>!existingIds.has(d.data().clientUid))
-      .map(d=>db.collection('users').doc(d.data().clientUid).get().catch(()=>null));
-    const extraDocs = await Promise.all(extraFetches);
-    const fromReturns = extraDocs
-      .filter(d=>d&&d.exists)
-      .map(d=>({id:d.id,...d.data()}));
-
-    myClients = [...fromUsers, ...fromReturns];
+    // From users collection
+    usersSnap.docs.forEach(d => clientMap.set(d.id, {id:d.id,...d.data()}));
+    
+    // From assignments collection (fallback when users write failed)
+    assignSnap.docs.forEach(d => {
+      const data = d.data();
+      if (!clientMap.has(data.clientUid)) {
+        clientMap.set(data.clientUid, {id:data.clientUid,...data});
+      }
+    });
+    
+    // From tax_returns — fetch user docs for any clients not yet in map
+    const missingUids = retSnap.docs
+      .map(d=>d.data().clientUid)
+      .filter(uid=>uid && !clientMap.has(uid));
+    const missingFetches = [...new Set(missingUids)].map(uid=>
+      db.collection('users').doc(uid).get().catch(()=>null)
+    );
+    const missingDocs = await Promise.all(missingFetches);
+    missingDocs.filter(d=>d&&d.exists).forEach(d=>clientMap.set(d.id,{id:d.id,...d.data()}));
+    
+    myClients = [...clientMap.values()];
     document.getElementById('sb-client-count').textContent = myClients.length;
 
     // Populate upload-client-select
@@ -705,6 +792,9 @@ async function openClient(clientId) {
   document.getElementById('workspace').style.display = 'block';
   document.getElementById('workspace').scrollIntoView({behavior:'smooth',block:'start'});
   showWsPanel('overview-panel');
+  // Reset messages panel for new client
+  if (clientMsgListener) { clientMsgListener(); clientMsgListener = null; }
+  document.getElementById('ws-msgs-container').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.83rem;padding:24px;">Click the Messages tab to load conversation.</div>';
 }
 
 window.closeWorkspace = function() {
@@ -719,6 +809,69 @@ window.showWsPanel = function(panel) {
   document.getElementById('ws-'+panel).classList.add('active');
   const tab = document.getElementById('wst-'+panel);
   if (tab) tab.classList.add('active');
+};
+
+/* ── CLIENT MESSAGES ── */
+let clientMsgListener = null;
+
+window.loadClientMessages = function() {
+  if (!activeClientId || !currentUser) return;
+  const convId = activeClientId + '_' + currentUser.uid;
+  const client = myClients.find(c=>c.id===activeClientId);
+  const clientName = client ? ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||'Client' : 'Client';
+  const ini = clientName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)||'?';
+
+  document.getElementById('ws-msg-client-name').textContent = clientName;
+  document.getElementById('ws-msg-avatar').textContent = ini;
+
+  if (clientMsgListener) clientMsgListener();
+  clientMsgListener = db.collection('messages').doc(convId)
+    .onSnapshot(snap => {
+      const data = snap.exists ? snap.data() : {};
+      const thread = data.thread || [];
+      const container = document.getElementById('ws-msgs-container');
+      if (!thread.length) {
+        container.innerHTML = '<div style="text-align:center;padding:32px;color:var(--muted);font-size:.83rem;"><div style="font-size:2rem;margin-bottom:8px;">💬</div><div>No messages yet. Send the client a welcome message!</div></div>';
+        return;
+      }
+      container.innerHTML = thread.map(m => {
+        const isMe = m.from === currentUser.uid;
+        const time = m.sentAt ? new Date(m.sentAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+        const bubble = `<div style="max-width:78%;display:flex;flex-direction:column;gap:3px;align-self:${isMe?'flex-end':'flex-start'};align-items:${isMe?'flex-end':'flex-start'};">
+          <div style="padding:10px 14px;border-radius:14px;font-size:.85rem;line-height:1.5;${isMe?'background:var(--navy);color:#fff;border-bottom-right-radius:4px;':'background:var(--surface);color:var(--navy);border:1px solid var(--border);border-bottom-left-radius:4px;'}">${m.body}</div>
+          <div style="font-size:.65rem;color:var(--muted);">${isMe?'You':m.senderName||'Client'} · ${time}</div>
+        </div>`;
+        return bubble;
+      }).join('');
+      container.scrollTop = container.scrollHeight;
+    }, e => console.warn('Msg listener:', e.message));
+};
+
+window.sendClientMessage = async function() {
+  if (!activeClientId || !currentUser) return;
+  const input = document.getElementById('ws-msg-input');
+  const body = input.value.trim();
+  if (!body) return;
+  input.value = '';
+  const convId = activeClientId + '_' + currentUser.uid;
+  const ts = new Date().toISOString();
+  const myCPAName = cpaData.firstName ? (cpaData.firstName+' '+(cpaData.lastName||'')).trim() : currentUser.email;
+  try {
+    await db.collection('messages').doc(convId).set({
+      participants: [activeClientId, currentUser.uid],
+      clientUid: activeClientId, cpaUid: currentUser.uid,
+      thread: firebase.firestore.FieldValue.arrayUnion({
+        from: currentUser.uid, senderName: myCPAName, body, sentAt: ts
+      }),
+      lastUpdated: ts
+    }, {merge: true});
+    // Notify client
+    db.collection('notifications').doc(activeClientId).collection('items').add({
+      type: 'new_message', cpaUid: currentUser.uid, cpaName: myCPAName,
+      message: 'Message from '+myCPAName+': '+body.slice(0,60),
+      read: false, createdAt: ts
+    }).catch(()=>{});
+  } catch(e) { showToast('Error sending message', 'red'); }
 };
 
 /* ── STATUS UPDATE ── */
