@@ -557,7 +557,7 @@ auth.onAuthStateChanged(async user => {
   }
 });
 
-async function lgIn() {
+window.lgIn = async function() {
   const email = document.getElementById('lg-email').value.trim();
   const pw = document.getElementById('lg-pw').value;
   const err = document.getElementById('lg-err');
@@ -571,7 +571,7 @@ async function lgIn() {
     err.textContent = 'Incorrect email or password.';
     err.classList.add('show');
   }
-}
+};
 
 function showApp(user) {
   console.log('showApp called for:', user.email);
@@ -653,7 +653,7 @@ window.openNotifPanel = function() {
     .catch(()=>{});
 };
 
-function handleLogout() { auth.signOut(); location.reload(); }
+window.handleLogout = function() { auth.signOut(); location.reload(); };
 
 /* ── CLIENTS ── */
 async function loadClients() {
