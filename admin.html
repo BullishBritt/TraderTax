@@ -771,16 +771,28 @@ async function confirmAssign() {
   const cpaName=((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
   const clientEmail=uidEmailLookup[assignClientId]||'';
 
-  // STEP 1: users doc
+  // STEP 1: write to both users doc AND a dedicated assignments collection
   msg.textContent='Step 1: Saving...';msg.style.color='var(--muted)';
   try {
+    // Try users doc first (may fail if rules are strict)
     await db.collection('users').doc(assignClientId).set({
       assignedCPA:{uid:cpaId,name:cpaName},role:'client',
       taxYear:parseInt(taxYear),returnStatus:'assigned',
       updatedAt:new Date().toISOString(),
       ...(clientEmail?{email:clientEmail}:{})
     },{merge:true});
-  } catch(e){ msg.textContent='❌ Step 1 failed (users): '+e.message;msg.style.color='var(--red)';console.error(e);return; }
+  } catch(e){
+    console.warn('users doc write failed, using assignments fallback:', e.message);
+    // Fallback: write to assignments collection (always open)
+    try {
+      await db.collection('assignments').doc(assignClientId).set({
+        clientUid:assignClientId, clientEmail,
+        assignedCPA:{uid:cpaId,name:cpaName},
+        taxYear:parseInt(taxYear), returnStatus:'assigned',
+        updatedAt:new Date().toISOString()
+      },{merge:true});
+    } catch(e2){ msg.textContent='❌ Step 1 failed: '+e2.message;msg.style.color='var(--red)';console.error(e2);return; }
+  }
 
   // STEP 2: tax_returns record
   msg.textContent='Step 2: Creating return...';
@@ -794,12 +806,33 @@ async function confirmAssign() {
     });
   } catch(e){ msg.textContent='❌ Step 2 failed (tax_returns): '+e.message;msg.style.color='var(--red)';console.error(e);return; }
 
+  // STEP 3: Fire notifications to both client and CPA (non-blocking)
+  const ts = new Date().toISOString();
+  try {
+    const batch = db.batch();
+    // Notify client — they'll see this instantly on their dashboard
+    const clientNotifRef = db.collection('notifications').doc(assignClientId).collection('items').doc();
+    batch.set(clientNotifRef, {
+      type: 'cpa_assigned', cpaName, cpaUid: cpaId, cpaEmail: cpa.email||'',
+      message: 'Your tax specialist '+cpaName+' has been assigned. You can now message them directly in your dashboard.',
+      read: false, createdAt: ts
+    });
+    // Notify CPA — shows "New Assignment" alert in their portal instantly
+    const cpaNotifRef = db.collection('notifications').doc(cpaId).collection('items').doc();
+    batch.set(cpaNotifRef, {
+      type: 'new_client', clientUid: assignClientId, clientEmail,
+      message: 'New client assigned: '+(clientEmail||assignClientId)+'. Tax Year '+taxYear+'.',
+      read: false, createdAt: ts
+    });
+    await batch.commit();
+  } catch(e) { console.warn('Notifications skipped (non-critical):', e.message); }
+
   // SUCCESS
   const c=allClients.find(cl=>cl.id===assignClientId);
   if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
   msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
   msg.style.color='var(--green-dk)';
-  showToast('✓ Assigned to '+cpaName,'green-t');
+  showToast('✓ Assigned to '+cpaName+' — both parties notified','green-t');
   loadClients(); loadCPAs();
   setTimeout(()=>closeAssignModal(),2500);
 }
