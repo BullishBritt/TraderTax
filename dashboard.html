@@ -505,7 +505,6 @@ async function loadUser(user){
       document.getElementById('pf-phone').value=userData.phone||'';
       document.getElementById('pf-state').value=userData.state||'';
       if(userData.createdAt){const d=new Date(userData.createdAt);document.getElementById('stat-since').textContent=d.toLocaleDateString('en-US',{month:'short',year:'numeric'});}
-    }
     } else {
       // First time — create user doc with email so admin can look them up
       await setDoc(doc(db,'users',user.uid),{email:user.email,role:'client',createdAt:new Date().toISOString()},{merge:true});
