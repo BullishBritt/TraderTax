@@ -413,7 +413,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="page-sub">Get help from our team. We respond within 24 hours — usually faster.</div>
       <div class="support-grid">
         <div class="sup-card" onclick="focusNewMessage()"><div class="sup-card-icon">💬</div><div class="sup-card-title">Message Our Team</div><div class="sup-card-sub">Ask about your return, documents, or account</div></div>
-        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98ebede8e8f7eaecd8eceaf9fcfdeaecf9e0b6f6fdec">[email&#160;protected]</a></div></div>
+        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub">support@tradertax.net</div></div>
         <div class="sup-card" onclick="window.location.href='contact.html'"><div class="sup-card-icon">📞</div><div class="sup-card-title">Book a Call</div><div class="sup-card-sub">Schedule with your specialist</div></div>
       </div>
       <div class="chat-layout">
@@ -468,7 +468,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 </div>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
+<script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getDocs,updateDoc,arrayUnion,serverTimestamp,onSnapshot}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -789,4 +789,12 @@ window.sendCPAMessage = async function() {
     setDoc(doc(db,'notifications',assignedCPAData.uid), {lastMessage:ts},{merge:true}).catch(()=>{});
     addDoc(collection(db,'notifications',assignedCPAData.uid,'items'), {
       type:'new_message', clientUid:currentUser.uid, clientEmail:currentUser.email,
-      message:'New message from '+(myNam
+      message:'New message from '+(myName.trim()||currentUser.email)+': '+body.slice(0,60),
+      read:false, createdAt:ts
+    }).catch(()=>{});
+  } catch(e) { console.error('Send message:', e); }
+};
+</script>
+  <script src="affiliate-tracker.js"></script>
+</body>
+</html>
