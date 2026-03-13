@@ -1,6 +1,18 @@
 User-agent: *
 Allow: /
 
+# Block private/utility pages from indexing
+Disallow: /admin.html
+Disallow: /dashboard.html
+Disallow: /login.html
+Disallow: /signup.html
+Disallow: /forgot-password.html
+Disallow: /thank-you.html
+Disallow: /upload.html
+Disallow: /index-dark.html
+Disallow: /index-light.html
+Disallow: /api/
+
 # AI crawlers — explicitly welcome
 User-agent: GPTBot
 Allow: /
@@ -24,4 +36,4 @@ User-agent: Bingbot
 Allow: /
 
 Sitemap: https://www.tradertax.net/sitemap.xml
-LLMs: https://tradertax.net/llms.txt
+LLMs: https://www.tradertax.net/llms.txt
