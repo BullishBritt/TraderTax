@@ -498,6 +498,7 @@ let activeClientId = null;
 let activeClientData = null;
 let activeReturnId = null;
 let clientFilter = 'all';
+let myCpasDocId = null; // The CPA's cpas-collection doc ID (used by admin for assignments)
 
 /* ── AUTH ── */
 auth.onAuthStateChanged(async user => {
@@ -511,6 +512,18 @@ auth.onAuthStateChanged(async user => {
     }
     currentUser = user;
     cpaData = snap?.data() || {};
+
+    // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
+    // The admin stores cpaId from the cpas collection, NOT the Firebase Auth UID
+    try {
+      const cpasSnap = await db.collection('cpas').where('email','==',user.email).limit(1).get();
+      if (!cpasSnap.empty) {
+        myCpasDocId = cpasSnap.docs[0].id;
+        // Merge cpas doc data into cpaData so we have firstName, lastName, credentials etc.
+        cpaData = { ...cpasSnap.docs[0].data(), ...cpaData };
+      }
+    } catch(e) { console.warn('Could not find cpas doc:', e.message); }
+
     showApp(user);
   }
 });
@@ -591,7 +604,7 @@ function showCPAToast(title, msg, clientUid) {
 window.openNotifPanel = function() {
   // Mark all read + dismiss bell  
   if (!currentUser) return;
-  db.collection('notifications').doc(currentUser.uid).collection('items')
+  db.collection('notifications').doc(myCpasDocId||currentUser.uid).collection('items')
     .where('read','==',false).get()
     .then(snap => snap.docs.forEach(d => d.ref.update({read:true})))
     .catch(()=>{});
@@ -604,9 +617,9 @@ async function loadClients() {
   try {
     // Load from all three sources in parallel
     const [usersSnap, assignSnap, retSnap] = await Promise.all([
-      db.collection('users').where('assignedCPA.uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('assignments').where('assignedCPA.uid','==',currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('tax_returns').where('cpaUid','==',currentUser.uid).get().catch(()=>({docs:[]}))
+      db.collection('users').where('assignedCPA.uid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('assignments').where('assignedCPA.uid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]})),
+      db.collection('tax_returns').where('cpaUid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]}))
     ]);
 
     // Build client list — prefer users doc data, supplement with assignments data
@@ -816,7 +829,7 @@ let clientMsgListener = null;
 
 window.loadClientMessages = function() {
   if (!activeClientId || !currentUser) return;
-  const convId = activeClientId + '_' + currentUser.uid;
+  const convId = activeClientId + '_' + (myCpasDocId||currentUser.uid);
   const client = myClients.find(c=>c.id===activeClientId);
   const clientName = client ? ((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||'Client' : 'Client';
   const ini = clientName.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2)||'?';
@@ -853,13 +866,13 @@ window.sendClientMessage = async function() {
   const body = input.value.trim();
   if (!body) return;
   input.value = '';
-  const convId = activeClientId + '_' + currentUser.uid;
+  const convId = activeClientId + '_' + (myCpasDocId||currentUser.uid);
   const ts = new Date().toISOString();
   const myCPAName = cpaData.firstName ? (cpaData.firstName+' '+(cpaData.lastName||'')).trim() : currentUser.email;
   try {
     await db.collection('messages').doc(convId).set({
-      participants: [activeClientId, currentUser.uid],
-      clientUid: activeClientId, cpaUid: currentUser.uid,
+      participants: [activeClientId, myCpasDocId||currentUser.uid],
+      clientUid: activeClientId, cpaUid: myCpasDocId||currentUser.uid,
       thread: firebase.firestore.FieldValue.arrayUnion({
         from: currentUser.uid, senderName: myCPAName, body, sentAt: ts
       }),
@@ -867,7 +880,7 @@ window.sendClientMessage = async function() {
     }, {merge: true});
     // Notify client
     db.collection('notifications').doc(activeClientId).collection('items').add({
-      type: 'new_message', cpaUid: currentUser.uid, cpaName: myCPAName,
+      type: 'new_message', cpaUid: myCpasDocId||currentUser.uid, cpaName: myCPAName,
       message: 'Message from '+myCPAName+': '+body.slice(0,60),
       read: false, createdAt: ts
     }).catch(()=>{});
@@ -888,7 +901,7 @@ window.updateReturnStatus = async function() {
       });
     } else {
       const ref = await db.collection('tax_returns').add({
-        clientUid: activeClientId, cpaUid: currentUser.uid,
+        clientUid: activeClientId, cpaUid: myCpasDocId||currentUser.uid,
         cpaFirstName: cpaData.firstName||'', taxYear: activeClientData?.taxYear||2025,
         status, updatedAt: firebase.firestore.FieldValue.serverTimestamp(), createdAt: firebase.firestore.FieldValue.serverTimestamp(),
         timeline: [{date:new Date().toISOString(),note:`Status set to: ${labels[status]||status}`}]
@@ -910,7 +923,7 @@ async function loadClientNotes(clientId) {
   try {
     const snap = await db.collection('cpa_notes')
       .where('clientUid','==',clientId)
-      .where('cpaUid','==',currentUser.uid).get();
+      .where('cpaUid','==',myCpasDocId||currentUser.uid).get();
     const notes = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
       const at=a.createdAt?.toMillis?.()||0;
       const bt=b.createdAt?.toMillis?.()||0;
@@ -933,7 +946,7 @@ window.saveNote = async function() {
   if (!text) return;
   try {
     await db.collection('cpa_notes').add({
-      clientUid: activeClientId, cpaUid: currentUser.uid,
+      clientUid: activeClientId, cpaUid: myCpasDocId||currentUser.uid,
       noteText: text, createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
     document.getElementById('note-input').value = '';
@@ -984,7 +997,7 @@ function renderAllDocs() {
 /* ── ALL NOTES ── */
 async function loadAllNotes() {
   try {
-    const snap = await db.collection('cpa_notes').where('cpaUid','==',currentUser.uid).limit(100).get();
+    const snap = await db.collection('cpa_notes').where('cpaUid','==',myCpasDocId||currentUser.uid).limit(100).get();
     allMyNotes = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
       const at=a.createdAt?.toMillis?.()||0;
       const bt=b.createdAt?.toMillis?.()||0;
@@ -1043,7 +1056,7 @@ async function processReturnForClient(file,clientId,client,resultElId) {
       if(activeReturnId){
         await db.collection('tax_returns').doc(activeReturnId).update({completedFileUrl:url,status:'completed',updatedAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:firebase.firestore.FieldValue.arrayUnion({date:new Date().toISOString(),note:'Completed tax return uploaded by specialist.'})});
       } else {
-        const r=await db.collection('tax_returns').add({clientUid:clientId,cpaUid:currentUser.uid,cpaFirstName:cpaData.firstName||'',taxYear:yr,status:'completed',completedFileUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:[{date:new Date().toISOString(),note:'Return completed and uploaded.'}]});
+        const r=await db.collection('tax_returns').add({clientUid:clientId,cpaUid:myCpasDocId||currentUser.uid,cpaFirstName:cpaData.firstName||'',taxYear:yr,status:'completed',completedFileUrl:url,updatedAt:firebase.firestore.FieldValue.serverTimestamp(),createdAt:firebase.firestore.FieldValue.serverTimestamp(),timeline:[{date:new Date().toISOString(),note:'Return completed and uploaded.'}]});
         if(clientId===activeClientId)activeReturnId=r.id;
       }
       await db.collection('users').doc(clientId).update({returnStatus:'completed'});
