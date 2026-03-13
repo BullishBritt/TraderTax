@@ -90,6 +90,35 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 .doc-dl{font-size:.72rem;font-weight:700;color:var(--green);cursor:pointer;padding:4px 8px;border-radius:6px;margin-left:auto;text-decoration:none;flex-shrink:0;}
 .doc-dl:hover{background:var(--green-lt);}
 .prog-row{display:flex;align-items:center;gap:10px;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px;}
+/* CPA ASSIGNED CARD */
+.cpa-assigned-card{background:linear-gradient(135deg,var(--navy) 0%,#1a2e5a 100%);border-radius:14px;padding:20px 22px;margin-bottom:22px;display:flex;align-items:center;gap:16px;position:relative;overflow:hidden;}
+.cpa-assigned-card::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:rgba(61,186,126,.15);border-radius:50%;}
+.cpa-avatar-lg{width:50px;height:50px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;flex-shrink:0;z-index:1;}
+.cpa-card-info{flex:1;z-index:1;}
+.cpa-card-label{font-size:.6rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.5);margin-bottom:3px;}
+.cpa-card-name{font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;margin-bottom:2px;}
+.cpa-card-email{font-size:.75rem;color:rgba(255,255,255,.5);}
+.btn-msg-cpa{padding:9px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;z-index:1;transition:background .2s;}
+.btn-msg-cpa:hover{background:var(--green-dk);}
+/* CPA MESSAGES */
+.cpa-chat-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+.cpa-chat-head{background:var(--navy);padding:13px 18px;display:flex;align-items:center;gap:12px;}
+.cpa-chat-avatar{width:34px;height:34px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.85rem;color:#fff;flex-shrink:0;}
+.cpa-chat-msgs{height:320px;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--bg);}
+.cpa-msg{max-width:78%;display:flex;flex-direction:column;gap:3px;}
+.cpa-msg.me{align-self:flex-end;align-items:flex-end;}
+.cpa-msg.them{align-self:flex-start;align-items:flex-start;}
+.cpa-bubble{padding:10px 14px;border-radius:14px;font-size:.85rem;line-height:1.5;}
+.cpa-msg.me .cpa-bubble{background:var(--navy);color:#fff;border-bottom-right-radius:4px;}
+.cpa-msg.them .cpa-bubble{background:var(--surface);color:var(--navy);border:1px solid var(--border);border-bottom-left-radius:4px;}
+.cpa-msg-time{font-size:.65rem;color:var(--muted);}
+.cpa-chat-input-wrap{border-top:1px solid var(--border);padding:12px 14px;display:flex;gap:8px;background:var(--surface);}
+.cpa-chat-input{flex:1;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:.87rem;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;resize:none;transition:border-color .2s;height:42px;}
+.cpa-chat-input:focus{border-color:var(--navy);}
+.cpa-send-btn{padding:10px 16px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:background .2s;}
+.cpa-send-btn:hover{background:var(--green-dk);}
+/* NOTIFICATION BADGE */
+.notif-dot{width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block;margin-left:4px;vertical-align:middle;}
 .prog-bar-bg{flex:1;background:var(--border);border-radius:99px;height:4px;}
 .prog-bar{height:100%;background:var(--green);border-radius:99px;transition:width .3s;}
 /* RETURN STATUS */
@@ -199,8 +228,9 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
     <div class="sidebar-link active" onclick="showTab('overview')" id="tab-overview"><span class="icon">📊</span>Overview</div>
     <div class="sidebar-link" onclick="showTab('documents')" id="tab-documents"><span class="icon">📁</span>Documents</div>
     <div class="sidebar-link" onclick="showTab('return')" id="tab-return"><span class="icon">📋</span>My Return</div>
+    <div class="sidebar-link" onclick="showTab('messages')" id="tab-messages"><span class="icon">💬</span>My Specialist <span id="msg-notif-dot" class="notif-dot" style="display:none;"></span></div>
     <div class="sidebar-link" onclick="showTab('billing')" id="tab-billing"><span class="icon">💳</span>Billing</div>
-    <div class="sidebar-link" onclick="showTab('support')" id="tab-support"><span class="icon">💬</span>Support</div>
+    <div class="sidebar-link" onclick="showTab('support')" id="tab-support"><span class="icon">🎧</span>Support</div>
     <div class="sidebar-link" onclick="showTab('snapshots')" id="tab-snapshots"><span class="icon">✨</span>Tax Snapshots</div>
     <div class="sidebar-link" onclick="showTab('profile')" id="tab-profile"><span class="icon">👤</span>Profile</div>
     <div class="sidebar-section">Resources</div>
@@ -223,6 +253,16 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
         <span style="font-size:1.3rem;">📋</span>
         <div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.95rem;margin-bottom:2px;">Tax Return In Progress</div><div style="font-size:.8rem;color:rgba(255,255,255,.6);" id="banner-txt">Your specialist is working on your return.</div></div>
         <button onclick="showTab('return')" style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;white-space:nowrap;">View →</button>
+      </div>
+      <!-- CPA ASSIGNED CARD — shown once admin assigns a specialist -->
+      <div id="cpa-assigned-card" class="cpa-assigned-card" style="display:none;">
+        <div class="cpa-avatar-lg" id="cpa-card-avatar">?</div>
+        <div class="cpa-card-info">
+          <div class="cpa-card-label">Your Assigned Specialist</div>
+          <div class="cpa-card-name" id="cpa-card-name">—</div>
+          <div class="cpa-card-email" id="cpa-card-email">TraderTax Certified</div>
+        </div>
+        <button class="btn-msg-cpa" onclick="showTab('messages')">💬 Message Them →</button>
       </div>
       <div class="section-title">Quick Actions</div>
       <div class="quick-grid">
@@ -300,6 +340,53 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="section-title">Activity Timeline</div>
       <div class="card"><div id="return-timeline"><div class="tl-item"><div class="tl-dot muted"></div><div><div class="tl-date">Waiting for activity</div><div class="tl-text" style="color:var(--muted);">Timeline appears here once your return starts.</div></div></div></div></div>
       <div class="card" style="margin-top:16px;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:7px;">Need to add documents?</div><p style="font-size:.82rem;color:var(--muted);margin-bottom:12px;">You can upload additional documents even after your return has started.</p><button class="btn-outline" onclick="showTab('documents')">Go to Document Vault →</button></div>
+    </div>
+
+    <!-- MY SPECIALIST / MESSAGES -->
+    <div class="content-section" id="section-messages">
+      <div class="page-title">My Specialist</div>
+      <div class="page-sub">Direct line to your assigned TraderTax specialist. Every message goes straight to them — private and secure.</div>
+
+      <!-- Waiting state (no CPA yet) -->
+      <div id="msg-no-cpa" class="empty" style="display:none;">
+        <div class="empty-icon">⏳</div>
+        <h3>Specialist Assignment Pending</h3>
+        <p>Our team is matching you with the right specialist for your tax situation. You'll receive a notification the moment they're assigned — usually within 1 business day.</p>
+        <p style="margin-top:12px;font-size:.8rem;color:var(--muted);">Have questions in the meantime? <span class="section-link" onclick="showTab('support')">Contact support →</span></p>
+      </div>
+
+      <!-- Assigned state -->
+      <div id="msg-has-cpa" style="display:none;">
+        <div class="cpa-assigned-card" style="margin-bottom:20px;">
+          <div class="cpa-avatar-lg" id="msg-cpa-avatar">?</div>
+          <div class="cpa-card-info">
+            <div class="cpa-card-label">Your Assigned Specialist</div>
+            <div class="cpa-card-name" id="msg-cpa-name">—</div>
+            <div class="cpa-card-email" id="msg-cpa-email">TraderTax Certified</div>
+          </div>
+          <div style="z-index:1;">
+            <div style="font-size:.68rem;color:rgba(255,255,255,.5);text-align:right;margin-bottom:4px;">RESPONSE TIME</div>
+            <div style="font-size:.78rem;font-weight:700;color:var(--green);">Usually same day</div>
+          </div>
+        </div>
+
+        <div class="cpa-chat-wrap">
+          <div class="cpa-chat-head">
+            <div class="cpa-chat-avatar" id="msg-chat-avatar">?</div>
+            <div>
+              <div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.88rem;" id="msg-chat-name">Your Specialist</div>
+              <div style="font-size:.7rem;color:rgba(255,255,255,.5);">TraderTax Certified · Messages are private</div>
+            </div>
+          </div>
+          <div class="cpa-chat-msgs" id="cpa-msgs-container">
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:.83rem;">Loading messages…</div>
+          </div>
+          <div class="cpa-chat-input-wrap">
+            <textarea class="cpa-chat-input" id="cpa-chat-input" placeholder="Message your specialist…" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendCPAMessage();}"></textarea>
+            <button class="cpa-send-btn" onclick="sendCPAMessage()">Send</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- BILLING -->
@@ -381,15 +468,17 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getDocs,updateDoc,arrayUnion,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getDocs,updateDoc,arrayUnion,serverTimestamp,onSnapshot}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import{getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 const fbConfig={apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",authDomain:"taxtrader.firebaseapp.com",projectId:"taxtrader",storageBucket:"taxtrader.firebasestorage.app",messagingSenderId:"887085050235",appId:"1:887085050235:web:a7b8c6e6b416e413e975de"};
 const app=initializeApp(fbConfig);const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
 let currentUser=null,userData={},allDocs=[];
+let assignedCPAData=null, cpaConversationId=null, cpaMessageListener=null, userDocListener=null;
 onAuthStateChanged(auth,async user=>{
   if(!user){window.location.href='login.html';return;}
   currentUser=user;await loadUser(user);
   loadDocuments(user);loadReturn(user);loadBilling(user);loadMessages(user);
+  setupUserListener(user); // real-time CPA assignment listener
   document.getElementById('loading').style.display='none';
   document.getElementById('app').style.display='block';
 });
@@ -571,7 +660,130 @@ function renderSnapshots(snapshots){
 window.saveProfile=async function(){const msg=document.getElementById('profile-msg');try{await setDoc(doc(db,'users',currentUser.uid),{...userData,firstName:document.getElementById('pf-first').value.trim(),lastName:document.getElementById('pf-last').value.trim(),phone:document.getElementById('pf-phone').value.trim(),state:document.getElementById('pf-state').value.trim(),updatedAt:new Date().toISOString()},{merge:true});msg.textContent='✓ Saved';msg.style.color='var(--green)';}catch(e){msg.textContent='Error saving.';msg.style.color='#dc2626';}setTimeout(()=>msg.textContent='',3000);};
 window.sendPasswordReset=async function(){try{await sendPasswordResetEmail(auth,currentUser.email);document.getElementById('pw-reset-msg').textContent='✓ Reset email sent';}catch(e){document.getElementById('pw-reset-msg').textContent='Error sending reset email.';}};
 window.handleLogout=async function(){await signOut(auth);window.location.href='index.html';};
-window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');};
+window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');if(tab==='messages')loadCPAMessages();};
+
+// ── REAL-TIME USER DOC LISTENER (detects instant CPA assignment) ──
+function setupUserListener(user) {
+  if (userDocListener) userDocListener(); // unsubscribe previous
+  const userRef = doc(db, 'users', user.uid);
+  userDocListener = onSnapshot(userRef, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const assigned = data.assignedCPA;
+    if (assigned?.uid) {
+      assignedCPAData = assigned;
+      cpaConversationId = user.uid + '_' + assigned.uid;
+      showCPACard(assigned);
+    }
+  }, (e) => console.warn('User listener:', e.message));
+
+  // Also listen for new notifications
+  const notifRef = collection(db, 'notifications', user.uid, 'items');
+  onSnapshot(query(notifRef, where('read','==',false)), (snap) => {
+    const unread = snap.docs.filter(d=>d.data().type==='cpa_assigned'||d.data().type==='new_message');
+    const dot = document.getElementById('msg-notif-dot');
+    if (dot) dot.style.display = unread.length ? 'inline-block' : 'none';
+    // Show toast for new CPA assignment
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const d = change.doc.data();
+        if (d.type === 'cpa_assigned' && !d.read) {
+          showAssignmentToast(d);
+          change.doc.ref.update({read: true}).catch(()=>{});
+        }
+      }
+    });
+  }, ()=>{});
+}
+
+function showCPACard(assigned) {
+  const name = assigned.name || 'Your Specialist';
+  const ini = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) || '?';
+  const email = assigned.email || 'TraderTax Certified';
+
+  // Overview card
+  const card = document.getElementById('cpa-assigned-card');
+  if (card) {
+    card.style.display = 'flex';
+    document.getElementById('cpa-card-avatar').textContent = ini;
+    document.getElementById('cpa-card-name').textContent = name;
+    document.getElementById('cpa-card-email').textContent = email;
+  }
+  // Messages section
+  document.getElementById('msg-no-cpa').style.display = 'none';
+  document.getElementById('msg-has-cpa').style.display = 'block';
+  document.getElementById('msg-cpa-avatar').textContent = ini;
+  document.getElementById('msg-cpa-name').textContent = name;
+  document.getElementById('msg-cpa-email').textContent = email;
+  document.getElementById('msg-chat-avatar').textContent = ini;
+  document.getElementById('msg-chat-name').textContent = name;
+}
+
+function showAssignmentToast(notif) {
+  const existing = document.getElementById('assign-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.id = 'assign-toast';
+  t.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:16px 20px;border-radius:14px;box-shadow:0 8px 32px rgba(10,22,40,.4);z-index:9999;max-width:320px;animation:slideIn .3s ease;';
+  t.innerHTML = `<div style="font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;margin-bottom:4px;">🎉 Specialist Assigned!</div><div style="font-size:.82rem;color:rgba(255,255,255,.7);">${notif.message||'Your tax specialist has been assigned.'}</div><div style="margin-top:10px;display:flex;gap:8px;"><button onclick="showTab('messages');this.closest('#assign-toast').remove();" style="padding:6px 14px;background:var(--green);color:#fff;border:none;border-radius:7px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;">Message Them →</button><button onclick="this.closest('#assign-toast').remove();" style="padding:6px 12px;background:none;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.6);border-radius:7px;font-size:.75rem;cursor:pointer;">Dismiss</button></div>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 12000);
+}
+
+// ── CPA MESSAGES ──
+function loadCPAMessages() {
+  const container = document.getElementById('cpa-msgs-container');
+  if (!assignedCPAData || !cpaConversationId) {
+    document.getElementById('msg-no-cpa').style.display = 'block';
+    document.getElementById('msg-has-cpa').style.display = 'none';
+    return;
+  }
+  document.getElementById('msg-no-cpa').style.display = 'none';
+  document.getElementById('msg-has-cpa').style.display = 'block';
+
+  // Unsubscribe previous listener
+  if (cpaMessageListener) cpaMessageListener();
+
+  const convRef = doc(db, 'messages', cpaConversationId);
+  cpaMessageListener = onSnapshot(convRef, (snap) => {
+    const data = snap.exists() ? snap.data() : {};
+    const thread = data.thread || [];
+    if (!thread.length) {
+      container.innerHTML = `<div style="text-align:center;padding:32px;color:var(--muted);font-size:.83rem;"><div style="font-size:2rem;margin-bottom:10px;">👋</div><div style="font-weight:600;color:var(--navy);margin-bottom:6px;">Say hello to your specialist!</div><div>They can see your documents and will walk you through the entire process.</div></div>`;
+      return;
+    }
+    container.innerHTML = thread.map(m => {
+      const isMe = m.from === currentUser.uid;
+      const time = m.sentAt ? new Date(m.sentAt).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+      return `<div class="cpa-msg ${isMe?'me':'them'}"><div class="cpa-bubble">${m.body}</div><div class="cpa-msg-time">${isMe?'You':m.senderName||'Specialist'} · ${time}</div></div>`;
+    }).join('');
+    container.scrollTop = container.scrollHeight;
+  }, ()=>{});
+}
+
+window.sendCPAMessage = async function() {
+  const input = document.getElementById('cpa-chat-input');
+  const body = input.value.trim();
+  if (!body || !cpaConversationId || !assignedCPAData) return;
+  input.value = '';
+  const ts = new Date().toISOString();
+  const myName = userData.firstName ? userData.firstName + ' ' + (userData.lastName||'') : currentUser.email;
+  try {
+    await setDoc(doc(db,'messages',cpaConversationId), {
+      participants: [currentUser.uid, assignedCPAData.uid],
+      clientUid: currentUser.uid, cpaUid: assignedCPAData.uid,
+      thread: arrayUnion({from:currentUser.uid, senderName:myName.trim()||currentUser.email, body, sentAt:ts}),
+      lastUpdated: ts
+    }, {merge:true});
+    // Notify CPA of new message (non-blocking)
+    setDoc(doc(db,'notifications',assignedCPAData.uid), {lastMessage:ts},{merge:true}).catch(()=>{});
+    addDoc(collection(db,'notifications',assignedCPAData.uid,'items'), {
+      type:'new_message', clientUid:currentUser.uid, clientEmail:currentUser.email,
+      message:'New message from '+(myName.trim()||currentUser.email)+': '+body.slice(0,60),
+      read:false, createdAt:ts
+    }).catch(()=>{});
+  } catch(e) { console.error('Send message:', e); }
+};
 </script>
   <script src="affiliate-tracker.js"></script>
 </body>
