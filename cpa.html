@@ -1142,4 +1142,12 @@ window.showTab = function(tab) {
 
 /* ── TOAST ── */
 function showToast(msg,type='') {
-  const t=document.getElementById
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast'+(type?' '+type:'');
+  setTimeout(()=>t.classList.add('show'),10);
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+  <script src="affiliate-tracker.js"></script>
+</body>
+</html>
