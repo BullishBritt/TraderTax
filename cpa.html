@@ -560,10 +560,9 @@ function showApp(user) {
 
 /* ── REAL-TIME NOTIFICATIONS ── */
 function setupCPANotifications(user) {
-  db.collection('notifications').doc(user.uid).collection('items')
-    .where('read','==',false)
+  db.collection('notifications').doc(myCpasDocId||user.uid).collection('items')
     .onSnapshot(snap => {
-      const unread = snap.docs.length;
+      const unread = snap.docs.filter(d => !d.data().read).length;
       const bell = document.getElementById('notif-bell');
       const badge = document.getElementById('notif-badge');
       if (unread > 0) {
