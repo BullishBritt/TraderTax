@@ -1,0 +1,1499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin Panel | TraderTax</title>
+<meta name="robots" content="noindex,nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;
+  --bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;
+  --red:#ef4444;--red-lt:#fff5f5;--amber:#d97706;--amber-lt:#fffbeb;
+  --blue:#1d4ed8;--blue-lt:#eff6ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}html,body{overflow-x:hidden;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--navy);}
+#login-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:20px;}
+.login-box{background:var(--surface);border-radius:18px;padding:40px 36px;width:360px;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35);}
+.login-logo{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
+.login-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:-.4px;}
+.login-logo-txt .nv{color:var(--navy);}.login-logo-txt .gr{color:var(--green);}
+.login-sub{font-size:.82rem;color:var(--muted);margin-bottom:10px;}
+.login-tag{display:inline-block;background:rgba(10,22,40,.08);border:1px solid rgba(10,22,40,.12);border-radius:99px;padding:3px 12px;font-size:.7rem;font-weight:700;color:var(--navy);margin-bottom:24px;letter-spacing:.5px;text-transform:uppercase;}
+.lg-field{display:flex;flex-direction:column;gap:5px;margin-bottom:13px;text-align:left;}
+.lg-field label{font-size:.67rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);}
+.lg-field input{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:.9rem;color:var(--navy);outline:none;width:100%;font-family:'DM Sans',sans-serif;transition:border-color .2s;}
+.lg-field input:focus{border-color:var(--navy);}
+.lg-btn{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;cursor:pointer;margin-top:4px;transition:background .2s;}
+.lg-btn:hover{background:#0d1f3c;}
+.lg-err{font-size:.75rem;color:var(--red);margin-top:10px;display:none;}
+.lg-err.show{display:block;}
+#app{display:none;min-height:100vh;}
+.topbar{background:var(--navy);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:100;}
+.topbar-logo{display:flex;align-items:center;gap:10px;}
+.topbar-logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;letter-spacing:-.3px;}
+.topbar-logo-txt .gr{color:var(--green);}
+.topbar-tag{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:'DM Sans',sans-serif;font-size:.65rem;font-weight:700;letter-spacing:.8px;padding:3px 9px;border-radius:6px;text-transform:uppercase;margin-left:4px;}
+.topbar-right{display:flex;align-items:center;gap:20px;}
+.topbar-user{font-size:.78rem;color:rgba(255,255,255,.5);}
+.topbar-out{font-size:.78rem;color:var(--green);cursor:pointer;font-weight:700;transition:color .15s;}
+.topbar-out:hover{color:#fff;}
+.tab-nav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;gap:0;padding:0 24px;overflow-x:auto;}
+.tab-nav-item{padding:14px 20px;font-size:.84rem;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;display:flex;align-items:center;gap:7px;}
+.tab-nav-item:hover{color:var(--navy);}
+.tab-nav-item.active{color:var(--navy);border-bottom-color:var(--green);}
+.tab-nav-item .tn-count{background:var(--bg);border:1px solid var(--border);border-radius:99px;font-size:.65rem;font-weight:700;padding:1px 7px;color:var(--muted);}
+.tab-nav-item.active .tn-count{background:var(--green-lt);color:var(--green-dk);border-color:rgba(61,186,126,.3);}
+.page-content{max-width:1280px;margin:0 auto;padding:28px 24px 60px;}
+.content-section{display:none;}.content-section.active{display:block;}
+.page-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;margin-bottom:4px;}
+.page-sub{font-size:.875rem;color:var(--muted);margin-bottom:24px;}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+.stat{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:18px 20px;}
+.stat-lbl{font-size:.65rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.stat-val{font-family:'Syne',sans-serif;font-weight:800;font-size:1.75rem;color:var(--navy);}
+.stat-sub{font-size:.72rem;color:var(--muted);margin-top:3px;}
+.stat.green .stat-val{color:var(--green-dk);}
+.stat.red .stat-val{color:var(--red);}
+.stat.amber .stat-val{color:var(--amber);}
+.controls{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.ctrl-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;flex:1;}
+.filter-btn{padding:7px 14px;border-radius:8px;font-size:.77rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .15s;}
+.filter-btn:hover{border-color:var(--navy);color:var(--navy);}
+.filter-btn.on{background:var(--navy);color:#fff;border-color:var(--navy);}
+.filter-btn.red-f.on{background:var(--red);border-color:var(--red);}
+.filter-btn.amber-f.on{background:var(--amber);border-color:var(--amber);}
+.filter-btn.green-f.on{background:var(--green-dk);border-color:var(--green-dk);}
+.search-box{padding:8px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;color:var(--navy);outline:none;font-family:'DM Sans',sans-serif;background:var(--surface);width:200px;transition:border-color .2s;}
+.search-box:focus{border-color:var(--navy);}
+.export-btn{padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .2s;}
+.export-btn:hover{background:var(--green-dk);}
+.btn-action{padding:8px 16px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;transition:background .2s;font-family:'Syne',sans-serif;}
+.btn-action:hover{background:#0d1f3c;}
+.table-wrap{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;}
+.table-head{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 16px;gap:10px;display:grid;}
+.th{font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);cursor:pointer;user-select:none;}
+.th:hover{color:var(--navy);}
+.t-row{padding:13px 16px;gap:10px;border-bottom:1px solid var(--bg);align-items:center;transition:background .1s;cursor:pointer;display:grid;}
+.t-row:hover{background:#f9fafb;}
+.t-row:last-child{border-bottom:none;}
+.leads-grid{grid-template-columns:80px 1fr 140px 110px 100px 120px 130px 90px;}
+.clients-grid{grid-template-columns:1fr 140px 110px 1fr 160px 80px;}
+.cpas-grid{grid-template-columns:1fr 160px 80px 100px 80px;}
+.support-grid{grid-template-columns:1fr 140px 100px 100px 80px;}
+.pri{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:.67rem;font-weight:700;}
+.pri.hot{background:#fff0f0;color:var(--red);border:1px solid #fca5a5;}
+.pri.warm{background:var(--amber-lt);color:var(--amber);border:1px solid #fde68a;}
+.pri.standard{background:var(--green-lt);color:var(--green-dk);border:1px solid #a7f3d0;}
+.status-badge{display:inline-flex;align-items:center;border-radius:99px;padding:3px 10px;font-size:.67rem;font-weight:700;}
+.status-badge.received{background:#eff6ff;color:var(--blue);}
+.status-badge.assigned{background:var(--amber-lt);color:var(--amber);}
+.status-badge.review{background:var(--amber-lt);color:var(--amber);}
+.status-badge.completed{background:var(--green-lt);color:var(--green-dk);}
+.status-badge.filed{background:var(--green-lt);color:var(--green-dk);}
+.status-badge.open{background:var(--amber-lt);color:var(--amber);}
+.status-badge.resolved{background:var(--green-lt);color:var(--green-dk);}
+.status-badge.active{background:var(--green-lt);color:var(--green-dk);}
+.cell-name{font-size:.87rem;font-weight:600;color:var(--navy);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cell-email{font-size:.82rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cell-muted{font-size:.8rem;color:var(--muted);}
+.empty{text-align:center;padding:52px 20px;color:var(--muted);}
+.empty-icon{font-size:2rem;margin-bottom:10px;}
+.loading{text-align:center;padding:40px;color:var(--muted);font-size:.85rem;}
+.spin{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--navy);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.modal-bg{position:fixed;inset:0;background:rgba(10,22,40,.5);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:16px;width:100%;max-width:580px;max-height:90vh;overflow-y:auto;}
+.modal-hd{padding:22px 24px 0;display:flex;align-items:flex-start;justify-content:space-between;}
+.modal-hd h2{font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;}
+.modal-close{background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--muted);padding:2px 6px;}
+.modal-body{padding:16px 24px 24px;}
+.modal-sec{margin-bottom:18px;}
+.modal-sec-title{font-size:.62rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.modal-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--bg);}
+.modal-row:last-child{border-bottom:none;}
+.modal-key{font-size:.78rem;color:var(--muted);}
+.modal-val{font-size:.82rem;color:var(--navy);font-weight:600;text-align:right;}
+.modal-actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap;}
+.btn-copy{flex:1;padding:11px;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;font-size:.82rem;font-weight:600;cursor:pointer;color:var(--navy);font-family:'DM Sans',sans-serif;min-width:120px;}
+.btn-copy:hover{border-color:var(--navy);}
+.btn-handoff{flex:1;padding:11px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-size:.82rem;font-weight:700;cursor:pointer;font-family:'DM Sans',sans-serif;min-width:120px;}
+.btn-handoff:hover{background:#0d1f3c;}
+.form-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:28px;max-width:560px;margin-bottom:24px;}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.ff{display:flex;flex-direction:column;gap:5px;}
+.ff label{font-size:.67rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);}
+.ff input,.ff select{background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.88rem;color:var(--navy);outline:none;font-family:'DM Sans',sans-serif;transition:border-color .2s;}
+.ff input:focus,.ff select:focus{border-color:var(--navy);}
+.support-layout{display:grid;grid-template-columns:300px 1fr;gap:16px;min-height:600px;}
+.ticket-list-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column;}
+.tl-head{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.tl-head h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;}
+.ticket-items-wrap{overflow-y:auto;flex:1;}
+.ticket-item{padding:13px 18px;border-bottom:1px solid var(--bg);cursor:pointer;transition:background .15s;}
+.ticket-item:hover{background:var(--bg);}
+.ticket-item.active{background:var(--green-lt);border-left:3px solid var(--green);}
+.ti-email{font-size:.83rem;font-weight:700;color:var(--navy);margin-bottom:2px;}
+.ti-subject{font-size:.77rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px;}
+.ti-bottom{display:flex;align-items:center;justify-content:space-between;}
+.ti-date{font-size:.67rem;color:var(--muted);}
+.ti-status{font-size:.63rem;font-weight:700;border-radius:99px;padding:2px 7px;}
+.ti-status.open{background:var(--amber-lt);color:var(--amber);}
+.ti-status.resolved{background:var(--green-lt);color:var(--green-dk);}
+.chat-pane{background:var(--surface);border:1px solid var(--border);border-radius:12px;display:flex;flex-direction:column;}
+.chat-head{padding:16px 22px;border-bottom:1px solid var(--border);}
+.chat-head h3{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:3px;}
+.chat-head p{font-size:.75rem;color:var(--muted);}
+.chat-head-actions{display:flex;gap:8px;margin-top:10px;}
+.resolve-btn{padding:6px 14px;background:var(--green-lt);border:1px solid rgba(61,186,126,.3);color:var(--green-dk);border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.resolve-btn:hover{background:var(--green);color:#fff;}
+.urgent-btn{padding:6px 14px;background:var(--red-lt);border:1px solid rgba(239,68,68,.2);color:var(--red);border-radius:7px;font-size:.74rem;font-weight:700;cursor:pointer;}
+.chat-msgs{flex:1;overflow-y:auto;padding:18px 22px;display:flex;flex-direction:column;gap:12px;min-height:400px;}
+.msg{max-width:78%;display:flex;flex-direction:column;gap:3px;}
+.msg.client{align-self:flex-start;align-items:flex-start;}
+.msg.team{align-self:flex-end;align-items:flex-end;}
+.msg-bubble{padding:10px 14px;border-radius:11px;font-size:.86rem;line-height:1.5;}
+.msg.client .msg-bubble{background:var(--bg);border:1px solid var(--border);border-radius:11px 11px 11px 3px;}
+.msg.team .msg-bubble{background:var(--navy);color:#fff;border-radius:11px 11px 3px 11px;}
+.msg-sender{font-size:.7rem;font-weight:700;color:var(--green);}
+.msg-time{font-size:.67rem;color:var(--muted);}
+.chat-input-wrap{padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:9px;}
+.chat-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.86rem;font-family:'DM Sans',sans-serif;color:var(--navy);resize:none;outline:none;transition:border-color .2s;height:42px;}
+.chat-input:focus{border-color:var(--navy);}
+.send-btn{padding:0 18px;height:42px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.83rem;cursor:pointer;transition:all .2s;}
+.send-btn:hover{background:#0d1f3c;}
+.activity-list{display:flex;flex-direction:column;gap:0;}
+.activity-item{display:flex;gap:14px;padding:14px 18px;border-bottom:1px solid var(--bg);background:var(--surface);}
+.activity-item:first-child{border-radius:12px 12px 0 0;}
+.activity-item:last-child{border-bottom:none;border-radius:0 0 12px 12px;}
+.act-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0;}
+.act-icon.green{background:var(--green-lt);}
+.act-icon.blue{background:var(--blue-lt);}
+.act-icon.amber{background:var(--amber-lt);}
+.act-text{font-size:.84rem;color:var(--navy);margin-bottom:3px;}
+.act-time{font-size:.7rem;color:var(--muted);}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--navy);color:#fff;padding:12px 20px;border-radius:10px;font-size:.84rem;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.green-t{background:var(--green-dk);}
+@media(max-width:1024px){.stats-row{grid-template-columns:1fr 1fr;}}
+@media(max-width:900px){.leads-grid,.clients-grid,.support-grid,.cpas-grid{grid-template-columns:1fr 1fr;}.table-head{display:none;}.t-row{grid-template-columns:1fr;gap:4px;}.support-layout{grid-template-columns:1fr;}}
+@media(max-width:600px){.stats-row{grid-template-columns:1fr 1fr;}.form-grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="toast" class="toast"></div>
+
+<div id="login-gate">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg width="30" height="30" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <div class="login-logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></div>
+    </div>
+    <div class="login-sub">Admin access only</div>
+    <div class="login-tag">Owner / Operator</div>
+    <div class="lg-field"><label>Email</label><input type="email" id="lg-email" placeholder="hello@tradertax.net" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <div class="lg-field"><label>Password</label><input type="password" id="lg-pw" placeholder="••••••••" onkeydown="if(event.key==='Enter')lgIn()"/></div>
+    <button class="lg-btn" onclick="lgIn()">Sign In to Admin</button>
+    <div class="lg-err" id="lg-err">Incorrect credentials. Admin access only.</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="24" height="24" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+      <span class="topbar-logo-txt">Trader<span class="gr">Tax</span></span>
+      <span class="topbar-tag">Admin</span>
+    </div>
+    <div class="topbar-right">
+      <span class="topbar-user" id="topbar-user"></span>
+      <span class="topbar-out" onclick="handleSignOut()">Sign Out</span>
+    </div>
+  </div>
+
+  <div class="tab-nav">
+    <div class="tab-nav-item active" onclick="showTab('leads')" id="tnav-leads">📋 Leads <span class="tn-count" id="tn-leads">0</span></div>
+    <div class="tab-nav-item" onclick="showTab('clients')" id="tnav-clients">👥 Clients <span class="tn-count" id="tn-clients">0</span></div>
+    <div class="tab-nav-item" onclick="showTab('cpas')" id="tnav-cpas">📊 CPAs <span class="tn-count" id="tn-cpas">0</span></div>
+    <div class="tab-nav-item" onclick="showTab('support')" id="tnav-support">💬 Support <span class="tn-count" id="tn-support">0</span></div>
+    <div class="tab-nav-item" onclick="showTab('documents')" id="tnav-documents">📁 Documents <span class="tn-count" id="tn-documents">0</span></div>
+    <div class="tab-nav-item" onclick="showTab('activity')" id="tnav-activity">📈 Activity</div>
+    <div class="tab-nav-item" onclick="showTab('affiliates')" id="tnav-affiliates">🔗 Affiliates <span class="tn-count" id="tn-affiliates">0</span></div>
+  </div>
+
+  <div class="page-content">
+
+    <div class="content-section active" id="section-leads">
+      <div class="stats-row" id="leads-stats">
+        <div class="stat"><div class="stat-lbl">Total Leads</div><div class="stat-val" id="s-total">—</div><div class="stat-sub">All time</div></div>
+        <div class="stat red"><div class="stat-lbl">🔴 High Priority</div><div class="stat-val" id="s-hot">—</div><div class="stat-sub">$50K+ income</div></div>
+        <div class="stat amber"><div class="stat-lbl">🟡 Warm</div><div class="stat-val" id="s-warm">—</div><div class="stat-sub">$20K–$50K</div></div>
+        <div class="stat green"><div class="stat-lbl">New This Week</div><div class="stat-val" id="s-week">—</div><div class="stat-sub">Last 7 days</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl-title">All Leads</div>
+        <input class="search-box" type="text" id="lead-search" placeholder="🔍 Search email or state…" oninput="renderLeads()"/>
+        <button class="filter-btn on" id="f-all" onclick="setLeadFilter('all')">All</button>
+        <button class="filter-btn red-f" id="f-hot" onclick="setLeadFilter('hot')">🔴 High</button>
+        <button class="filter-btn amber-f" id="f-warm" onclick="setLeadFilter('warm')">🟡 Warm</button>
+        <button class="filter-btn green-f" id="f-standard" onclick="setLeadFilter('standard')">🟢 Standard</button>
+        <button class="export-btn" onclick="exportCSV()">↓ Export CSV</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head leads-grid">
+          <div class="th" onclick="sortLeads('priority')">Priority</div>
+          <div class="th" onclick="sortLeads('email')">Email</div>
+          <div class="th" onclick="sortLeads('phone')">Phone</div>
+          <div class="th" onclick="sortLeads('income')">Total Income</div>
+          <div class="th">State</div>
+          <div class="th">Instruments</div>
+          <div class="th">Source</div>
+          <div class="th" onclick="sortLeads('date')">Date</div>
+        </div>
+        <div id="leads-body"><div class="loading"><span class="spin"></span>Loading leads…</div></div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-clients">
+      <div class="stats-row">
+        <div class="stat"><div class="stat-lbl">Total Clients</div><div class="stat-val" id="sc-total">—</div><div class="stat-sub">Registered accounts</div></div>
+        <div class="stat amber"><div class="stat-lbl">In Review</div><div class="stat-val" id="sc-review">—</div><div class="stat-sub">Active returns</div></div>
+        <div class="stat green"><div class="stat-lbl">Completed</div><div class="stat-val" id="sc-complete">—</div><div class="stat-sub">Returns filed</div></div>
+        <div class="stat"><div class="stat-lbl">Unassigned</div><div class="stat-val" id="sc-unassigned">—</div><div class="stat-sub">Needs CPA</div></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl-title">All Clients</div>
+        <input class="search-box" type="text" id="client-search" placeholder="🔍 Search clients..." oninput="renderClients()"/>
+        <button class="filter-btn on" id="cf-all" onclick="setClientFilter('all')">All</button>
+        <button class="filter-btn" id="cf-unassigned" onclick="setClientFilter('unassigned')">Unassigned</button>
+        <button class="filter-btn amber-f" id="cf-review" onclick="setClientFilter('review')">In Review</button>
+        <button class="filter-btn green-f" id="cf-completed" onclick="setClientFilter('completed')">Completed</button>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head clients-grid">
+          <div class="th">Client</div><div class="th">Return Status</div><div class="th">Tax Year</div>
+          <div class="th">Assigned CPA</div><div class="th">Actions</div><div class="th">Joined</div>
+        </div>
+        <div id="clients-body"><div class="loading"><span class="spin"></span>Loading clients…</div></div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-cpas">
+      <div class="form-card">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;">Add New CPA / Specialist</div>
+        <div class="form-grid">
+          <div class="ff"><label>First Name</label><input type="text" id="cpa-first" placeholder="Jane"/></div>
+          <div class="ff"><label>Last Name</label><input type="text" id="cpa-last" placeholder="Smith"/></div>
+          <div class="ff" style="grid-column:1/-1"><label>Email Address</label><input type="email" id="cpa-email" placeholder="jane@example.com"/></div>
+          <div class="ff"><label>Temporary Password</label><input type="text" id="cpa-pw" placeholder="Min 8 characters"/></div>
+          <div class="ff"><label>Credentials</label><input type="text" id="cpa-creds" placeholder="CPA, EA, etc."/></div>
+        </div>
+        <button class="btn-action" style="margin-top:16px;" onclick="createCPA()">Create CPA Account</button>
+        <div id="cpa-create-msg" style="font-size:.8rem;margin-top:8px;"></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl-title">All Specialists</div>
+        <span id="tn-cpas-sub" style="font-size:.82rem;color:var(--muted);"></span>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head cpas-grid">
+          <div class="th">Name / Email</div><div class="th">Credentials</div>
+          <div class="th">Clients</div><div class="th">Status</div><div class="th">Actions</div>
+        </div>
+        <div id="cpas-body"><div class="loading"><span class="spin"></span>Loading specialists…</div></div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-support">
+      <div class="stats-row" style="grid-template-columns:repeat(3,1fr);">
+        <div class="stat"><div class="stat-lbl">Total Tickets</div><div class="stat-val" id="ss-total">—</div><div class="stat-sub">All time</div></div>
+        <div class="stat amber"><div class="stat-lbl">Open</div><div class="stat-val" id="ss-open">—</div><div class="stat-sub">Needs response</div></div>
+        <div class="stat green"><div class="stat-lbl">Resolved</div><div class="stat-val" id="ss-resolved">—</div><div class="stat-sub">Closed tickets</div></div>
+      </div>
+      <div class="support-layout">
+        <div class="ticket-list-wrap">
+          <div class="tl-head">
+            <h3>All Tickets</h3>
+            <select id="ticket-filter" onchange="renderTickets()" style="font-size:.75rem;border:1px solid var(--border);border-radius:6px;padding:3px 8px;color:var(--muted);background:var(--surface);outline:none;cursor:pointer;">
+              <option value="all">All</option><option value="open">Open</option><option value="resolved">Resolved</option>
+            </select>
+          </div>
+          <div class="ticket-items-wrap" id="ticket-items"><div class="loading"><span class="spin"></span>Loading...</div></div>
+        </div>
+        <div class="chat-pane">
+          <div class="chat-head">
+            <h3 id="chat-client-name">Select a ticket</h3>
+            <p id="chat-ticket-subject" style="color:var(--muted);font-size:.78rem;">Click any ticket to view the conversation</p>
+            <div class="chat-head-actions" id="chat-actions" style="display:none;">
+              <button class="resolve-btn" onclick="resolveTicket()">✓ Mark Resolved</button>
+              <button class="urgent-btn" onclick="markUrgent()">⚠ Flag Urgent</button>
+            </div>
+          </div>
+          <div class="chat-msgs" id="support-chat-msgs">
+            <div style="text-align:center;color:var(--muted);font-size:.84rem;padding:40px 20px;">Select a support ticket to view the conversation and reply.</div>
+          </div>
+          <div class="chat-input-wrap" id="support-input-wrap" style="display:none;">
+            <textarea class="chat-input" id="support-reply" placeholder="Reply to client..." onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendSupportReply();}"></textarea>
+            <button class="send-btn" onclick="sendSupportReply()">Reply</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-documents">
+      <div class="page-title">All Documents</div>
+      <div class="page-sub">Every file uploaded across the platform — client tax docs, CPA uploads, and more.</div>
+
+      <!-- Stats row -->
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px;">
+        <div class="stat"><div class="stat-lbl">Total Files</div><div class="stat-val" id="ds-total">—</div><div class="stat-sub">All uploads</div></div>
+        <div class="stat green"><div class="stat-lbl">Client Uploads</div><div class="stat-val" id="ds-client">—</div><div class="stat-sub">From clients</div></div>
+        <div class="stat amber"><div class="stat-lbl">CPA Uploads</div><div class="stat-val" id="ds-cpa">—</div><div class="stat-sub">Returns & notes</div></div>
+        <div class="stat"><div class="stat-lbl">Snapshots</div><div class="stat-val" id="ds-snapshots">—</div><div class="stat-sub">Quick questions</div></div>
+      </div>
+
+      <!-- Filter + Search -->
+      <div class="controls" style="margin-bottom:12px;">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+          <button class="filter-btn on" id="df-all" onclick="setDocFilter('all')">All</button>
+          <button class="filter-btn" id="df-client" onclick="setDocFilter('client')">Client Docs</button>
+          <button class="filter-btn" id="df-return" onclick="setDocFilter('return')">Tax Returns</button>
+          <button class="filter-btn" id="df-snapshot" onclick="setDocFilter('snapshot')">Snapshots</button>
+        </div>
+        <input class="search-box" type="text" id="doc-search" placeholder="🔍 Search by name, client, category..." oninput="renderDocs()"/>
+      </div>
+
+      <!-- Documents table -->
+      <div class="table-wrap">
+        <div class="table-head" style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 100px;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+          <div class="th">File</div>
+          <div class="th">Client</div>
+          <div class="th">Category</div>
+          <div class="th">Uploaded</div>
+          <div class="th">Action</div>
+        </div>
+        <div id="docs-body"><div class="loading"><span class="spin"></span>Loading documents…</div></div>
+      </div>
+
+      <!-- Snapshots / Quick Questions section -->
+      <div style="margin-top:32px;">
+        <div class="page-title" style="font-size:1.05rem;margin-bottom:4px;">📋 Client Snapshots & Quick Questions</div>
+        <div class="page-sub" style="margin-bottom:16px;">Tax situation summaries submitted by clients.</div>
+        <div class="controls" style="margin-bottom:12px;">
+          <input class="search-box" type="text" id="snap-search" placeholder="🔍 Search snapshots..." oninput="renderSnapshots()"/>
+        </div>
+        <div class="table-wrap">
+          <div class="table-head" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+            <div class="th">Client</div>
+            <div class="th">Prop Firm</div>
+            <div class="th">Instruments</div>
+            <div class="th">Entity</div>
+            <div class="th">Date</div>
+          </div>
+          <div id="snaps-body"><div class="loading"><span class="spin"></span>Loading snapshots…</div></div>
+        </div>
+      </div>
+      <!-- Calculator Submissions section -->
+      <div style="margin-top:32px;">
+        <div class="page-title" style="font-size:1.05rem;margin-bottom:4px;">🧮 Calculator Submissions</div>
+        <div class="page-sub" style="margin-bottom:16px;">Tax estimates run by visitors — every lead who used the calculator.</div>
+        <div class="table-wrap">
+          <div class="table-head" style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+            <div class="th">Email / State</div>
+            <div class="th">W-2</div>
+            <div class="th">Prop Firm</div>
+            <div class="th">Futures P&L</div>
+            <div class="th">Est. Tax</div>
+            <div class="th">Date</div>
+          </div>
+          <div id="calc-leads-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-activity">
+      <div class="page-title">Activity Log</div>
+      <div class="page-sub">Recent platform activity across all users, CPAs, and clients.</div>
+      <div id="activity-wrap" class="table-wrap" style="border-radius:14px;overflow:hidden;">
+        <div class="loading"><span class="spin"></span>Loading activity…</div>
+      </div>
+    </div>
+
+    <div class="content-section" id="section-affiliates">
+      <div class="stats-row" style="grid-template-columns:repeat(4,1fr);">
+        <div class="stat"><div class="stat-lbl">Total Affiliates</div><div class="stat-val" id="sa-total">—</div><div class="stat-sub">Active partners</div></div>
+        <div class="stat green"><div class="stat-lbl">Total Referred</div><div class="stat-val" id="sa-leads">—</div><div class="stat-sub">Leads generated</div></div>
+        <div class="stat amber"><div class="stat-lbl">Conversions</div><div class="stat-val" id="sa-converted">—</div><div class="stat-sub">Became clients</div></div>
+        <div class="stat"><div class="stat-lbl">Payouts Owed</div><div class="stat-val" id="sa-owed">—</div><div class="stat-sub">Unpaid commissions</div></div>
+      </div>
+
+      <!-- PENDING APPLICATIONS -->
+      <div id="pending-apps-section" style="display:none;margin-bottom:24px;">
+        <div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:12px;display:flex;align-items:center;gap:10px;">
+          Pending Applications <span id="pending-count" style="background:#f59e0b;color:#fff;border-radius:99px;padding:2px 10px;font-size:.75rem;">0</span>
+        </div>
+        <div id="pending-apps-body"></div>
+      </div>
+
+      <div class="form-card" style="margin-bottom:24px;">
+        <div style="font-family:Syne,sans-serif;font-weight:700;font-size:1rem;margin-bottom:16px;">Add New Affiliate</div>
+        <div class="form-grid">
+          <div class="ff"><label>Name / Handle</label><input type="text" id="aff-name" placeholder="e.g. Apex Insider Discord"/></div>
+          <div class="ff"><label>Referral Code</label><input type="text" id="aff-code" placeholder="e.g. APEXGANG" style="text-transform:uppercase;"/></div>
+          <div class="ff" style="grid-column:1/-1"><label>Email (for payouts)</label><input type="email" id="aff-email" placeholder="affiliate@email.com"/></div>
+          <div class="ff"><label>Commission Type</label>
+            <select id="aff-type" style="background:var(--bg);border:1.5px solid var(--border);border-radius:9px;padding:10px 13px;font-size:.88rem;color:var(--navy);font-family:DM Sans,sans-serif;outline:none;">
+              <option value="flat">Flat rate per client ($)</option>
+              <option value="percent">% of plan price</option>
+            </select>
+          </div>
+          <div class="ff"><label>Commission Amount</label><input type="number" id="aff-commission" placeholder="e.g. 75 for $75 flat or 15 for 15%"/></div>
+          <div class="ff" style="grid-column:1/-1"><label>Notes (optional)</label><input type="text" id="aff-notes" placeholder="e.g. Discord mod, 12k members, posts weekly"/></div>
+        </div>
+        <button class="btn-action" style="margin-top:16px;" onclick="createAffiliate()">Add Affiliate</button>
+        <div id="aff-create-msg" style="font-size:.8rem;margin-top:8px;"></div>
+      </div>
+      <div class="controls">
+        <div class="ctrl-title">All Affiliates</div>
+        <input class="search-box" type="text" id="aff-search" placeholder="Search..." oninput="renderAffiliates()"/>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head" style="display:grid;grid-template-columns:1.5fr 110px 90px 80px 80px 100px 100px 80px;gap:10px;padding:10px 16px;background:var(--bg);border-bottom:1px solid var(--border);">
+          <div class="th">Name / Email</div><div class="th">Code</div><div class="th">Commission</div>
+          <div class="th">Leads</div><div class="th">Clients</div><div class="th">Owed</div>
+          <div class="th">Status</div><div class="th">Actions</div>
+        </div>
+        <div id="affiliates-body"><div class="loading"><span class="spin"></span>Loading affiliates...</div></div>
+      </div>
+      <div id="aff-breakdown" style="display:none;margin-top:24px;">
+        <div class="page-title" style="font-size:1.05rem;margin-bottom:4px;" id="aff-breakdown-title">Leads from —</div>
+        <div class="page-sub" id="aff-breakdown-sub">All leads attributed to this affiliate.</div>
+        <div class="table-wrap" style="margin-top:12px;">
+          <div class="table-head leads-grid"><div class="th">Priority</div><div class="th">Email</div><div class="th">Phone</div><div class="th">Total Income</div><div class="th">State</div><div class="th">Instruments</div><div class="th">Source</div><div class="th">Date</div></div>
+          <div id="aff-leads-body"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-hd"><h2 id="m-title">Lead Detail</h2><button class="modal-close" onclick="closeModal()">✕</button></div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="cpa-profile-modal" onclick="if(event.target===this)closeCPAProfile()" style="z-index:1100;">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-hd"><h2 id="cpa-profile-title">CPA Profile</h2><button class="modal-close" onclick="closeCPAProfile()">✕</button></div>
+    <div class="modal-body" id="cpa-profile-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+  </div>
+</div>
+<div class="modal-bg" id="client-profile-modal" onclick="if(event.target===this)closeClientProfile()" style="z-index:1100;">
+  <div class="modal" style="max-width:720px;">
+    <div class="modal-hd"><h2 id="cp-title">Client Profile</h2><button class="modal-close" onclick="closeClientProfile()">✕</button></div>
+    <div class="modal-body" id="cp-body"><div class="loading"><span class="spin"></span>Loading...</div></div>
+  </div>
+</div>
+<div class="modal-bg" id="assign-modal" onclick="if(event.target===this)closeAssignModal()">
+  <div class="modal">
+    <div class="modal-hd"><h2 id="assign-client-name">Assign CPA</h2><button class="modal-close" onclick="closeAssignModal()">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:.84rem;color:var(--muted);margin-bottom:16px;">Select a specialist to assign to this client.</p>
+      <div class="ff" style="margin-bottom:16px;">
+        <label>Tax Year</label>
+        <select id="assign-tax-year" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--navy);background:var(--surface);outline:none;">
+          <option value="2025">2025</option><option value="2024">2024</option><option value="2023">2023</option>
+        </select>
+      </div>
+      <div class="ff" style="margin-bottom:16px;">
+        <label>Assign to Specialist</label>
+        <select id="assign-cpa-select" onchange="updateCPAPreview(this.value)" style="width:100%;padding:10px 13px;border:1.5px solid var(--border);border-radius:9px;font-size:.88rem;font-family:'DM Sans',sans-serif;color:var(--navy);background:var(--surface);outline:none;">
+          <option value="">Loading CPAs...</option>
+        </select>
+      </div>
+      <!-- CPA preview card — shown when a CPA is selected -->
+      <div id="cpa-preview-card" style="display:none;background:var(--navy);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:none;align-items:center;gap:12px;">
+        <div id="cpa-preview-avatar" style="width:40px;height:40px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;flex-shrink:0;">?</div>
+        <div>
+          <div id="cpa-preview-name" style="font-family:'Syne',sans-serif;font-weight:800;font-size:.92rem;color:#fff;">—</div>
+          <div id="cpa-preview-meta" style="font-size:.74rem;color:rgba(255,255,255,.6);">—</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn-handoff" style="flex:1;" onclick="confirmAssign()">Assign CPA</button>
+        <button class="btn-copy" onclick="closeAssignModal()">Cancel</button>
+      </div>
+      <div id="assign-msg" style="font-size:.8rem;margin-top:10px;"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const db = firebase.firestore();
+const auth = firebase.auth();
+const ADMIN_EMAILS = ['hello@tradertax.net','brittainalfaro@gmail.com','brittain0404@yahoo.com'];
+
+let allLeads = [], allClients = [], allCPAs = [], allTickets = [];
+let activeLeadFilter = 'all', activeClientFilter = 'all';
+let leadSortField = 'date', leadSortDir = -1;
+let activeTicketId = null, assignClientId = null;
+
+(function(){const p=new URLSearchParams(window.location.search);if(p.get('key')!=='tt2025admin'){document.body.innerHTML='';window.location.replace('index.html');}})();
+
+async function lgIn() {
+  const email = document.getElementById('lg-email').value.trim();
+  const pw = document.getElementById('lg-pw').value;
+  const err = document.getElementById('lg-err');
+  err.classList.remove('show');
+  if(!email||!pw){err.textContent='Please enter email and password.';err.classList.add('show');return;}
+  try {
+    const cred = await auth.signInWithEmailAndPassword(email, pw);
+    if (!ADMIN_EMAILS.includes(cred.user.email)) { await auth.signOut(); err.textContent='Access denied — admin only.'; err.classList.add('show'); return; }
+    showApp(cred.user);
+  } catch(e) {
+    err.textContent = 'Incorrect email or password. (' + e.code + ')';
+    err.classList.add('show');
+  }
+}
+
+auth.onAuthStateChanged(user => { if (user && ADMIN_EMAILS.includes(user.email)) showApp(user); });
+
+function showApp(user) {
+  document.getElementById('login-gate').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('topbar-user').textContent = user.email;
+  // Immediately seed the lookup with the logged-in admin's own UID→email
+  // (useful when admin is also the test client)
+  uidEmailLookup[user.uid] = user.email;
+  // Write email to their own users doc so future lookups work
+  db.collection('users').doc(user.uid).set({email:user.email},{merge:true}).catch(()=>{});
+  loadLeads(); loadClients(); loadCPAs(); loadTickets(); loadActivity(); loadAffiliates(); loadPendingApplications();
+  loadAllDocuments().then(()=>backfillDocEmails());
+}
+
+// Backfill clientEmail onto existing docs that are missing it
+async function backfillDocEmails() {
+  try {
+    const snap = await db.collection('client_documents').get();
+    const batch = db.batch();
+    let count = 0;
+    snap.docs.forEach(d => {
+      const data = d.data();
+      if (!data.clientEmail && data.uid && uidEmailLookup[data.uid]) {
+        batch.update(d.ref, {clientEmail: uidEmailLookup[data.uid]});
+        count++;
+      }
+    });
+    if (count > 0) { await batch.commit(); console.log(`Backfilled email on ${count} docs`); loadAllDocuments(); }
+  } catch(e) { console.warn('Backfill skipped:', e.message); }
+}
+
+function handleSignOut() { auth.signOut(); location.reload(); }
+
+function getPriority(l) { const i=totalIncome(l); return i>=50000?'hot':i>=20000?'warm':'standard'; }
+function totalIncome(l) { return (l.w2||0)+(l.prop||0)+(l.pnl||0)+(l.futuresPnl||0)+(l.otherSe||0); }
+function priLabel(p) { if(p==='hot')return '<span class="pri hot">🔴 High</span>'; if(p==='warm')return '<span class="pri warm">🟡 Warm</span>'; return '<span class="pri standard">🟢 Standard</span>'; }
+
+async function loadLeads() {
+  try {
+    const [calcSnap, snapSnap] = await Promise.all([
+      db.collection('calculator_leads').orderBy('createdAt','desc').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('leads').orderBy('createdAt','desc').limit(500).get().catch(()=>({docs:[]}))
+    ]);
+    const leadMap = {};
+    calcSnap.docs.forEach(doc => { const d=doc.data(); const key=(d.email||doc.id).toLowerCase(); leadMap[key]={id:doc.id,email:d.email||'',phone:d.phone||'',w2:d.w2||0,prop:d.prop||0,pnl:d.pnl||0,futuresPnl:d.futuresPnl||0,otherSe:d.otherSe||0,expenses:d.expenses||0,state:d.stateCode||d.state||'',filing:d.filing||'',trades:d.trades||'',entity:d.entity||'',estimatedTax:d.estimatedTax||0,source:'Calculator',createdAt:d.createdAt?.toDate?d.createdAt.toDate():new Date(),status:d.status||'new',notes:d.notes||''}; });
+    snapSnap.docs.forEach(doc => { const d=doc.data(); const key=(d.email||doc.id).toLowerCase(); if(leadMap[key]){leadMap[key].source='Calc + Snapshot';leadMap[key].phone=leadMap[key].phone||d.phone||'';}else{leadMap[key]={id:doc.id,email:d.email||'',phone:d.phone||'',w2:d.w2||0,prop:d.prop||0,pnl:0,futuresPnl:0,otherSe:0,expenses:0,state:d.state||'',filing:'',trades:d.trades||'',entity:'',estimatedTax:0,source:'Snapshot',createdAt:d.createdAt?.toDate?d.createdAt.toDate():new Date(),status:d.status||'new',notes:d.notes||''};} });
+    allLeads = Object.values(leadMap).sort((a,b)=>b.createdAt-a.createdAt);
+    document.getElementById('tn-leads').textContent = allLeads.length;
+    updateLeadStats(); renderLeads();
+  } catch(e) { document.getElementById('leads-body').innerHTML=`<div class="empty"><div class="empty-icon">⚠️</div>Error loading leads: ${e.message}</div>`; }
+}
+
+function updateLeadStats() {
+  const now=new Date(); const week=new Date(now-7*24*60*60*1000);
+  document.getElementById('s-total').textContent=allLeads.length;
+  document.getElementById('s-hot').textContent=allLeads.filter(l=>getPriority(l)==='hot').length;
+  document.getElementById('s-warm').textContent=allLeads.filter(l=>getPriority(l)==='warm').length;
+  document.getElementById('s-week').textContent=allLeads.filter(l=>l.createdAt>week).length;
+}
+
+function setLeadFilter(f) { activeLeadFilter=f; ['all','hot','warm','standard'].forEach(id=>{document.getElementById('f-'+id)?.classList.toggle('on',id===f);}); renderLeads(); }
+function sortLeads(field) { if(leadSortField===field)leadSortDir*=-1;else{leadSortField=field;leadSortDir=-1;} renderLeads(); }
+
+function renderLeads() {
+  const search=document.getElementById('lead-search').value.toLowerCase();
+  let leads=allLeads.filter(l=>{ const p=getPriority(l); if(activeLeadFilter!=='all'&&p!==activeLeadFilter)return false; if(search){const h=(l.email+l.phone+l.state+l.trades).toLowerCase();if(!h.includes(search))return false;} return true; });
+  leads.sort((a,b)=>{ const po={hot:0,warm:1,standard:2}; if(leadSortField==='priority')return leadSortDir*(po[getPriority(a)]-po[getPriority(b)]); if(leadSortField==='income')return leadSortDir*(totalIncome(b)-totalIncome(a)); if(leadSortField==='date')return leadSortDir*(b.createdAt-a.createdAt); if(leadSortField==='email')return leadSortDir*a.email.localeCompare(b.email); return 0; });
+  if(!leads.length){document.getElementById('leads-body').innerHTML='<div class="empty"><div class="empty-icon">📭</div>No leads match this filter.</div>';return;}
+  document.getElementById('leads-body').innerHTML=leads.map(l=>{
+    const p=getPriority(l); const income=totalIncome(l); const date=l.createdAt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); const trades=(l.trades||'').split(',').slice(0,2).join(', ')||'—';
+    return `<div class="t-row leads-grid" onclick='openLeadModal(${JSON.stringify(l).replace(/'/g,"&#39;")})'>${priLabel(p)}<div><div class="cell-name">${l.email||'—'}</div></div><div class="cell-muted">${l.phone||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;">${income>0?'$'+income.toLocaleString():'—'}</div><div class="cell-muted">${l.state||'—'}</div><div class="cell-muted" style="font-size:.75rem;">${trades}</div><div><span style="font-size:.7rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;">${l.source}</span></div><div class="cell-muted">${date}</div></div>`;
+  }).join('');
+}
+
+function openLeadModal(l) {
+  const income=totalIncome(l); const p=getPriority(l);
+  const priText={hot:'🔴 High Priority ($50K+)',warm:'🟡 Warm ($20K–$50K)',standard:'🟢 Standard'};
+  document.getElementById('m-title').textContent=l.email||'Lead';
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-sec"><div class="modal-sec-title">Contact</div>
+      <div class="modal-row"><span class="modal-key">Email</span><span class="modal-val"><a href="mailto:${l.email}" style="color:var(--navy)">${l.email||'—'}</a></span></div>
+      <div class="modal-row"><span class="modal-key">Phone</span><span class="modal-val"><a href="tel:${l.phone}" style="color:var(--navy)">${l.phone||'—'}</a></span></div>
+      <div class="modal-row"><span class="modal-key">Priority</span><span class="modal-val">${priText[p]}</span></div>
+      <div class="modal-row"><span class="modal-key">Source</span><span class="modal-val">${l.source}</span></div>
+      <div class="modal-row"><span class="modal-key">Date</span><span class="modal-val">${l.createdAt.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}</span></div>
+    </div>
+    <div class="modal-sec"><div class="modal-sec-title">Income Breakdown</div>
+      <div class="modal-row"><span class="modal-key">W-2 / Salary</span><span class="modal-val">${l.w2>0?'$'+l.w2.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Prop Firm Payouts</span><span class="modal-val">${l.prop>0?'$'+l.prop.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Trading P&L</span><span class="modal-val">${l.pnl!==0?'$'+l.pnl.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Futures P&L</span><span class="modal-val">${l.futuresPnl!==0?'$'+l.futuresPnl.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Total Income</span><span class="modal-val" style="font-weight:800;font-size:.9rem;">${income>0?'$'+income.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Deductible Expenses</span><span class="modal-val" style="color:var(--green-dk);">${l.expenses>0?'-$'+l.expenses.toLocaleString():'—'}</span></div>
+    </div>
+    <div class="modal-sec"><div class="modal-sec-title">Tax Profile</div>
+      <div class="modal-row"><span class="modal-key">State</span><span class="modal-val">${l.state||'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Filing Status</span><span class="modal-val">${l.filing||'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Instruments</span><span class="modal-val">${l.trades||'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Entity</span><span class="modal-val">${l.entity||'None'}</span></div>
+      <div class="modal-row"><span class="modal-key">Est. Tax</span><span class="modal-val" style="color:var(--red);">${l.estimatedTax>0?'$'+l.estimatedTax.toLocaleString():'—'}</span></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-copy" onclick="copySummary(${JSON.stringify(l).replace(/"/g,'&quot;')})">📋 Copy CPA Summary</button>
+      <button class="btn-handoff" onclick="window.location.href='mailto:${l.email}?subject=Your%20TraderTax%20Return%20Is%20Ready'">✉️ Email Client</button>
+    </div>`;
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+
+function copySummary(l) {
+  const income=totalIncome(l);
+  const txt=`TRADERTAX — CPA CLIENT SUMMARY\n==============================\nEmail: ${l.email}\nPhone: ${l.phone||'N/A'}\nDate: ${l.createdAt.toLocaleDateString()}\nSource: ${l.source}\n\nINCOME\nW-2/Salary: $${(l.w2||0).toLocaleString()}\nProp Firm: $${(l.prop||0).toLocaleString()}\nTrading P&L: $${(l.pnl||0).toLocaleString()}\nFutures P&L: $${(l.futuresPnl||0).toLocaleString()}\nDeductible Expenses: -$${(l.expenses||0).toLocaleString()}\nTOTAL INCOME: $${income.toLocaleString()}\n\nTAX PROFILE\nState: ${l.state||'N/A'}\nFiling Status: ${l.filing||'N/A'}\nInstruments: ${l.trades||'N/A'}\nEntity: ${l.entity||'None'}\nEst. Tax: $${(l.estimatedTax||0).toLocaleString()}\n\nPRIORITY: ${getPriority(l).toUpperCase()}\n==============================`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('CPA summary copied!','green-t'));
+}
+
+function exportCSV() {
+  const hdrs=['Priority','Email','Phone','W2','Prop','PnL','Futures','OtherSE','Expenses','TotalIncome','State','Filing','Trades','Entity','EstTax','Source','Date'];
+  const rows=allLeads.map(l=>[getPriority(l),l.email,l.phone,l.w2,l.prop,l.pnl,l.futuresPnl,l.otherSe,l.expenses,totalIncome(l),l.state,l.filing,l.trades,l.entity,l.estimatedTax,l.source,l.createdAt.toLocaleDateString()].map(v=>`"${v}"`).join(','));
+  const csv=[hdrs.join(','),...rows].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download=`tradertax-leads-${new Date().toISOString().slice(0,10)}.csv`;a.click();
+}
+
+async function loadClients() {
+  try {
+    const snap = await db.collection('users').where('role','==','client').orderBy('createdAt','desc').limit(500).get().catch(()=>({docs:[]}));
+    allClients = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('tn-clients').textContent = allClients.length;
+    document.getElementById('sc-total').textContent = allClients.length;
+    document.getElementById('sc-review').textContent = allClients.filter(c=>(c.returnStatus||'')==='review').length;
+    document.getElementById('sc-complete').textContent = allClients.filter(c=>['completed','filed'].includes(c.returnStatus||'')).length;
+    document.getElementById('sc-unassigned').textContent = allClients.filter(c=>!c.assignedCPA?.uid).length;
+    renderClients();
+  } catch(e){console.error(e);}
+}
+
+let clientFilterMode='all';
+function setClientFilter(f){clientFilterMode=f;['all','unassigned','review','completed'].forEach(id=>{document.getElementById('cf-'+id)?.classList.toggle('on',id===f)});renderClients();}
+
+function renderClients() {
+  const search=(document.getElementById('client-search')?.value||'').toLowerCase();
+  let clients=allClients.filter(c=>{
+    if(clientFilterMode==='unassigned'&&c.assignedCPA?.uid)return false;
+    if(clientFilterMode==='review'&&c.returnStatus!=='review')return false;
+    if(clientFilterMode==='completed'&&!['completed','filed'].includes(c.returnStatus||''))return false;
+    if(search){const h=((c.firstName||'')+(c.lastName||'')+(c.email||'')).toLowerCase();if(!h.includes(search))return false;}
+    return true;
+  });
+  if(!clients.length){document.getElementById('clients-body').innerHTML='<div class="empty"><div class="empty-icon">👥</div>No clients match this filter.</div>';return;}
+  const stLabels={received:'📥 Received',assigned:'👤 Assigned',review:'🔍 In Review',completed:'✅ Completed',filed:'📄 Filed'};
+  const stCls={received:'received',assigned:'assigned',review:'review',completed:'completed',filed:'filed'};
+  document.getElementById('clients-body').innerHTML=clients.map(c=>{
+    const name=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Client';
+    const st=c.returnStatus||'received';
+    const cpaName=c.assignedCPA?.name||'—';
+    const joined=c.createdAt?new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'—';
+    return `<div class="t-row clients-grid" style="cursor:pointer;" onclick="openClientProfile('${c.id}')"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div><span class="status-badge ${stCls[st]||'received'}">${stLabels[st]||st}</span></div><div class="cell-muted">${c.taxYear||2025}</div><div class="cell-muted">${cpaName}</div><div><button onclick="event.stopPropagation();openAssignModal('${c.id}','${name.replace(/'/g,'')}')" style="padding:5px 12px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;color:var(--navy);">${c.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button></div><div class="cell-muted">${joined}</div></div>`;
+  }).join('');
+}
+
+function openAssignModal(clientId, clientName) {
+  assignClientId=clientId;
+  document.getElementById('assign-client-name').textContent='Assign CPA — '+clientName;
+  document.getElementById('assign-msg').textContent='';
+  document.getElementById('cpa-preview-card').style.display='none';
+  const sel=document.getElementById('assign-cpa-select');
+  sel.innerHTML=allCPAs.length?'<option value="">Choose specialist...</option>'+allCPAs.map(c=>`<option value="${c.id}">${((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email} — ${c.credentials||'CPA'}</option>`).join(''):'<option value="">No CPAs added yet</option>';
+  document.getElementById('assign-modal').classList.add('open');
+}
+
+function updateCPAPreview(cpaId) {
+  const card = document.getElementById('cpa-preview-card');
+  if(!cpaId){card.style.display='none';return;}
+  const cpa = allCPAs.find(c=>c.id===cpaId);
+  if(!cpa){card.style.display='none';return;}
+  const name = ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
+  const clientCount = allClients.filter(c=>c.assignedCPA?.uid===cpaId).length;
+  document.getElementById('cpa-preview-avatar').textContent = name[0].toUpperCase();
+  document.getElementById('cpa-preview-name').textContent = name;
+  document.getElementById('cpa-preview-meta').textContent = `${cpa.credentials||'CPA'} · ${cpa.email||''} · ${clientCount} client${clientCount!==1?'s':''} assigned`;
+  card.style.display='flex';
+}
+function closeAssignModal(){document.getElementById('assign-modal').classList.remove('open');}
+
+async function confirmAssign() {
+  const cpaId=document.getElementById('assign-cpa-select').value;
+  const taxYear=document.getElementById('assign-tax-year').value;
+  const msg=document.getElementById('assign-msg');
+  if(!cpaId){msg.textContent='Please select a specialist.';msg.style.color='var(--red)';return;}
+  const cpa=allCPAs.find(c=>c.id===cpaId);
+  if(!cpa){msg.textContent='CPA not found.';return;}
+  msg.textContent='Saving...';msg.style.color='var(--muted)';
+  const cpaName=((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'Specialist';
+  const clientEmail=uidEmailLookup[assignClientId]||'';
+
+  // STEP 1: write to both users doc AND a dedicated assignments collection
+  msg.textContent='Step 1: Saving...';msg.style.color='var(--muted)';
+  try {
+    // Try users doc first (may fail if rules are strict)
+    await db.collection('users').doc(assignClientId).set({
+      assignedCPA:{uid:cpaId,name:cpaName},role:'client',
+      taxYear:parseInt(taxYear),returnStatus:'assigned',
+      updatedAt:new Date().toISOString(),
+      ...(clientEmail?{email:clientEmail}:{})
+    },{merge:true});
+  } catch(e){
+    console.warn('users doc write failed, using assignments fallback:', e.message);
+    // Fallback: write to assignments collection (always open)
+    try {
+      await db.collection('assignments').doc(assignClientId).set({
+        clientUid:assignClientId, clientEmail,
+        assignedCPA:{uid:cpaId,name:cpaName},
+        taxYear:parseInt(taxYear), returnStatus:'assigned',
+        updatedAt:new Date().toISOString()
+      },{merge:true});
+    } catch(e2){ msg.textContent='❌ Step 1 failed: '+e2.message;msg.style.color='var(--red)';console.error(e2);return; }
+  }
+
+  // STEP 2: tax_returns record
+  msg.textContent='Step 2: Creating return...';
+  try {
+    await db.collection('tax_returns').add({
+      clientUid:assignClientId,clientEmail,cpaUid:cpaId,cpaName,
+      taxYear:parseInt(taxYear),status:'assigned',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      updatedAt:firebase.firestore.FieldValue.serverTimestamp(),
+      timeline:[{date:new Date().toISOString(),note:'Assigned to '+cpaName+'.'}]
+    });
+  } catch(e){ msg.textContent='❌ Step 2 failed (tax_returns): '+e.message;msg.style.color='var(--red)';console.error(e);return; }
+
+  // STEP 3: Fire notifications to both client and CPA (non-blocking)
+  const ts = new Date().toISOString();
+  try {
+    const batch = db.batch();
+    // Notify client — they'll see this instantly on their dashboard
+    const clientNotifRef = db.collection('notifications').doc(assignClientId).collection('items').doc();
+    batch.set(clientNotifRef, {
+      type: 'cpa_assigned', cpaName, cpaUid: cpaId, cpaEmail: cpa.email||'',
+      message: 'Your tax specialist '+cpaName+' has been assigned. You can now message them directly in your dashboard.',
+      read: false, createdAt: ts
+    });
+    // Notify CPA — shows "New Assignment" alert in their portal instantly
+    const cpaNotifRef = db.collection('notifications').doc(cpaId).collection('items').doc();
+    batch.set(cpaNotifRef, {
+      type: 'new_client', clientUid: assignClientId, clientEmail,
+      message: 'New client assigned: '+(clientEmail||assignClientId)+'. Tax Year '+taxYear+'.',
+      read: false, createdAt: ts
+    });
+    await batch.commit();
+  } catch(e) { console.warn('Notifications skipped (non-critical):', e.message); }
+
+  // SUCCESS
+  const c=allClients.find(cl=>cl.id===assignClientId);
+  if(c){c.assignedCPA={uid:cpaId,name:cpaName};c.returnStatus='assigned';c.taxYear=parseInt(taxYear);}
+  msg.innerHTML='✓ Assigned to '+cpaName+'! &nbsp;<a href="cpa.html" target="_blank" style="color:var(--green-dk);font-weight:700;text-decoration:underline;">Open CPA Portal →</a>';
+  msg.style.color='var(--green-dk)';
+  showToast('✓ Assigned to '+cpaName+' — both parties notified','green-t');
+  loadClients(); loadCPAs();
+  setTimeout(()=>closeAssignModal(),2500);
+}
+
+async function loadCPAs() {
+  try {
+    const snap=await db.collection('cpas').where('status','==','active').get().catch(()=>({docs:[]}));
+    allCPAs=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('tn-cpas').textContent=allCPAs.length;
+    document.getElementById('tn-cpas-sub').textContent=allCPAs.length+' specialists';
+    renderCPAs();
+  }catch(e){console.error(e);}
+}
+
+function renderCPAs() {
+  if(!allCPAs.length){document.getElementById('cpas-body').innerHTML='<div class="empty"><div class="empty-icon">📊</div>No specialists yet. Add one above.</div>';return;}
+  document.getElementById('cpas-body').innerHTML=allCPAs.map(c=>{
+    const name=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email;
+    const clientCount=allClients.filter(cl=>cl.assignedCPA?.uid===c.id).length;
+    return `<div class="t-row cpas-grid" style="cursor:pointer;" onclick="openCPAProfile('${c.id}')" title="Click to view CPA profile"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div class="cell-muted">${c.credentials||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;">${clientCount}</div><div><span class="status-badge active">Active</span></div><div><button data-cpaid="${c.id}" onclick="event.stopPropagation();deactivateCPA(this.dataset.cpaid)" style="font-size:.72rem;padding:4px 10px;border:1px solid var(--red-lt);border-radius:6px;background:none;color:var(--red);cursor:pointer;">Deactivate</button></div></div>`;
+  }).join('');
+}
+
+window.createCPA = async function() {
+  const first=document.getElementById('cpa-first').value.trim();
+  const last=document.getElementById('cpa-last').value.trim();
+  const email=document.getElementById('cpa-email').value.trim();
+  const pw=document.getElementById('cpa-pw').value.trim();
+  const creds=document.getElementById('cpa-creds').value.trim();
+  const msg=document.getElementById('cpa-create-msg');
+  if(!email||!first){msg.textContent='First name and email are required.';msg.style.color='var(--red)';return;}
+  msg.textContent='Creating account...';msg.style.color='var(--muted)';
+  try {
+    // Save CPA to cpas collection (used by admin CPA tab)
+    const ref = await db.collection('cpas').add({
+      firstName:first, lastName:last, email, credentials:creds,
+      role:'cpa', status:'active', clientCount:0,
+      temporaryPassword:pw||'',
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:'admin'
+    });
+    // Send welcome email via EmailJS
+    try {
+      emailjs.send('service_9p67iy9','template_vtt9a58',{
+        name: first+' '+last, email,
+        message:`You've been added as a CPA/Specialist on TraderTax!\n\nLog in to your workspace at: https://www.tradertax.net/cpa.html\n\nEmail: ${email}\n${pw?'Temporary password: '+pw+'\n(Please change this after first login)':''}\n\nWelcome to the team!`
+      }).catch(()=>{});
+    } catch(e){}
+    msg.textContent='✓ CPA account created! Welcome email sent.';msg.style.color='var(--green-dk)';
+    showToast('CPA account created','green-t');
+    document.getElementById('cpa-first').value='';document.getElementById('cpa-last').value='';
+    document.getElementById('cpa-email').value='';document.getElementById('cpa-pw').value='';document.getElementById('cpa-creds').value='';
+    loadCPAs();
+  }catch(e){msg.textContent='Error: '+e.message;msg.style.color='var(--red)';}
+};
+
+window.deactivateCPA = async function(cpaId) {
+  if(!confirm('Deactivate this specialist?'))return;
+  try {
+    await db.collection('users').doc(cpaId).update({role:'cpa_inactive',deactivatedAt:new Date().toISOString()});
+    showToast('Specialist deactivated');loadCPAs();
+  }catch(e){showToast('Error: '+e.message);}
+};
+
+async function loadTickets() {
+  try {
+    const snap=await db.collection('support_tickets').orderBy('createdAt','desc').limit(200).get().catch(()=>({docs:[]}));
+    allTickets=snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('tn-support').textContent=allTickets.filter(t=>t.status==='open').length;
+    document.getElementById('ss-total').textContent=allTickets.length;
+    document.getElementById('ss-open').textContent=allTickets.filter(t=>t.status==='open').length;
+    document.getElementById('ss-resolved').textContent=allTickets.filter(t=>t.status==='resolved').length;
+    renderTickets();
+  }catch(e){console.error(e);}
+}
+
+function renderTickets() {
+  const f=document.getElementById('ticket-filter').value;
+  let tickets=allTickets.filter(t=>f==='all'||t.status===f);
+  if(!tickets.length){document.getElementById('ticket-items').innerHTML='<div style="padding:20px;text-align:center;color:var(--muted);font-size:.82rem;">No tickets</div>';return;}
+  document.getElementById('ticket-items').innerHTML=tickets.map(t=>{
+    const dt=t.createdAt?.toDate?t.createdAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+    return `<div class="ticket-item${activeTicketId===t.id?' active':''}" data-ticketid="${t.id}" onclick="openTicket(this.dataset.ticketid)"><div class="ti-email">${t.clientEmail||'Unknown'}</div><div class="ti-subject">${t.subject||'Support Request'}</div><div class="ti-bottom"><span class="ti-date">${dt}</span><span class="ti-status ${t.status||'open'}">${t.status==='resolved'?'✓ Resolved':'● Open'}</span></div></div>`;
+  }).join('');
+}
+
+function openTicket(ticketId) {
+  const ticket=allTickets.find(t=>t.id===ticketId);
+  if(!ticket)return;
+  activeTicketId=ticketId;
+  document.querySelectorAll('.ticket-item').forEach(el=>el.classList.remove('active'));
+  document.querySelector(`.ticket-item[data-ticketid="${ticketId}"]`)?.classList.add('active');
+  document.getElementById('chat-client-name').textContent=ticket.clientEmail||'Client';
+  document.getElementById('chat-ticket-subject').textContent=ticket.subject||'Support Request';
+  document.getElementById('chat-actions').style.display='flex';
+  document.getElementById('support-input-wrap').style.display='flex';
+  document.getElementById('support-reply').dataset.ticketId=ticketId;
+  const msgs=ticket.messages||[];
+  document.getElementById('support-chat-msgs').innerHTML=`<div class="msg client"><div class="msg-sender">${ticket.clientEmail||'Client'}</div><div class="msg-bubble">Opened ticket: ${ticket.subject||'Support Request'}</div></div>`+msgs.map(m=>`<div class="msg ${m.fromSupport?'team':'client'}"><div class="msg-sender">${m.fromSupport?'TraderTax Team':ticket.clientEmail||'Client'}</div><div class="msg-bubble">${m.body}</div><div class="msg-time">${m.sentAt?new Date(m.sentAt).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):''}</div></div>`).join('');
+  document.getElementById('support-chat-msgs').scrollTop=99999;
+}
+
+window.sendSupportReply = async function() {
+  const input=document.getElementById('support-reply');const body=input.value.trim();if(!body)return;
+  const tid=input.dataset.ticketId||activeTicketId;if(!tid)return;
+  input.value='';
+  const msgEl=document.createElement('div');msgEl.className='msg team';msgEl.innerHTML=`<div class="msg-sender">TraderTax Team</div><div class="msg-bubble">${body}</div><div class="msg-time">Just now</div>`;
+  document.getElementById('support-chat-msgs').appendChild(msgEl);document.getElementById('support-chat-msgs').scrollTop=99999;
+  try {
+    await db.collection('support_tickets').doc(tid).update({messages:firebase.firestore.FieldValue.arrayUnion({body,fromSupport:true,sentAt:new Date().toISOString()}),updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    showToast('Reply sent','green-t');
+  }catch(e){showToast('Error sending reply');}
+};
+
+window.resolveTicket = async function() {
+  if(!activeTicketId)return;
+  try{await db.collection('support_tickets').doc(activeTicketId).update({status:'resolved',resolvedAt:firebase.firestore.FieldValue.serverTimestamp()});const t=allTickets.find(t2=>t2.id===activeTicketId);if(t)t.status='resolved';showToast('Ticket resolved','green-t');loadTickets();}catch(e){showToast('Error');}
+};
+
+window.markUrgent = async function() {
+  if(!activeTicketId)return;
+  try{await db.collection('support_tickets').doc(activeTicketId).update({priority:'urgent'});showToast('Marked urgent');}catch(e){}
+};
+
+async function loadActivity() {
+  try {
+    const [retSnap,docSnap,ticketSnap]=await Promise.all([
+      db.collection('tax_returns').orderBy('updatedAt','desc').limit(20).get().catch(()=>({docs:[]})),
+      db.collection('client_documents').orderBy('uploadedAt','desc').limit(20).get().catch(()=>({docs:[]})),
+      db.collection('support_tickets').orderBy('createdAt','desc').limit(10).get().catch(()=>({docs:[]}))
+    ]);
+    const activities=[];
+    retSnap.docs.forEach(d=>{const data=d.data();const dt=data.updatedAt?.toDate?data.updatedAt.toDate():new Date();activities.push({type:'return',text:`Return status → ${data.status||'updated'}`,sub:`Tax Year ${data.taxYear||2025}`,dt,icon:'📋',cls:'blue'});});
+    docSnap.docs.forEach(d=>{const data=d.data();const dt=data.uploadedAt?.toDate?data.uploadedAt.toDate():new Date();activities.push({type:'doc',text:`Document uploaded: ${data.fileName||'File'}`,sub:`Tax Year ${data.taxYear||2025}`,dt,icon:'📁',cls:'green'});});
+    ticketSnap.docs.forEach(d=>{const data=d.data();const dt=data.createdAt?.toDate?data.createdAt.toDate():new Date();activities.push({type:'ticket',text:`Support ticket opened`,sub:data.subject||data.clientEmail||'',dt,icon:'💬',cls:'amber'});});
+    activities.sort((a,b)=>b.dt-a.dt);
+    document.getElementById('activity-wrap').innerHTML='<div class="activity-list">'+activities.slice(0,40).map(a=>`<div class="activity-item"><div class="act-icon ${a.cls}">${a.icon}</div><div><div class="act-text">${a.text}</div><div style="font-size:.73rem;color:var(--muted);">${a.sub}</div></div><div class="act-time" style="margin-left:auto;font-size:.7rem;color:var(--muted);">${a.dt.toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</div></div>`).join('')+'</div>';
+  }catch(e){document.getElementById('activity-wrap').innerHTML='<div class="loading">Could not load activity log.</div>';}
+}
+
+window.showTab = function(tab) {
+  document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-nav-item').forEach(t=>t.classList.remove('active'));
+  document.getElementById('section-'+tab).classList.add('active');
+  document.getElementById('tnav-'+tab)?.classList.add('active');
+};
+
+let allAffiliates = [];
+
+async function loadPendingApplications() {
+  try {
+    const snap = await db.collection('affiliate_applications').where('status','==','pending').orderBy('createdAt','desc').get().catch(()=>({docs:[]}));
+    const apps = snap.docs.map(d=>({id:d.id,...d.data()}));
+    const section = document.getElementById('pending-apps-section');
+    const body = document.getElementById('pending-apps-body');
+    const count = document.getElementById('pending-count');
+    if(!apps.length){section.style.display='none';return;}
+    section.style.display='block';
+    count.textContent = apps.length;
+    body.innerHTML = apps.map(a=>`
+      <div style="background:var(--bg);border:1.5px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="font-weight:700;font-size:.95rem;">${a.firstName||''} ${a.lastName||''}</div>
+          <div style="font-size:.82rem;color:var(--muted);">${a.email||''}</div>
+          <div style="font-size:.78rem;color:var(--muted);margin-top:2px;">${a.partnerType||''} · ${a.platform||''} · ${a.audience||''}</div>
+          ${a.notes?`<div style="font-size:.78rem;color:var(--muted);margin-top:2px;font-style:italic;">"${a.notes}"</div>`:''}
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-action" style="padding:8px 16px;font-size:.82rem;" onclick="approveAffiliate('${a.id}','${a.firstName} ${a.lastName}','${a.email}')">✓ Approve</button>
+          <button class="btn-action" style="padding:8px 16px;font-size:.82rem;background:#dc2626;" onclick="rejectAffiliate('${a.id}')">✕ Reject</button>
+        </div>
+      </div>`).join('');
+  } catch(e){console.error('Pending apps:',e);}
+}
+
+async function approveAffiliate(appId, name, email) {
+  const code = (name.split(' ')[0]||'AFF').toUpperCase().replace(/[^A-Z]/g,'') + Math.floor(Math.random()*900+100);
+  try {
+    // Create affiliate record
+    await db.collection('affiliates').add({
+      name, email, code,
+      commissionType:'flat', commissionAmount:75,
+      status:'active', approved:true,
+      totalLeads:0, totalClients:0, totalPaid:0,
+      createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      createdBy:'admin'
+    });
+    // Mark application as approved
+    await db.collection('affiliate_applications').doc(appId).update({status:'approved', approvedAt:firebase.firestore.FieldValue.serverTimestamp()});
+    // Send welcome email via EmailJS
+    try {
+      emailjs.send('service_9p67iy9','template_vtt9a58',{
+        name, email,
+        message:`You've been approved as a TraderTax affiliate!\n\nYour referral code: ${code}\nYour referral link: https://www.tradertax.net/?ref=${code}\n\nLog in to your affiliate portal at: https://www.tradertax.net/affiliate-portal.html\n\nFirst time logging in? Click "New Affiliate? Set up your account" on the portal page to create your password.\n\nWelcome to the team!`
+      }).catch(()=>{});
+    } catch(e){}
+    alert(`✓ Approved! ${name} has been added with code ${code}. Welcome email sent.`);
+    loadPendingApplications();
+    loadAffiliates();
+  } catch(e){alert('Error approving: '+e.message);}
+}
+
+async function rejectAffiliate(appId) {
+  if(!confirm('Reject this application?'))return;
+  await db.collection('affiliate_applications').doc(appId).update({status:'rejected'});
+  loadPendingApplications();
+}
+
+async function loadAffiliates() {
+  try {
+    const snap = await db.collection('affiliates').orderBy('createdAt','desc').get().catch(()=>({docs:[]}));
+    allAffiliates = snap.docs.map(d=>({id:d.id,...d.data()}));
+    document.getElementById('tn-affiliates').textContent = allAffiliates.length;
+    updateAffiliateStats();
+    renderAffiliates();
+  } catch(e){ console.error(e); }
+}
+
+function updateAffiliateStats() {
+  const codes = allAffiliates.map(a=>a.code);
+  const referred = allLeads.filter(l=>codes.includes(l.referredBy));
+  const converted = allClients.filter(c=>codes.includes(c.referredBy));
+  let owed = 0;
+  allAffiliates.forEach(a => {
+    if(a.status==='active') {
+      const clientsFromAff = allClients.filter(c=>c.referredBy===a.code&&!c.affiliatePaid);
+      if(a.commissionType==='flat') owed += clientsFromAff.length * (a.commissionAmount||0);
+      else owed += clientsFromAff.length * ((497 * (a.commissionAmount||0)) / 100);
+    }
+  });
+  document.getElementById('sa-total').textContent = allAffiliates.length;
+  document.getElementById('sa-leads').textContent = referred.length;
+  document.getElementById('sa-converted').textContent = converted.length;
+  document.getElementById('sa-owed').textContent = owed>0?'$'+Math.round(owed).toLocaleString():'$0';
+}
+
+function renderAffiliates() {
+  const search = (document.getElementById('aff-search')?.value||'').toLowerCase();
+  let affs = allAffiliates.filter(a => {
+    if(search) return (a.name+a.code+a.email).toLowerCase().includes(search);
+    return true;
+  });
+  if(!affs.length){
+    document.getElementById('affiliates-body').innerHTML='<div class="empty"><div class="empty-icon">🔗</div>No affiliates yet. Add one above.</div>';
+    return;
+  }
+  document.getElementById('affiliates-body').innerHTML = affs.map(a => {
+    const leadCount = allLeads.filter(l=>l.referredBy===a.code).length;
+    const clientCount = allClients.filter(c=>c.referredBy===a.code).length;
+    let owed = 0;
+    if(a.commissionType==='flat') owed = clientCount * (a.commissionAmount||0);
+    else owed = clientCount * ((497*(a.commissionAmount||0))/100);
+    const isActive = a.status !== 'inactive';
+    const link = 'https://tradertax.net/?ref=' + a.code;
+    return `<div class="t-row" style="display:grid;grid-template-columns:1.5fr 110px 90px 80px 80px 100px 100px 80px;gap:10px;padding:13px 16px;border-bottom:1px solid var(--bg);align-items:center;cursor:default;">
+      <div><div class="cell-name">${a.name}</div><div class="cell-email">${a.email}</div></div>
+      <div><span style="font-family:Syne,sans-serif;font-weight:800;font-size:.78rem;background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;" data-link="${link}" onclick="copyLinkEl(this)" title="Click to copy link">${a.code}</span></div>
+      <div class="cell-muted">${a.commissionType==='flat'?'$'+a.commissionAmount+' flat':a.commissionAmount+'%'}</div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;">${leadCount}</div>
+      <div style="font-family:Syne,sans-serif;font-weight:700;color:var(--green);">${clientCount}</div>
+      <div style="font-weight:700;color:${owed>0?'var(--amber)':'var(--muted)'};">${owed>0?'$'+Math.round(owed).toLocaleString():'—'}</div>
+      <div><span class="status-badge ${isActive?'active':'filed'}">${isActive?'Active':'Inactive'}</span></div>
+      <div style="display:flex;gap:5px;">
+        <button data-affid="${a.id}" onclick="viewAffLeads(this.dataset.affid)" style="font-size:.7rem;padding:4px 8px;border:1px solid var(--border);border-radius:6px;background:none;cursor:pointer;color:var(--navy);">Leads</button>
+        <button data-affid="${a.id}" onclick="markAffiliatePaid(this.dataset.affid)" style="font-size:.7rem;padding:4px 8px;border:1px solid var(--green-lt);border-radius:6px;background:none;cursor:pointer;color:var(--green-dk);">Paid</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.copyLinkEl = function(el) {
+  const link = el.dataset.link;
+  const orig = el.textContent;
+  navigator.clipboard.writeText(link).then(()=>{
+    el.textContent='Copied!'; el.style.color='var(--green)';
+    setTimeout(()=>{ el.textContent=orig; el.style.color=''; }, 1500);
+  });
+};
+
+window.createAffiliate = async function() {
+  const name = document.getElementById('aff-name').value.trim();
+  const code = document.getElementById('aff-code').value.toUpperCase().trim().replace(/\s+/g,'');
+  const email = document.getElementById('aff-email').value.trim();
+  const type = document.getElementById('aff-type').value;
+  const amount = parseFloat(document.getElementById('aff-commission').value)||0;
+  const notes = document.getElementById('aff-notes').value.trim();
+  const msg = document.getElementById('aff-create-msg');
+  if(!name||!code){msg.textContent='Name and code are required.';msg.style.color='var(--red)';return;}
+  if(allAffiliates.find(a=>a.code===code)){msg.textContent='Code already in use.';msg.style.color='var(--red)';return;}
+  msg.textContent='Creating...';msg.style.color='var(--muted)';
+  try {
+    const ref = await db.collection('affiliates').add({name,code,email,commissionType:type,commissionAmount:amount,notes,status:'active',totalLeads:0,totalClients:0,totalPaid:0,createdAt:firebase.firestore.FieldValue.serverTimestamp(),createdBy:'admin'});
+    allAffiliates.push({id:ref.id,name,code,email,commissionType:type,commissionAmount:amount,notes,status:'active',totalLeads:0,totalClients:0,totalPaid:0});
+    msg.textContent='Affiliate created! Link: tradertax.net/?ref='+code;msg.style.color='var(--green-dk)';
+    document.getElementById('tn-affiliates').textContent=allAffiliates.length;
+    document.getElementById('sa-total').textContent=allAffiliates.length;
+    renderAffiliates();
+    document.getElementById('aff-name').value='';document.getElementById('aff-code').value='';
+    document.getElementById('aff-email').value='';document.getElementById('aff-commission').value='';document.getElementById('aff-notes').value='';
+    showToast('Affiliate created! Link: tradertax.net/?ref='+code,'green-t');
+  } catch(e){msg.textContent='Error: '+e.message;msg.style.color='var(--red)';}
+};
+
+window.viewAffLeads = function(affId) {
+  const aff = allAffiliates.find(a=>a.id===affId);
+  if(!aff)return;
+  const leads = allLeads.filter(l=>l.referredBy===aff.code);
+  document.getElementById('aff-breakdown-title').textContent='Leads from '+aff.name+' ('+aff.code+')';
+  document.getElementById('aff-breakdown-sub').textContent=leads.length+' lead'+(leads.length!==1?'s':'')+' attributed to this affiliate.';
+  const getPri = l => {const i=(l.w2||0)+(l.prop||0)+(l.pnl||0)+(l.futuresPnl||0)+(l.otherSe||0);return i>=50000?'hot':i>=20000?'warm':'standard';};
+  document.getElementById('aff-leads-body').innerHTML = leads.length
+    ? leads.map(l=>{
+        const i=(l.w2||0)+(l.prop||0)+(l.pnl||0)+(l.futuresPnl||0)+(l.otherSe||0);
+        const dt=l.createdAt instanceof Date?l.createdAt.toLocaleDateString('en-US',{month:'short',day:'numeric'}):typeof l.createdAt==='string'?new Date(l.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}):'';
+        return `<div class="t-row leads-grid">${priLabel(getPri(l))}<div class="cell-name">${l.email}</div><div class="cell-muted">${l.phone}</div><div style="font-weight:700;">${i>0?'$'+i.toLocaleString():'—'}</div><div class="cell-muted">${l.state}</div><div class="cell-muted">${l.trades}</div><div class="cell-muted">${l.source}</div><div class="cell-muted">${dt}</div></div>`;
+      }).join('')
+    : '<div class="empty"><div class="empty-icon">📭</div>No leads yet from this affiliate.</div>';
+  document.getElementById('aff-breakdown').style.display='block';
+  document.getElementById('aff-breakdown').scrollIntoView({behavior:'smooth'});
+};
+
+window.markAffiliatePaid = async function(affId) {
+  const aff = allAffiliates.find(a=>a.id===affId);
+  if(!aff||!confirm('Mark all outstanding commission for '+aff.name+' as paid?'))return;
+  try {
+    await db.collection('affiliates').doc(affId).update({lastPaidAt:firebase.firestore.FieldValue.serverTimestamp()});
+    const clientsFromAff = allClients.filter(c=>c.referredBy===aff.code&&!c.affiliatePaid);
+    for(const c of clientsFromAff){await db.collection('users').doc(c.id).update({affiliatePaid:true});c.affiliatePaid=true;}
+    showToast('Commission marked as paid for '+aff.name,'green-t');
+    updateAffiliateStats();renderAffiliates();
+  } catch(e){showToast('Error: '+e.message);}
+};
+
+function showToast(msg,cls='') {
+  const t=document.getElementById('toast');t.textContent=msg;t.className='toast'+(cls?' '+cls:'');
+  setTimeout(()=>t.classList.add('show'),10);setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+<script>
+// ── CLIENT PROFILE MODAL ──
+function closeClientProfile(){document.getElementById('client-profile-modal').classList.remove('open');}
+
+// ── CPA PROFILE MODAL ──
+function closeCPAProfile(){document.getElementById('cpa-profile-modal').classList.remove('open');}
+
+window.openCPAProfile = async function(cpaId) {
+  const modal = document.getElementById('cpa-profile-modal');
+  const body = document.getElementById('cpa-profile-body');
+  const title = document.getElementById('cpa-profile-title');
+  modal.classList.add('open');
+  body.innerHTML = '<div class="loading"><span class="spin"></span>Loading profile...</div>';
+
+  const cpa = allCPAs.find(c=>c.id===cpaId)||{};
+  const name = ((cpa.firstName||'')+' '+(cpa.lastName||'')).trim()||cpa.email||'CPA';
+  title.textContent = name + ' — Specialist Profile';
+
+  // Get assigned clients
+  const assignedClients = allClients.filter(c=>c.assignedCPA?.uid===cpaId);
+
+  // Load CPA's uploaded returns + notes in parallel
+  const [returnsSnap, notesSnap] = await Promise.all([
+    db.collection('tax_returns').where('cpaUid','==',cpaId).get().catch(()=>({docs:[]})),
+    db.collection('cpa_notes').where('cpaUid','==',cpaId).get().catch(()=>({docs:[]}))
+  ]);
+
+  const returns = returnsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const notes = notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+  const fmtDate = ts => { if(!ts) return '—'; const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts); return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); };
+  const stColors = {received:'#6b7280',assigned:'#1d4ed8',review:'#d97706',completed:'#2ea86c',filed:'#059669'};
+
+  body.innerHTML = `
+    <!-- Header -->
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
+      <div style="width:52px;height:52px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
+      <div style="flex:1;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.05rem;color:#fff;">${name}</div>
+        <div style="font-size:.78rem;color:rgba(255,255,255,.6);">${cpa.email||'—'} · ${cpa.credentials||'CPA'}</div>
+      </div>
+      <div style="text-align:right;">
+        <span style="background:var(--green);color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;">Active</span>
+        <div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">${assignedClients.length} client${assignedClients.length!==1?'s':''} assigned</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);">${assignedClients.length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Clients</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--green-dk);">${returns.filter(r=>r.returnFileUrl||r.fileUrl).length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Returns Filed</div>
+      </div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;text-align:center;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.6rem;color:var(--navy);">${notes.length}</div>
+        <div style="font-size:.72rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);">Notes Written</div>
+      </div>
+    </div>
+
+    <!-- Assigned Clients -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">👥 Assigned Clients (${assignedClients.length})</div>
+      ${assignedClients.length ? assignedClients.map(c=>{
+        const cName=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email||'Client';
+        const st=c.returnStatus||'received';
+        const taxReturn=returns.find(r=>r.clientUid===c.id)||{};
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer;" onclick="closeCPAProfile();openClientProfile('${c.id}')">
+          <div>
+            <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${cName}</div>
+            <div style="font-size:.72rem;color:var(--muted);">${c.email||''} · Tax Year ${c.taxYear||2025}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="background:${stColors[st]||'#6b7280'};color:#fff;padding:3px 10px;border-radius:99px;font-size:.68rem;font-weight:700;text-transform:uppercase;">${st}</span>
+            <span style="font-size:.74rem;color:var(--green-dk);font-weight:700;">View →</span>
+          </div>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No clients assigned yet.</div>'}
+    </div>
+
+    <!-- Tax Returns uploaded by CPA -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📄 Tax Returns Uploaded (${returns.filter(r=>r.returnFileUrl||r.fileUrl).length})</div>
+      ${returns.filter(r=>r.returnFileUrl||r.fileUrl).length ? returns.filter(r=>r.returnFileUrl||r.fileUrl).map(r=>{
+        const client=allClients.find(c=>c.id===r.clientUid)||{};
+        const cName=((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||r.clientUid||'Client';
+        const url=r.returnFileUrl||r.fileUrl;
+        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);">
+          <div>
+            <div style="font-weight:600;font-size:.84rem;color:var(--navy);">${r.fileName||'Tax Return '+r.taxYear}</div>
+            <div style="font-size:.72rem;color:var(--muted);">For: ${cName} · ${fmtDate(r.updatedAt||r.createdAt)}</div>
+          </div>
+          <a href="${url}" target="_blank" style="font-size:.75rem;font-weight:700;color:var(--green-dk);text-decoration:none;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;">📄 View</a>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No returns uploaded yet.</div>'}
+    </div>
+
+    <!-- Recent Notes -->
+    <div style="margin-bottom:20px;">
+      <div class="modal-sec-title">📝 Recent Notes (${notes.length})</div>
+      ${notes.slice(0,5).length ? notes.slice(0,5).map(n=>{
+        const client=allClients.find(c=>c.id===n.clientUid)||{};
+        const cName=((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email||'Client';
+        return `<div style="background:var(--bg);border-radius:9px;padding:12px 14px;margin-bottom:8px;">
+          <div style="font-size:.72rem;color:var(--muted);margin-bottom:4px;">${fmtDate(n.createdAt)} · Re: ${cName}</div>
+          <div style="font-size:.84rem;color:var(--navy);">${n.note||n.content||''}</div>
+        </div>`;
+      }).join('') : '<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
+    </div>
+
+    <!-- Actions -->
+    <div style="display:flex;gap:10px;padding-top:16px;border-top:1px solid var(--border);">
+      <a href="mailto:${cpa.email||''}" style="flex:1;padding:10px;font-size:.8rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;">Email CPA</a>
+      <button onclick="closeCPAProfile();if(confirm('Deactivate this specialist?'))deactivateCPA('${cpaId}')" style="padding:10px 20px;font-size:.8rem;font-weight:700;border:1.5px solid var(--red-lt);border-radius:9px;background:none;color:var(--red);cursor:pointer;">Deactivate</button>
+    </div>
+  `;
+};
+
+window.openClientProfile = async function(clientId) {
+  if(!clientId||clientId==='undefined') return;
+  const modal=document.getElementById('client-profile-modal');
+  const body=document.getElementById('cp-body');
+  const title=document.getElementById('cp-title');
+  modal.classList.add('open');
+  body.innerHTML='<div class="loading"><span class="spin"></span>Loading profile...</div>';
+
+  const clientFromList = allClients.find(c=>c.id===clientId)||null;
+  const userDoc = await db.collection('users').doc(clientId).get().catch(()=>null);
+  const userEmail = userDoc?.exists ? (userDoc.data().email||'') : '';
+
+  const [docsSnap,notesSnap,returnsSnap,ticketSnap]=await Promise.all([
+    db.collection('client_documents').where('uid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('cpa_notes').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('tax_returns').where('clientUid','==',clientId).get().catch(()=>({docs:[]})),
+    db.collection('support_tickets').where('clientUid','==',clientId).limit(1).get().catch(()=>({docs:[]}))
+  ]);
+
+  const emailFromDoc = docsSnap.docs.find(d=>d.data().clientEmail)?.data().clientEmail||'';
+  const emailFromTicket = ticketSnap.docs[0]?.data().clientEmail||'';
+  const resolvedEmail = userEmail||emailFromDoc||emailFromTicket||uidEmailLookup[clientId]||'';
+
+  const baseData = userDoc?.exists ? {id:clientId,...userDoc.data(),email:resolvedEmail} : {id:clientId,email:resolvedEmail};
+  const client = clientFromList ? {...clientFromList,email:clientFromList.email||resolvedEmail} : baseData;
+  const name = ((client.firstName||'')+' '+(client.lastName||'')).trim()||resolvedEmail||'Unknown Client';
+  title.textContent = name + ' — Profile';
+
+  const docs=docsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.seconds||0)-(a.uploadedAt?.seconds||0));
+  const notes=notesSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+  const returns=returnsSnap.docs.map(d=>({id:d.id,...d.data()}));
+  const taxReturn=returns[0]||{};
+  const cpa=allCPAs.find(c=>c.id===client.assignedCPA?.uid);
+  const fmt=v=>v?'$'+Number(v).toLocaleString():'—';
+  const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});};
+  const stColors={received:'#6b7280',assigned:'#1d4ed8',review:'#d97706',completed:'#2ea86c',filed:'#059669'};
+  const st=client.returnStatus||'received';
+
+  const docRow=d=>{
+    const docUrl=d.url||d.fileUrl||null;
+    const isImg=docUrl&&/\.(jpg|jpeg|png|gif|webp)/i.test(docUrl);
+    const viewBtn=docUrl?`<button onclick="openDocPreview('${(docUrl).replace(/'/g,"\\'")}','${(d.fileName||d.name||'Doc').replace(/'/g,"\\'")}');event.stopPropagation();" style="font-size:.75rem;font-weight:700;color:var(--green-dk);background:none;border:1.5px solid var(--green);border-radius:7px;padding:5px 14px;cursor:pointer;">${isImg?'🖼 View':'📄 View'}</button>`:'<span style="font-size:.74rem;color:var(--muted);">No link</span>';
+    return`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);"><div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Document'}</div><div style="font-size:.72rem;color:var(--muted);">${d.category||'General'} · ${fmtDate(d.uploadedAt)}</div></div>${viewBtn}</div>`;
+  };
+
+  body.innerHTML=`
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:var(--navy);border-radius:12px;margin-bottom:20px;">
+      <div style="width:48px;height:48px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;color:#fff;">${(name[0]||'?').toUpperCase()}</div>
+      <div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1rem;color:#fff;">${name==='Unknown Client'&&resolvedEmail?resolvedEmail:name}</div><div style="font-size:.78rem;color:rgba(255,255,255,.6);">${resolvedEmail||'No email on file'}${client.phone?' · '+client.phone:''}</div></div>
+      <div style="text-align:right;"><span style="background:${stColors[st]||'#6b7280'};color:#fff;padding:4px 12px;border-radius:99px;font-size:.72rem;font-weight:700;text-transform:uppercase;">${st}</span><div style="font-size:.72rem;color:rgba(255,255,255,.5);margin-top:4px;">Tax Year ${client.taxYear||2025}</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;"><div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Assigned CPA</div><div style="font-weight:600;color:var(--navy);">${cpa?((cpa.firstName||'')+' '+(cpa.lastName||'')).trim():'—'}</div><div style="font-size:.76rem;color:var(--muted);">${cpa?.email||''}</div></div>
+      <div style="background:var(--bg);border-radius:10px;padding:14px 16px;"><div style="font-size:.62rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Return Status</div><div style="font-weight:600;color:var(--navy);">${taxReturn.status?taxReturn.status.charAt(0).toUpperCase()+taxReturn.status.slice(1):'—'}</div><div style="font-size:.76rem;color:var(--muted);">Updated ${fmtDate(taxReturn.updatedAt)}</div></div>
+    </div>
+    ${client.calcResults?`<div style="margin-bottom:20px;"><div class="modal-sec-title">💰 Income & Tax Estimate</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px;">${[['W-2',fmt(client.calcResults.w2)],['Prop Firm',fmt(client.calcResults.prop)],['Futures P&L',fmt(client.calcResults.futuresPnl)],['Est. Tax',fmt(client.calcResults.estimatedTax)],['State',client.calcResults.state||'—'],['Filing',client.calcResults.filing||'—']].map(([k,v])=>`<div style="background:var(--bg);border-radius:9px;padding:12px 14px;"><div style="font-size:.62rem;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--muted);margin-bottom:3px;">${k}</div><div style="font-weight:700;color:var(--navy);font-size:.92rem;">${v}</div></div>`).join('')}</div></div>`:''}
+    <div style="margin-bottom:20px;"><div class="modal-sec-title">📁 Uploaded Documents (${docs.length})</div>${docs.length?docs.map(docRow).join(''):'<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No documents yet.</div>'}</div>
+    <div style="margin-bottom:20px;"><div class="modal-sec-title">📝 CPA Notes (${notes.length})</div>${notes.length?notes.map(n=>`<div style="background:var(--bg);border-radius:9px;padding:12px 14px;margin-bottom:8px;"><div style="font-size:.78rem;color:var(--muted);margin-bottom:4px;">${fmtDate(n.createdAt)} · ${n.cpaName||'CPA'}</div><div style="font-size:.86rem;color:var(--navy);">${n.note||n.content||''}</div></div>`).join(''):'<div style="font-size:.82rem;color:var(--muted);padding:10px 0;">No notes yet.</div>'}
+    </div>
+    ${taxReturn.timeline?.length?`<div style="margin-bottom:20px;"><div class="modal-sec-title">📅 Return Timeline</div>${taxReturn.timeline.map(t=>`<div style="display:flex;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);"><div style="font-size:.74rem;color:var(--muted);white-space:nowrap;min-width:60px;">${new Date(t.date).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div><div style="font-size:.82rem;color:var(--navy);">${t.note}</div></div>`).join('')}</div>`:''}
+    <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);">
+      <button onclick="closeClientProfile();openAssignModal('${clientId}','${name.replace(/'/g,'')}')" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:1.5px solid var(--border);border-radius:9px;background:none;cursor:pointer;color:var(--navy);">${client.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button>
+      <a href="mailto:${resolvedEmail||''}" style="flex:1;padding:11px;font-size:.82rem;font-weight:700;border:none;border-radius:9px;background:var(--navy);color:#fff;text-align:center;text-decoration:none;display:block;">Email Client</a>
+    </div>
+    ${!resolvedEmail?`<div style="margin-top:14px;padding:12px 14px;background:#fff8ed;border:1.5px solid #f59e0b;border-radius:10px;">
+      <div style="font-size:.76rem;font-weight:700;color:#b45309;margin-bottom:8px;">⚠️ No email found — set it manually:</div>
+      <div style="display:flex;gap:8px;">
+        <input id="manual-email-input" type="email" placeholder="client@email.com" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-size:.82rem;outline:none;"/>
+        <button onclick="saveClientEmail('${clientId}',document.getElementById('manual-email-input').value)" style="padding:8px 16px;background:var(--navy);color:#fff;border:none;border-radius:7px;font-size:.8rem;font-weight:700;cursor:pointer;">Save</button>
+      </div>
+    </div>`:''}
+  `;
+};
+
+window.saveClientEmail = async function(clientId, email) {
+  if(!email||!email.includes('@')){showToast('Enter a valid email','error');return;}
+  try {
+    // Write to users doc
+    await db.collection('users').doc(clientId).set({email},{merge:true});
+    // Backfill all their docs
+    const snap = await db.collection('client_documents').where('uid','==',clientId).get();
+    const batch = db.batch();
+    snap.docs.forEach(d=>{ if(!d.data().clientEmail) batch.update(d.ref,{clientEmail:email}); });
+    await batch.commit();
+    uidEmailLookup[clientId] = email;
+    showToast('Email saved ✓','success');
+    loadAllDocuments();
+    openClientProfile(clientId);
+  } catch(e){ showToast('Error: '+e.message,'error'); }
+};
+
+// ── DOCUMENTS TAB ──
+let _allDocs = [];
+let allSnapshots = [];
+let allCalcLeads = [];
+let docFilterMode = 'all';
+let uidEmailLookup = {};
+
+async function loadAllDocuments() {
+  try {
+    const [clientDocsSnap,taxReturnsSnap,leadsSnap,calcLeadsSnap,allUsersSnap,ticketsSnap]=await Promise.all([
+      db.collection('client_documents').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('tax_returns').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('leads').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('calculator_leads').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('users').limit(500).get().catch(()=>({docs:[]})),
+      db.collection('support_tickets').limit(500).get().catch(()=>({docs:[]}))
+    ]);
+    uidEmailLookup={};
+    allUsersSnap.docs.forEach(d=>{if(d.data().email)uidEmailLookup[d.id]=d.data().email;});
+    ticketsSnap.docs.forEach(d=>{const td=d.data();if(td.clientUid&&td.clientEmail&&!uidEmailLookup[td.clientUid])uidEmailLookup[td.clientUid]=td.clientEmail;});
+    clientDocsSnap.docs.forEach(d=>{const dd=d.data();if(dd.uid&&dd.clientEmail&&!uidEmailLookup[dd.uid])uidEmailLookup[dd.uid]=dd.clientEmail;});
+    const clientDocs=clientDocsSnap.docs.map(d=>({id:d.id,...d.data(),url:d.data().fileUrl||d.data().url||null,clientEmail:d.data().clientEmail||uidEmailLookup[d.data().uid]||'',_type:'client'}));
+    const returnDocs=taxReturnsSnap.docs.filter(d=>d.data().returnFileUrl||d.data().fileUrl).map(d=>({id:d.id,...d.data(),fileName:d.data().fileName||'Tax Return '+d.data().taxYear,url:d.data().returnFileUrl||d.data().fileUrl,category:'Tax Return',_type:'return'}));
+    _allDocs=[...clientDocs,...returnDocs].sort((a,b)=>(b.uploadedAt?.seconds||b.createdAt?.seconds||0)-(a.uploadedAt?.seconds||a.createdAt?.seconds||0));
+    allSnapshots=leadsSnap.docs.map(d=>({id:d.id,...d.data()})).filter(d=>d.source==='Snapshot'||d.source==='Calc + Snapshot').sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    allCalcLeads=calcLeadsSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    document.getElementById('ds-total').textContent=_allDocs.length;
+    document.getElementById('ds-client').textContent=clientDocs.length;
+    document.getElementById('ds-cpa').textContent=returnDocs.length;
+    document.getElementById('ds-snapshots').textContent=allSnapshots.length;
+    document.getElementById('tn-documents').textContent=_allDocs.length;
+    renderDocs();renderSnapshots();renderCalcLeads();
+  }catch(e){console.error('loadAllDocuments error:',e);}
+}
+
+function setDocFilter(f){docFilterMode=f;['all','client','return','snapshot'].forEach(id=>{document.getElementById('df-'+id)?.classList.toggle('on',id===f)});renderDocs();}
+
+function openDocPreview(url,fileName){
+  const isImage=/\.(jpg|jpeg|png|gif|webp)/i.test(url);
+  const isPDF=/\.pdf/i.test(url);
+  const existing=document.getElementById('doc-preview-modal');
+  if(existing)existing.remove();
+  const modal=document.createElement('div');
+  modal.id='doc-preview-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.onclick=e=>{if(e.target===modal)modal.remove();};
+  modal.innerHTML=`<div style="background:#fff;border-radius:16px;max-width:860px;width:100%;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;"><div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #e5e8ef;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;color:#0a1628;">${fileName||'Document'}</div><div style="display:flex;gap:10px;"><a href="${url}" target="_blank" style="font-size:.78rem;font-weight:700;color:#2ea86c;text-decoration:none;padding:6px 14px;border:1.5px solid #3dba7e;border-radius:8px;">Open in New Tab</a><button onclick="document.getElementById('doc-preview-modal').remove()" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#6b7280;">✕</button></div></div><div style="flex:1;overflow:auto;padding:20px;display:flex;align-items:center;justify-content:center;background:#f7f8fb;">${isImage?`<img src="${url}" style="max-width:100%;max-height:70vh;border-radius:8px;" />`:isPDF?`<iframe src="${url}" style="width:100%;height:70vh;border:none;border-radius:8px;"></iframe>`:`<div style="text-align:center;"><div style="font-size:3rem;margin-bottom:16px;">📄</div><a href="${url}" target="_blank" style="font-weight:700;color:#2ea86c;">Download File →</a></div>`}</div></div>`;
+  document.body.appendChild(modal);
+}
+
+function renderDocs(){
+  const search=(document.getElementById('doc-search')?.value||'').toLowerCase();
+  let docs=_allDocs.filter(d=>{
+    if(docFilterMode==='client'&&d._type!=='client')return false;
+    if(docFilterMode==='return'&&d._type!=='return')return false;
+    if(search){const h=((d.fileName||d.name||'')+(d.category||'')+(d.clientEmail||d.email||'')).toLowerCase();if(!h.includes(search))return false;}
+    return true;
+  });
+  if(!docs.length){document.getElementById('docs-body').innerHTML='<div class="empty"><div class="empty-icon">📁</div>No documents found.</div>';return;}
+  const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});};
+  const clientLookup={};
+  allClients.forEach(c=>{clientLookup[c.id]=((c.firstName||'')+' '+(c.lastName||'')).trim()||c.email;});
+  const typeColors={client:'var(--blue-lt)',return:'var(--green-lt)'};
+  const typeLabels={client:'Client Doc',return:'CPA Return'};
+  document.getElementById('docs-body').innerHTML=docs.map(d=>{
+    const clientName=d.clientEmail||(d.uid?(clientLookup[d.uid]||uidEmailLookup[d.uid]||''):'');
+    const clientDisplay=clientName||'<span style="color:var(--muted);font-size:.74rem;">Unknown</span>';
+    const uploaded=fmtDate(d.uploadedAt||d.createdAt);
+    const category=d.category||d.documentType||'General';
+    const typeBadge=`<span style="background:${typeColors[d._type]||'var(--bg)'};color:var(--navy);padding:2px 8px;border-radius:99px;font-size:.68rem;font-weight:700;">${typeLabels[d._type]||d._type}</span>`;
+    const docUrl=d.url||d.fileUrl||null;
+    const isImg=docUrl&&/\.(jpg|jpeg|png|gif|webp)/i.test(docUrl);
+    const safeUrl=(docUrl||'').replace(/'/g,"\\'");
+    const safeName=(d.fileName||d.name||'Document').replace(/'/g,"\\'");
+    const viewBtn=docUrl?`<button onclick="event.stopPropagation();openDocPreview('${safeUrl}','${safeName}')" style="font-size:.75rem;font-weight:700;color:var(--green-dk);background:none;border:1.5px solid var(--green);border-radius:7px;padding:5px 12px;cursor:pointer;">${isImg?'🖼 View':'📄 View'}</button>`:'<span style="font-size:.74rem;color:var(--muted);">No link</span>';
+    const clientId=d.uid||'';
+    return`<div style="display:grid;grid-template-columns:2fr 1.2fr 1fr 1fr 100px;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="if(event.target.tagName!=='BUTTON'&&'${clientId}')openClientProfile('${clientId}')"><div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${d.fileName||d.name||'Untitled'}</div><div style="margin-top:3px;">${typeBadge}</div></div><div style="font-size:.82rem;color:var(--body);">${clientDisplay}</div><div style="font-size:.8rem;color:var(--muted);">${category}</div><div style="font-size:.78rem;color:var(--muted);">${uploaded}</div><div>${viewBtn}</div></div>`;
+  }).join('');
+}
+
+function renderSnapshots(){
+  const search=(document.getElementById('snap-search')?.value||'').toLowerCase();
+  let snaps=allSnapshots.filter(s=>!search||((s.email||'')+(s.trades||'')+(s.entity||'')+(s.prop||'')).toLowerCase().includes(search));
+  if(!snaps.length){document.getElementById('snaps-body').innerHTML='<div class="empty"><div class="empty-icon">📋</div>No snapshots yet.</div>';return;}
+  const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});};
+  document.getElementById('snaps-body').innerHTML=snaps.map(s=>`
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''" onclick="openLead('${s.id}')">
+      <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${s.email||'Unknown'}</div><div style="font-size:.72rem;color:var(--muted);">${s.phone||''}</div></div>
+      <div style="font-size:.8rem;">${s.prop?'$'+Number(s.prop).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${s.trades||'—'}</div>
+      <div style="font-size:.8rem;">${s.entity||'—'}</div>
+      <div style="font-size:.78rem;color:var(--muted);">${fmtDate(s.createdAt)}</div>
+    </div>`).join('');
+}
+
+function renderCalcLeads(){
+  const el=document.getElementById('calc-leads-body');
+  if(!el)return;
+  if(!allCalcLeads.length){el.innerHTML='<div class="empty"><div class="empty-icon">🧮</div>No calculator submissions yet.</div>';return;}
+  const fmtDate=ts=>{if(!ts)return'—';const d=ts.toDate?ts.toDate():new Date(ts.seconds?ts.seconds*1000:ts);return d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});};
+  el.innerHTML=allCalcLeads.map(c=>`
+    <div style="display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr 1fr 1fr;gap:10px;padding:12px 16px;border-bottom:1px solid var(--border);align-items:center;transition:background .15s;" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background=''">
+      <div><div style="font-weight:600;font-size:.84rem;color:var(--navy);">${c.email||'Unknown'}</div><div style="font-size:.72rem;color:var(--muted);">${c.state||''} · ${c.filing||''}</div></div>
+      <div style="font-size:.8rem;">${c.w2?'$'+Number(c.w2).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${c.prop?'$'+Number(c.prop).toLocaleString():'—'}</div>
+      <div style="font-size:.8rem;">${c.futuresPnl?'$'+Number(c.futuresPnl).toLocaleString():'—'}</div>
+      <div style="font-weight:700;font-size:.84rem;color:var(--green-dk);">${c.estimatedTax?'$'+Number(c.estimatedTax).toLocaleString():'—'}</div>
+      <div style="font-size:.78rem;color:var(--muted);">${fmtDate(c.createdAt)}</div>
+    </div>`).join('');
+}
+</script>
+<script src="affiliate-tracker.js"></script>
+</body>
+</html>
