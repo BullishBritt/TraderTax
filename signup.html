@@ -195,7 +195,7 @@ function checkStrength(pw) {
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getAuth, createUserWithEmailAndPassword, updateProfile, onAuthStateChanged, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   import { getFirestore, doc, setDoc, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   // ⚠️  PASTE YOUR FIREBASE CONFIG HERE
@@ -282,8 +282,8 @@ function checkStrength(pw) {
 
       try { sendLeadEmail('Signup Lead', firstName + ' ' + lastName, email, '', '', ''); } catch(e) {}
 
-      showMsg('Account created! Redirecting to your dashboard...', 'success');
-      setTimeout(() => window.location.href = 'dashboard.html', 1000);
+      showMsg('Account created! Please verify your phone number...', 'success');
+      setTimeout(() => showSignupPhoneModal(), 1000);
     } catch (e) {
       btn.disabled = false;
       btn.textContent = 'Create Account →';
@@ -309,5 +309,119 @@ function checkStrength(pw) {
   }
 </script>
   <script src="affiliate-tracker.js"></script>
+
+<!-- Signup Phone Verification -->
+<div id="signup-phone-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,0.9);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:32px;max-width:420px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:20px;">
+      <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#0a1628;margin-bottom:8px;">One Last Step</h3>
+      <p style="font-size:0.88rem;color:#6b7280;">Verify your phone to secure your account.</p>
+    </div>
+
+    <div id="signup-phone-input">
+      <input type="tel" id="signup-phone-number" placeholder="+1 (555) 123-4567" style="width:100%;padding:12px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;outline:none;margin-bottom:8px;"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Include +1 for US</div>
+      <div id="signup-recaptcha"></div>
+      <button onclick="sendSignupCode()" id="signup-send-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:12px;">Send Code</button>
+      <button onclick="skipPhoneVerification()" style="width:100%;padding:10px;background:none;color:#6b7280;border:none;font-size:0.8rem;cursor:pointer;margin-top:6px;text-decoration:underline;">Skip for now</button>
+    </div>
+
+    <div id="signup-code-input" style="display:none;">
+      <input type="text" id="signup-verification-code" maxlength="6" placeholder="123456" style="width:100%;padding:12px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:1.1rem;text-align:center;letter-spacing:4px;margin-bottom:12px;"/>
+      <button onclick="verifySignupCode()" id="signup-verify-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;">Verify & Continue</button>
+    </div>
+
+    <div id="signup-phone-error" style="display:none;margin-top:12px;padding:10px;background:#fef2f2;border-radius:8px;font-size:0.8rem;color:#dc2626;"></div>
+  </div>
+</div>
+
+<script type="module">
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const auth = getAuth();
+const db = getFirestore();
+
+let signupConfirmationResult = null;
+
+window.showSignupPhoneModal = function() {
+  document.getElementById('signup-phone-modal').style.display = 'flex';
+  
+  if (!window.signupRecaptchaVerifier) {
+    window.signupRecaptchaVerifier = new RecaptchaVerifier(auth, 'signup-recaptcha', { 'size': 'normal' });
+    window.signupRecaptchaVerifier.render();
+  }
+};
+
+window.sendSignupCode = async function() {
+  const phoneNumber = document.getElementById('signup-phone-number').value.trim();
+  
+  if (!phoneNumber || !phoneNumber.startsWith('+')) {
+    showSignupPhoneError('Phone must include +1');
+    return;
+  }
+  
+  const btn = document.getElementById('signup-send-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  
+  try {
+    signupConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.signupRecaptchaVerifier);
+    document.getElementById('signup-phone-input').style.display = 'none';
+    document.getElementById('signup-code-input').style.display = 'block';
+    window.signupPhoneNumber = phoneNumber;
+  } catch (error) {
+    console.error('SMS error:', error);
+    btn.disabled = false;
+    btn.textContent = 'Send Code';
+    showSignupPhoneError('Failed to send code');
+  }
+};
+
+window.verifySignupCode = async function() {
+  const code = document.getElementById('signup-verification-code').value.trim();
+  
+  if (code.length !== 6) {
+    showSignupPhoneError('Enter 6-digit code');
+    return;
+  }
+  
+  const btn = document.getElementById('signup-verify-btn');
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  
+  try {
+    await signupConfirmationResult.confirm(code);
+    
+    const user = auth.currentUser;
+    if (user) {
+      await setDoc(doc(db, 'users', user.uid), {
+        phone: window.signupPhoneNumber,
+        phoneVerified: true,
+        verifiedAt: new Date().toISOString()
+      }, { merge: true });
+    }
+    
+    window.location.href = 'dashboard.html';
+  } catch (error) {
+    console.error('Verification error:', error);
+    btn.disabled = false;
+    btn.textContent = 'Verify & Continue';
+    showSignupPhoneError('Invalid code');
+  }
+};
+
+window.skipPhoneVerification = function() {
+  window.location.href = 'dashboard.html';
+};
+
+function showSignupPhoneError(msg) {
+  const err = document.getElementById('signup-phone-error');
+  err.textContent = msg;
+  err.style.display = 'block';
+  setTimeout(() => { err.style.display = 'none'; }, 5000);
+}
+</script>
+
 </body>
 </html>
