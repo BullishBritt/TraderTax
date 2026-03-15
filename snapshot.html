@@ -708,6 +708,27 @@ Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
   document.getElementById(lSteps[lSteps.length-1]).className = 'load-step done';
   await new Promise(r => setTimeout(r, 400));
 
+  // Save lead to Firestore BEFORE phone verification (capture every lead!)
+  try {
+    await db.collection('leads').add({
+      name: profile.name,
+      email: profile.email,
+      phone: profile.phone,
+      source: 'Snapshot Lead',
+      who: profile.who,
+      instruments: profile.instruments,
+      profitable: profile.profitable,
+      income: profile.income,
+      situation: profile.situation,
+      structure: profile.structure,
+      needs: profile.needs,
+      bestTime: profile.bestTime,
+      notes: profile.notes,
+      ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
+      createdAt: new Date().toISOString()
+    });
+  } catch(e) { console.log('Lead save error:', e); }
+
   // Store data for after phone verification
   window.snapshotProfile = profile;
   window.snapshotAiSummary = aiSummary;
