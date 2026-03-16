@@ -500,60 +500,59 @@ let activeReturnId = null;
 let clientFilter = 'all';
 let myCpasDocId = null; // The CPA's cpas-collection doc ID (used by admin for assignments)
 
-/* ── AUTH ── */
+/* ── SECURE CPA AUTHENTICATION ── */
+// Hide page until authenticated
+document.body.style.display = 'none';
+
 auth.onAuthStateChanged(async user => {
-  if (user) {
-    console.log('Auth state changed - user logged in:', user.email);
-    const adminEmails = ['hello@tradertax.net','brittainalfaro@gmail.com','brittain0404@yahoo.com'];
+  if (!user) {
+    // Not logged in - redirect to login
+    window.location.href = 'login.html?redirect=cpa&message=CPA access requires login';
+    return;
+  }
+  
+  try {
+    const userDoc = await db.collection('users').doc(user.uid).get();
     
-    try {
-      // Allow admin emails immediately
-      if (adminEmails.includes(user.email)) {
-        console.log('Admin email detected, granting access');
-        currentUser = user;
-        const snap = await db.collection('users').doc(user.uid).get().catch(err => {
-          console.warn('Could not fetch user doc:', err);
-          return null;
-        });
-        cpaData = snap?.exists ? snap.data() : {};
-      } else {
-        // For non-admin emails, check role
-        console.log('Non-admin email, checking role');
-        const snap = await db.collection('users').doc(user.uid).get().catch(err => {
-          console.warn('Could not fetch user doc:', err);
-          return null;
-        });
-        const role = snap?.exists ? snap.data()?.role : null;
-        console.log('User role:', role);
-        if (role !== 'cpa' && role !== 'admin') {
-          console.log('Access denied - invalid role');
-          auth.signOut();
-          return;
-        }
-        currentUser = user;
-        cpaData = snap.data() || {};
-      }
-
-      // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
-      try {
-        const cpasSnap = await db.collection('cpas').where('email','==',user.email).limit(1).get();
-        if (!cpasSnap.empty) {
-          myCpasDocId = cpasSnap.docs[0].id;
-          cpaData = { ...cpasSnap.docs[0].data(), ...cpaData };
-          console.log('Found CPA doc ID:', myCpasDocId);
-        } else {
-          console.log('No CPA doc found for', user.email);
-        }
-      } catch(e) { console.warn('Could not find cpas doc:', e.message); }
-
-      console.log('Calling showApp');
-      showApp(user);
-    } catch(e) {
-      console.error('Auth flow error:', e);
-      auth.signOut();
+    if (!userDoc.exists) {
+      alert('Access denied. Contact hello@tradertax.net');
+      await auth.signOut();
+      window.location.href = 'index.html';
+      return;
     }
-  } else {
-    console.log('No user logged in');
+    
+    const userData = userDoc.data();
+    const userRole = userData.role;
+    
+    // Allow CPA or admin roles
+    if (userRole !== 'cpa' && userRole !== 'admin') {
+      alert('Access denied. CPA portal only.\\n\\nYour role: ' + (userRole || 'none') + '\\nRequired: cpa');
+      await auth.signOut();
+      window.location.href = 'index.html';
+      return;
+    }
+    
+    // User authenticated with correct role
+    document.body.style.display = 'block';
+    currentUser = user;
+    cpaData = userData;
+    
+    // Find this CPA's cpas-collection doc ID (what the admin uses to assign clients)
+    try {
+      const cpasSnap = await db.collection('cpas').where('email','==',user.email).limit(1).get();
+      if (!cpasSnap.empty) {
+        myCpasDocId = cpasSnap.docs[0].id;
+        cpaData = { ...cpasSnap.docs[0].data(), ...cpaData };
+      }
+    } catch(e) { console.warn('Could not find cpas doc:', e.message); }
+    
+    showApp(user);
+    
+  } catch(e) {
+    console.error('Auth flow error:', e);
+    alert('Authentication error.');
+    await auth.signOut();
+    window.location.href = 'login.html';
   }
 });
 
