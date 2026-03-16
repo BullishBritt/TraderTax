@@ -243,8 +243,6 @@ function checkStrength(pw) {
         firstName,
         lastName,
         email,
-          role: 'client',
-          
         createdAt: new Date().toISOString(),
         taxYear: new Date().getFullYear(),
         snapshots: [],
@@ -346,8 +344,22 @@ const db = getFirestore();
 
 let signupConfirmationResult = null;
 
+// RATE LIMITING VARIABLES
+let signupVerificationAttempts = 0;
+const SIGNUP_MAX_ATTEMPTS = 5;
+
+let signupResendCount = 0;
+const SIGNUP_MAX_RESENDS = 3;
+
+let signupLastResendTime = 0;
+const SIGNUP_RESEND_COOLDOWN = 60000; // 60 seconds
+
 window.showSignupPhoneModal = function() {
   document.getElementById('signup-phone-modal').style.display = 'flex';
+  
+  // Reset counters
+  signupVerificationAttempts = 0;
+  signupResendCount = 0;
   
   if (!window.signupRecaptchaVerifier) {
     window.signupRecaptchaVerifier = new RecaptchaVerifier(auth, 'signup-recaptcha', { 'size': 'normal' });
@@ -363,12 +375,34 @@ window.sendSignupCode = async function() {
     return;
   }
   
+  // Check cooldown
+  const now = Date.now();
+  const timeSinceLastResend = now - signupLastResendTime;
+  
+  if (signupLastResendTime > 0 && timeSinceLastResend < SIGNUP_RESEND_COOLDOWN) {
+    const waitSeconds = Math.ceil((SIGNUP_RESEND_COOLDOWN - timeSinceLastResend) / 1000);
+    showSignupPhoneError('Please wait ' + waitSeconds + ' seconds before resending.');
+    startSignupCooldownTimer(waitSeconds);
+    return;
+  }
+  
+  // Check max resends
+  if (signupResendCount >= SIGNUP_MAX_RESENDS) {
+    showSignupPhoneError('Maximum resends reached (' + SIGNUP_MAX_RESENDS + '). Please try again later.');
+    return;
+  }
+  
   const btn = document.getElementById('signup-send-btn');
   btn.disabled = true;
   btn.textContent = 'Sending...';
   
   try {
     signupConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.signupRecaptchaVerifier);
+    
+    signupResendCount++;
+    signupLastResendTime = now;
+    signupVerificationAttempts = 0;
+    
     document.getElementById('signup-phone-input').style.display = 'none';
     document.getElementById('signup-code-input').style.display = 'block';
     window.signupPhoneNumber = phoneNumber;
@@ -388,20 +422,46 @@ window.verifySignupCode = async function() {
     return;
   }
   
+  // Check attempt limit
+  if (signupVerificationAttempts >= SIGNUP_MAX_ATTEMPTS) {
+    showSignupPhoneError('Too many attempts (' + SIGNUP_MAX_ATTEMPTS + '). Request a new code.');
+    document.getElementById('signup-code-input').style.display = 'none';
+    document.getElementById('signup-phone-input').style.display = 'block';
+    signupVerificationAttempts = 0;
+    return;
+  }
+  
   const btn = document.getElementById('signup-verify-btn');
   btn.disabled = true;
   btn.textContent = 'Verifying...';
+  
+  signupVerificationAttempts++;
   
   try {
     await signupConfirmationResult.confirm(code);
     
     const user = auth.currentUser;
     if (user) {
+      // Save phone to user doc
       await setDoc(doc(db, 'users', user.uid), {
         phone: window.signupPhoneNumber,
         phoneVerified: true,
         verifiedAt: new Date().toISOString()
       }, { merge: true });
+      
+      // Save verified lead
+      try {
+        await addDoc(collection(db, 'verified_leads'), {
+          email: user.email,
+          phone: window.signupPhoneNumber,
+          phoneVerified: true,
+          verifiedAt: new Date().toISOString(),
+          source: 'Signup - Verified',
+          attempts: signupVerificationAttempts,
+          createdAt: new Date().toISOString(),
+          uid: user.uid
+        });
+      } catch (e) { console.log('Verified lead save error:', e); }
     }
     
     window.location.href = 'dashboard.html';
@@ -409,7 +469,28 @@ window.verifySignupCode = async function() {
     console.error('Verification error:', error);
     btn.disabled = false;
     btn.textContent = 'Verify & Continue';
-    showSignupPhoneError('Invalid code');
+    
+    const remaining = SIGNUP_MAX_ATTEMPTS - signupVerificationAttempts;
+    
+    if (error.code === 'auth/invalid-verification-code') {
+      if (remaining > 0) {
+        showSignupPhoneError('Invalid code. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
+      } else {
+        showSignupPhoneError('Invalid code. Maximum attempts reached.');
+      }
+    } else if (error.code === 'auth/code-expired') {
+      showSignupPhoneError('Code expired. Request a new one.');
+    } else {
+      showSignupPhoneError('Verification failed. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
+    }
+    
+    if (remaining <= 0) {
+      setTimeout(() => {
+        document.getElementById('signup-code-input').style.display = 'none';
+        document.getElementById('signup-phone-input').style.display = 'block';
+        signupVerificationAttempts = 0;
+      }, 2000);
+    }
   }
 };
 
@@ -423,7 +504,28 @@ function showSignupPhoneError(msg) {
   err.style.display = 'block';
   setTimeout(() => { err.style.display = 'none'; }, 5000);
 }
+
+function startSignupCooldownTimer(seconds) {
+  const btn = document.getElementById('signup-send-btn');
+  let remainingSeconds = seconds;
+  
+  btn.disabled = true;
+  btn.textContent = 'Wait ' + remainingSeconds + 's';
+  
+  const countdown = setInterval(() => {
+    remainingSeconds--;
+    
+    if (remainingSeconds <= 0) {
+      clearInterval(countdown);
+      btn.disabled = false;
+      btn.textContent = 'Send Code';
+    } else {
+      btn.textContent = 'Wait ' + remainingSeconds + 's';
+    }
+  }, 1000);
+}
 </script>
 
 </body>
 </html>
+
