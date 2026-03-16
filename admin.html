@@ -559,80 +559,61 @@ let leadSortField = 'date', leadSortDir = -1;
 let activeTicketId = null, assignClientId = null;
 
 // ============================================
-// SECURE ADMIN AUTHENTICATION
-// Firebase Auth + Role Check (admin only)
+// SIMPLE ADMIN AUTHENTICATION
+// Firebase Auth + Email Whitelist (no Firestore read needed!)
 // ============================================
 (async function() {
   const auth = firebase.auth();
   const db = firebase.firestore();
   
+  // Admin email whitelist
+  const ADMIN_EMAILS = [
+    'hello@tradertax.net',
+    'brittainalfaro@gmail.com',
+    'brittain0404@yahoo.com'
+  ];
+  
   document.body.style.display = 'none';
   
   auth.onAuthStateChanged(async (user) => {
     if (!user) {
-      window.location.href = 'login.html?redirect=admin&message=Admin access requires login';
+      window.location.href = 'login.html';
       return;
     }
     
-    try {
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      
-      if (!userDoc.exists) {
-        alert('Access denied. Contact hello@tradertax.net');
-        await auth.signOut();
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      const userData = userDoc.data();
-      if (userData.role !== 'admin') {
-        alert('Access denied. Admin only.\\n\\nYour role: ' + (userData.role || 'none') + '\\nRequired: admin');
-        await auth.signOut();
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      document.body.style.display = 'block';
-      const loginGate = document.getElementById('login-gate');
-      const app = document.getElementById('app');
-      if (loginGate) loginGate.style.display = 'none';
-      if (app) app.style.display = 'block';
-      
-      const topbarUser = document.querySelector('.topbar-user');
-      if (topbarUser) {
-        topbarUser.textContent = (userData.firstName || '') + ' ' + (userData.lastName || '') + ' (' + user.email + ')';
-      }
-      
-      try {
-        await db.collection('audit_logs').add({
-          action: 'admin_login',
-          userId: user.uid,
-          userEmail: user.email,
-          timestamp: new Date().toISOString(),
-          userAgent: navigator.userAgent
-        });
-      } catch (e) { console.log('Audit log:', e); }
-      
-    } catch (error) {
-      alert('Authentication error.');
+    // Simple email check - no Firestore read!
+    if (!ADMIN_EMAILS.includes(user.email)) {
+      alert('Access denied. Admin only.\n\nYour email: ' + user.email);
       await auth.signOut();
-      window.location.href = 'login.html';
+      window.location.href = 'index.html';
+      return;
     }
+    
+    // User is admin - show panel
+    document.body.style.display = 'block';
+    const loginGate = document.getElementById('login-gate');
+    const app = document.getElementById('app');
+    if (loginGate) loginGate.style.display = 'none';
+    if (app) app.style.display = 'block';
+    
+    const topbarUser = document.querySelector('.topbar-user');
+    if (topbarUser) {
+      topbarUser.textContent = user.email;
+    }
+    
+    // Optional: Log admin access
+    try {
+      await db.collection('audit_logs').add({
+        action: 'admin_login',
+        userId: user.uid,
+        userEmail: user.email,
+        timestamp: new Date().toISOString()
+      });
+    } catch (e) {}
   });
   
   window.adminLogout = async function() {
     if (confirm('Log out?')) {
-      const user = auth.currentUser;
-      if (user) {
-        try {
-          await db.collection('audit_logs').add({
-            action: 'admin_logout',
-            userId: user.uid,
-            userEmail: user.email,
-            timestamp: new Date().toISOString()
-          });
-        } catch (e) {}
-      }
       await auth.signOut();
       window.location.href = 'index.html';
     }
