@@ -11,7 +11,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
   import { getFirestore, collection, addDoc, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+  import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
   const app = initializeApp({
     apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
     authDomain:"taxtrader.firebaseapp.com",
@@ -861,7 +861,7 @@ function chkGate(){
   document.getElementById('gate-btn').disabled=!v;
 }
 
-function unlock(){
+async function unlock(){
   S.email=document.getElementById('gate-email').value;
   S.phone=document.getElementById('gate-phone').value||'';
 
@@ -876,25 +876,54 @@ function unlock(){
   S.stateCode=sv[0];S.stateRate=parseFloat(sv[1])||0;
   S.stateName=document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
 
-  if(window._saveLead){
-    window._saveLead({
-      email:S.email,phone:S.phone,source:'Calculator Lead',
+  // Save lead to Firestore BEFORE phone verification (capture every lead!)
+  try {
+    const leadData = {
+      email:S.email,
+      phone:S.phone,
+      source:'Calculator Lead',
       referralCode:manualRefCode,
-      w2:S.w2,pnl:S.pnl,futuresPnl:S.futuresPnl,prop:S.prop,
-      otherSe:S.otherSe,expenses:S.expenses,
-      trades:S.trades.join(','),filing:S.filing,
-      hold:S.hold,entity:S.entity,
-      stateCode:S.stateCode,stateName:S.stateName,
-      estimatedTax:Math.round(calculate().totalTax)
-    });
+      w2:S.w2,
+      pnl:S.pnl,
+      futuresPnl:S.futuresPnl,
+      prop:S.prop,
+      otherSe:S.otherSe,
+      expenses:S.expenses,
+      trades:S.trades.join(','),
+      filing:S.filing,
+      hold:S.hold,
+      entity:S.entity,
+      stateCode:S.stateCode,
+      stateName:S.stateName,
+      estimatedTax:Math.round(calculate().totalTax),
+      ...(window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload()),
+      createdAt: new Date().toISOString()
+    };
+    
+    await addDoc(collection(db, 'leads'), leadData);
+    
+    // Also save via existing method if available
+    if(window._saveLead) window._saveLead(leadData);
+  } catch(e) { 
+    console.log('Lead save error:', e);
   }
 
+  // Also send to Google Sheets (backup)
   fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec',{
     method:'POST',mode:'no-cors',
     body:JSON.stringify({timestamp:new Date().toISOString(),email:S.email,phone:S.phone,source:'Calculator Lead',referralCode:manualRefCode,state:S.stateCode,filing:S.filing,trades:S.trades.join(','),w2:S.w2,prop:S.prop,pnl:S.pnl,futuresPnl:S.futuresPnl,estimatedTax:Math.round(calculate().totalTax)})
   }).catch(()=>{});
 
-  setTimeout(()=>go('results'),900);
+  // Store calculator state globally for phone verification
+  window.calculatorEmail = S.email;
+  window.calculatorPhone = S.phone;
+
+  // Show phone modal instead of going directly to results
+  setTimeout(() => {
+    btn.innerHTML = 'Unlock Results →';
+    btn.disabled = false;
+    showPhoneModal();
+  }, 900);
 }
 
 function chk1(){
@@ -947,4 +976,162 @@ window.addEventListener('load', function() {
     try {
       var stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
       var affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
-      if (
+      if (affCode) {
+        var el = document.getElementById('refcode-input');
+        if (el && !el.value) el.value = affCode;
+      }
+    } catch(e) { /* silent */ }
+  }, 300);
+});
+</script>
+  <script src="affiliate-tracker.js"></script>
+
+<!-- Phone Verification Modal for Calculator -->
+<div id="phone-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,0.9);z-index:9999;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:56px;height:56px;background:#3dba7e;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5">
+          <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+        </svg>
+      </div>
+      <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;color:#0a1628;margin-bottom:8px;">Verify Your Phone</h3>
+      <p style="font-size:0.88rem;color:#6b7280;">We'll text you a 6-digit code to unlock your results.</p>
+    </div>
+
+    <div id="phone-input-step">
+      <input type="tel" id="phone-number-input" placeholder="+1 (555) 123-4567" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Include country code (e.g., +1 for US)</div>
+      <div id="recaptcha-container"></div>
+      <button onclick="sendVerificationCode()" id="send-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:12px;">Send Code</button>
+    </div>
+
+    <div id="code-input-step" style="display:none;">
+      <input type="text" id="verification-code-input" maxlength="6" placeholder="123456" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:1.1rem;font-family:'DM Sans',sans-serif;text-align:center;letter-spacing:4px;outline:none;margin-bottom:8px;"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;text-align:center;">Didn't get it? <a href="#" onclick="resendCode();return false;" style="color:#3dba7e;font-weight:600;">Resend</a></div>
+      <button onclick="verifyCalculatorCode()" id="verify-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Verify & Continue</button>
+    </div>
+
+    <div id="phone-error" style="display:none;margin-top:12px;padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:0.8rem;color:#dc2626;"></div>
+  </div>
+</div>
+
+<script type="module">
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const auth = getAuth();
+const db = getFirestore();
+
+let phoneConfirmationResult = null;
+
+window.showPhoneModal = function() {
+  document.getElementById('phone-modal').style.display = 'flex';
+  
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+      'size': 'normal'
+    });
+    window.recaptchaVerifier.render();
+  }
+};
+
+function showPhoneError(message) {
+  const errorEl = document.getElementById('phone-error');
+  errorEl.textContent = message;
+  errorEl.style.display = 'block';
+  setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
+}
+
+window.sendVerificationCode = async function() {
+  const phoneNumber = document.getElementById('phone-number-input').value.trim();
+  
+  if (!phoneNumber || !phoneNumber.startsWith('+')) {
+    showPhoneError('Phone number must include country code (e.g., +1)');
+    return;
+  }
+  
+  const btn = document.getElementById('send-code-btn');
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+  
+  try {
+    phoneConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+    
+    document.getElementById('phone-input-step').style.display = 'none';
+    document.getElementById('code-input-step').style.display = 'block';
+    window.verifiedPhoneNumber = phoneNumber;
+    
+  } catch (error) {
+    console.error('SMS error:', error);
+    btn.disabled = false;
+    btn.textContent = 'Send Code';
+    
+    if (error.code === 'auth/invalid-phone-number') {
+      showPhoneError('Invalid phone number format');
+    } else if (error.code === 'auth/too-many-requests') {
+      showPhoneError('Too many attempts. Try again later.');
+    } else {
+      showPhoneError('Failed to send code');
+    }
+  }
+};
+
+window.verifyCalculatorCode = async function() {
+  const code = document.getElementById('verification-code-input').value.trim();
+  
+  if (!code || code.length !== 6) {
+    showPhoneError('Please enter the 6-digit code');
+    return;
+  }
+  
+  const btn = document.getElementById('verify-code-btn');
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+  
+  try {
+    await phoneConfirmationResult.confirm(code);
+    
+    // Save verified lead
+    try {
+      await addDoc(collection(db, 'verified_leads'), {
+        email: window.calculatorEmail || '',
+        phone: window.verifiedPhoneNumber,
+        phoneVerified: true,
+        verifiedAt: new Date().toISOString(),
+        source: 'Calculator - Verified',
+        createdAt: new Date().toISOString()
+      });
+    } catch (e) { console.log('Save error:', e); }
+    
+    // Show results
+    document.getElementById('phone-modal').style.display = 'none';
+    if (typeof go === 'function') {
+      go('results');
+    }
+    
+  } catch (error) {
+    console.error('Verification error:', error);
+    btn.disabled = false;
+    btn.textContent = 'Verify & Continue';
+    
+    if (error.code === 'auth/invalid-verification-code') {
+      showPhoneError('Invalid code');
+    } else if (error.code === 'auth/code-expired') {
+      showPhoneError('Code expired. Request new one.');
+    } else {
+      showPhoneError('Verification failed');
+    }
+  }
+};
+
+window.resendCode = function() {
+  document.getElementById('code-input-step').style.display = 'none';
+  document.getElementById('phone-input-step').style.display = 'block';
+  document.getElementById('send-code-btn').disabled = false;
+  document.getElementById('send-code-btn').textContent = 'Send Code';
+};
+</script>
+
+</body>
+</html>
