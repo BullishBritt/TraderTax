@@ -874,8 +874,22 @@ renderStep();
 // Phone Verification System for Snapshot
 let phoneConfirmationResult = null;
 
+// RATE LIMITING VARIABLES
+let verificationAttempts = 0;
+const MAX_ATTEMPTS = 5;
+
+let resendCount = 0;
+const MAX_RESENDS = 3;
+
+let lastResendTime = 0;
+const RESEND_COOLDOWN = 60000; // 60 seconds
+
 function showPhoneModal() {
   document.getElementById('phone-modal').style.display = 'flex';
+  
+  // Reset counters
+  verificationAttempts = 0;
+  resendCount = 0;
   
   if (!window.recaptchaVerifier) {
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
@@ -900,12 +914,33 @@ async function sendVerificationCode() {
     return;
   }
   
+  // Check cooldown
+  const now = Date.now();
+  const timeSinceLastResend = now - lastResendTime;
+  
+  if (lastResendTime > 0 && timeSinceLastResend < RESEND_COOLDOWN) {
+    const waitSeconds = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000);
+    showPhoneError('Please wait ' + waitSeconds + ' seconds before resending.');
+    startResendCooldownTimer(waitSeconds);
+    return;
+  }
+  
+  // Check max resends
+  if (resendCount >= MAX_RESENDS) {
+    showPhoneError('Maximum resends reached (' + MAX_RESENDS + '). Please try again later.');
+    return;
+  }
+  
   const btn = document.getElementById('send-code-btn');
   btn.disabled = true;
   btn.textContent = 'Sending...';
   
   try {
     phoneConfirmationResult = await firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier);
+    
+    resendCount++;
+    lastResendTime = now;
+    verificationAttempts = 0;
     
     document.getElementById('phone-input-step').style.display = 'none';
     document.getElementById('code-input-step').style.display = 'block';
@@ -934,9 +969,20 @@ async function verifySnapshotCode() {
     return;
   }
   
+  // Check attempt limit
+  if (verificationAttempts >= MAX_ATTEMPTS) {
+    showPhoneError('Too many attempts (' + MAX_ATTEMPTS + '). Request a new code.');
+    document.getElementById('code-input-step').style.display = 'none';
+    document.getElementById('phone-input-step').style.display = 'block';
+    verificationAttempts = 0;
+    return;
+  }
+  
   const btn = document.getElementById('verify-code-btn');
   btn.disabled = true;
   btn.textContent = 'Verifying...';
+  
+  verificationAttempts++;
   
   try {
     await phoneConfirmationResult.confirm(code);
@@ -949,6 +995,7 @@ async function verifySnapshotCode() {
         phoneVerified: true,
         verifiedAt: new Date().toISOString(),
         source: 'Snapshot - Verified',
+        attempts: verificationAttempts,
         createdAt: new Date().toISOString()
       });
     } catch (e) { console.log('Save error:', e); }
@@ -964,21 +1011,69 @@ async function verifySnapshotCode() {
     btn.disabled = false;
     btn.textContent = 'Verify & Continue';
     
+    const remaining = MAX_ATTEMPTS - verificationAttempts;
+    
     if (error.code === 'auth/invalid-verification-code') {
-      showPhoneError('Invalid code');
+      if (remaining > 0) {
+        showPhoneError('Invalid code. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
+      } else {
+        showPhoneError('Invalid code. Maximum attempts reached.');
+      }
     } else if (error.code === 'auth/code-expired') {
-      showPhoneError('Code expired. Request new one.');
+      showPhoneError('Code expired. Request a new one.');
     } else {
-      showPhoneError('Verification failed');
+      showPhoneError('Verification failed. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
+    }
+    
+    if (remaining <= 0) {
+      setTimeout(() => {
+        document.getElementById('code-input-step').style.display = 'none';
+        document.getElementById('phone-input-step').style.display = 'block';
+        verificationAttempts = 0;
+      }, 2000);
     }
   }
 }
 
 function resendCode() {
+  const now = Date.now();
+  const timeSinceLastResend = now - lastResendTime;
+  
+  if (timeSinceLastResend < RESEND_COOLDOWN) {
+    const waitSeconds = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000);
+    showPhoneError('Please wait ' + waitSeconds + ' seconds before resending.');
+    return;
+  }
+  
+  if (resendCount >= MAX_RESENDS) {
+    showPhoneError('Maximum resends reached (' + MAX_RESENDS + ').');
+    return;
+  }
+  
   document.getElementById('code-input-step').style.display = 'none';
   document.getElementById('phone-input-step').style.display = 'block';
   document.getElementById('send-code-btn').disabled = false;
-  document.getElementById('send-code-btn').textContent = 'Send Code';
+  document.getElementById('send-code-btn').textContent = 'Send New Code';
+}
+
+function startResendCooldownTimer(seconds) {
+  const btn = document.getElementById('send-code-btn');
+  let remainingSeconds = seconds;
+  
+  btn.disabled = true;
+  btn.textContent = 'Wait ' + remainingSeconds + 's';
+  
+  const countdown = setInterval(() => {
+    remainingSeconds--;
+    
+    if (remainingSeconds <= 0) {
+      clearInterval(countdown);
+      btn.disabled = false;
+      btn.textContent = 'Send Code';
+    } else {
+      btn.textContent = 'Wait ' + remainingSeconds + 's';
+    }
+  }, 1000);
 }
 </script>
 
