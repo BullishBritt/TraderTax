@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Test Checklist | TraderTax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--red:#ef4444;--amber:#d97706;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--muted:#6b7280;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;padding:24px;color:var(--navy);}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.subtitle{color:var(--muted);margin-bottom:24px;}
+.progress{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:20px;margin-bottom:24px;}
+.progress-bar{height:12px;background:var(--bg);border-radius:99px;overflow:hidden;margin-bottom:8px;}
+.progress-fill{height:100%;background:var(--green);border-radius:99px;transition:width .3s;}
+.progress-text{font-size:.85rem;color:var(--muted);}
+.test-section{margin-bottom:32px;}
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.test{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;cursor:pointer;transition:all .2s;}
+.test:hover{border-color:var(--navy);}
+.test.passed{border-color:var(--green);background:#f0fdf7;}
+.test.failed{border-color:var(--red);background:#fff5f5;}
+.test-header{display:flex;align-items:center;gap:12px;}
+.test-checkbox{width:20px;height:20px;border:2px solid var(--border);border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s;}
+.test.passed .test-checkbox{background:var(--green);border-color:var(--green);}
+.test.failed .test-checkbox{background:var(--red);border-color:var(--red);}
+.test-checkbox svg{display:none;width:14px;height:14px;}
+.test.passed .test-checkbox svg.check{display:block;}
+.test.failed .test-checkbox svg.x{display:block;}
+.test-title{font-weight:700;flex:1;}
+.test-desc{font-size:.85rem;color:var(--muted);margin-top:8px;margin-left:32px;}
+.test-steps{font-size:.8rem;color:var(--muted);margin-top:8px;margin-left:32px;line-height:1.6;}
+.test-expected{font-size:.8rem;background:var(--bg);padding:8px 10px;border-radius:6px;margin-top:8px;margin-left:32px;}
+.actions{display:flex;gap:8px;margin-top:12px;margin-left:32px;}
+.btn-pass{background:var(--green);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;}
+.btn-fail{background:var(--red);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;}
+.btn-reset{background:var(--muted);color:#fff;border:none;padding:6px 16px;border-radius:6px;font-size:.75rem;font-weight:700;cursor:pointer;}
+.summary{background:var(--navy);color:#fff;padding:24px;border-radius:12px;text-align:center;margin-top:32px;}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px;}
+.summary-item{padding:12px;}
+.summary-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;}
+.summary-label{font-size:.8rem;opacity:.7;margin-top:4px;}
+</style>
+</head>
+<body>
+
+<h1>✅ Testing Checklist</h1>
+<p class="subtitle">Track your testing progress</p>
+
+<div class="progress">
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+  <div class="progress-text"><span id="progress-count">0 of 13</span> tests completed</div>
+</div>
+
+<!-- TEST 1 -->
+<div class="test-section">
+  <div class="section-title">🧪 Core Flow Tests</div>
+  
+  <div class="test" id="test-1" onclick="toggleExpand('test-1')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 1: Successful Lead + Successful Verification</div>
+    </div>
+    <div class="test-desc">Golden path - user submits form and verifies phone</div>
+    <div class="test-steps" style="display:none;">
+      1. Go to calculator.html<br>
+      2. Fill out all fields<br>
+      3. Enter email<br>
+      4. Click "Unlock Results"<br>
+      5. Phone modal appears<br>
+      6. Enter valid phone (+1...)<br>
+      7. Receive SMS<br>
+      8. Enter correct code<br>
+      9. Results shown
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Lead saved to `leads` collection<br>
+      ✅ Lead saved to `verified_leads` collection<br>
+      ✅ Results display correctly
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-1','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-1','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-1','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-2" onclick="toggleExpand('test-2')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 2: Successful Lead + Wrong Code</div>
+    </div>
+    <div class="test-desc">User enters wrong verification code</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete steps 1-7 from Test 1<br>
+      2. Enter WRONG code (123456)<br>
+      3. Error appears<br>
+      4. Enter correct code<br>
+      5. Verify succeeds
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Error message: "Invalid code. X attempts remaining"<br>
+      ✅ Can retry without restarting<br>
+      ✅ Success on correct code
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-2','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-2','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-2','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-3" onclick="toggleExpand('test-3')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 3: Abandoned Verification</div>
+    </div>
+    <div class="test-desc">User closes modal without verifying</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete steps 1-6 from Test 1<br>
+      2. Close phone modal<br>
+      3. Check Firestore
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Lead exists in `leads` collection<br>
+      ❌ NO entry in `verified_leads`<br>
+      ❌ Results NOT shown
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-3','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-3','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-3','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-4" onclick="toggleExpand('test-4')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 4: Invalid Phone Number</div>
+    </div>
+    <div class="test-desc">User enters phone without country code</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete steps 1-5 from Test 1<br>
+      2. Enter "1234567890" (no +1)<br>
+      3. Click "Send Code"
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Error: "Phone must include country code"<br>
+      ❌ No SMS sent<br>
+      ✅ Can correct and retry
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-4','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-4','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-4','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-5" onclick="toggleExpand('test-5')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 5: Attempt Limit Enforcement</div>
+    </div>
+    <div class="test-desc">User hits 5 attempt limit</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete steps 1-8 from Test 1<br>
+      2. Enter wrong code 5 times<br>
+      3. Check what happens
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ After 5 wrong codes: "Maximum attempts reached"<br>
+      ✅ Modal resets to phone input<br>
+      ✅ Can request new code
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-5','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-5','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-5','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-6" onclick="toggleExpand('test-6')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 6: Resend Cooldown</div>
+    </div>
+    <div class="test-desc">User tries to resend too quickly</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete steps 1-7 from Test 1<br>
+      2. Click "Resend" immediately<br>
+      3. Check cooldown timer
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Error: "Please wait X seconds"<br>
+      ✅ Button shows countdown: "Wait 59s..."<br>
+      ✅ Can resend after 60 seconds
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-6','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-6','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-6','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-7" onclick="toggleExpand('test-7')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 7: Maximum Resends</div>
+    </div>
+    <div class="test-desc">User hits 3 resend limit</div>
+    <div class="test-steps" style="display:none;">
+      1. Complete Test 1<br>
+      2. Go back, submit again<br>
+      3. Request code, wait 60s, resend<br>
+      4. Repeat 2 more times (total 3 resends)<br>
+      5. Try 4th resend
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Error: "Maximum resends reached"<br>
+      ❌ Can't request more codes<br>
+      ✅ Message suggests trying later
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-7','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-7','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-7','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- FIRESTORE TESTS -->
+<div class="test-section">
+  <div class="section-title">🗄️ Firestore Data Tests</div>
+
+  <div class="test" id="test-8" onclick="toggleExpand('test-8')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 8: Leads Collection Structure</div>
+    </div>
+    <div class="test-desc">Check leads collection has correct data</div>
+    <div class="test-steps" style="display:none;">
+      1. Go to Firebase Console → Firestore<br>
+      2. Open `leads` collection<br>
+      3. Check a few documents
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ email field present<br>
+      ✅ source field present<br>
+      ✅ createdAt timestamp<br>
+      ✅ Form data present (calculator/snapshot/signup fields)
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-8','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-8','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-8','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-9" onclick="toggleExpand('test-9')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 9: Verified Leads Collection</div>
+    </div>
+    <div class="test-desc">Check verified_leads has correct structure</div>
+    <div class="test-steps" style="display:none;">
+      1. Go to Firebase Console → Firestore<br>
+      2. Open `verified_leads` collection<br>
+      3. Check documents
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ email, phone present<br>
+      ✅ phoneVerified: true<br>
+      ✅ verifiedAt timestamp<br>
+      ✅ source includes "- Verified"
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-9','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-9','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-9','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-10" onclick="toggleExpand('test-10')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 10: Data Validator Passes</div>
+    </div>
+    <div class="test-desc">Run automated data quality check</div>
+    <div class="test-steps" style="display:none;">
+      1. Open data-validator.html<br>
+      2. Click "Run Validation"<br>
+      3. Check score
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Score >= 90% (Excellent)<br>
+      ✅ All critical checks pass<br>
+      ⚠️ Warnings OK if explained
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-10','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-10','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-10','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY TESTS -->
+<div class="test-section">
+  <div class="section-title">🔐 Security Tests</div>
+
+  <div class="test" id="test-11" onclick="toggleExpand('test-11')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 11: Admin Auth Required</div>
+    </div>
+    <div class="test-desc">Non-admin cannot access admin panel</div>
+    <div class="test-steps" style="display:none;">
+      1. Create test account (signup.html)<br>
+      2. Try to access /admin.html<br>
+      3. Should be blocked
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Redirected to login<br>
+      ✅ Error message shown<br>
+      ❌ Cannot access admin dashboard
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-11','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-11','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-11','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-12" onclick="toggleExpand('test-12')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 12: Admin Access Works</div>
+    </div>
+    <div class="test-desc">Admin can access dashboard</div>
+    <div class="test-steps" style="display:none;">
+      1. Login with admin account<br>
+      2. Go to /admin.html<br>
+      3. Should see dashboard
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Dashboard loads<br>
+      ✅ Can see leads<br>
+      ✅ All features work
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-12','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-12','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-12','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+
+  <div class="test" id="test-13" onclick="toggleExpand('test-13')">
+    <div class="test-header">
+      <div class="test-checkbox">
+        <svg class="check" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <svg class="x" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </div>
+      <div class="test-title">Test 13: Old URL Key Blocked</div>
+    </div>
+    <div class="test-desc">Old ?key=tt2025admin no longer works</div>
+    <div class="test-steps" style="display:none;">
+      1. Logout of admin<br>
+      2. Try /admin.html?key=tt2025admin<br>
+      3. Should not grant access
+    </div>
+    <div class="test-expected" style="display:none;">
+      ✅ Still requires login<br>
+      ❌ URL key doesn't bypass auth<br>
+      ✅ Must have admin role
+    </div>
+    <div class="actions" style="display:none;">
+      <button class="btn-pass" onclick="markTest('test-13','passed');event.stopPropagation();">✓ Pass</button>
+      <button class="btn-fail" onclick="markTest('test-13','failed');event.stopPropagation();">✗ Fail</button>
+      <button class="btn-reset" onclick="markTest('test-13','');event.stopPropagation();">Reset</button>
+    </div>
+  </div>
+</div>
+
+<div class="summary">
+  <h2 style="margin-bottom:16px;">Testing Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-item">
+      <div class="summary-value" id="passed-count">0</div>
+      <div class="summary-label">Passed</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-value" id="failed-count">0</div>
+      <div class="summary-label">Failed</div>
+    </div>
+    <div class="summary-item">
+      <div class="summary-value" id="remaining-count">13</div>
+      <div class="summary-label">Remaining</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleExpand(testId) {
+  const test = document.getElementById(testId);
+  const steps = test.querySelector('.test-steps');
+  const expected = test.querySelector('.test-expected');
+  const actions = test.querySelector('.actions');
+  
+  const isExpanded = steps.style.display === 'block';
+  
+  steps.style.display = isExpanded ? 'none' : 'block';
+  expected.style.display = isExpanded ? 'none' : 'block';
+  actions.style.display = isExpanded ? 'none' : 'flex';
+}
+
+function markTest(testId, status) {
+  const test = document.getElementById(testId);
+  test.className = 'test ' + status;
+  
+  // Save to localStorage
+  const results = JSON.parse(localStorage.getItem('test-results') || '{}');
+  results[testId] = status;
+  localStorage.setItem('test-results', JSON.stringify(results));
+  
+  updateProgress();
+}
+
+function updateProgress() {
+  const results = JSON.parse(localStorage.getItem('test-results') || '{}');
+  const total = 13;
+  const completed = Object.values(results).filter(r => r === 'passed' || r === 'failed').length;
+  const passed = Object.values(results).filter(r => r === 'passed').length;
+  const failed = Object.values(results).filter(r => r === 'failed').length;
+  const remaining = total - completed;
+  
+  const percentage = (completed / total * 100).toFixed(0);
+  
+  document.getElementById('progress-fill').style.width = percentage + '%';
+  document.getElementById('progress-count').textContent = `${completed} of ${total}`;
+  document.getElementById('passed-count').textContent = passed;
+  document.getElementById('failed-count').textContent = failed;
+  document.getElementById('remaining-count').textContent = remaining;
+}
+
+// Load saved results
+window.addEventListener('DOMContentLoaded', () => {
+  const results = JSON.parse(localStorage.getItem('test-results') || '{}');
+  Object.entries(results).forEach(([testId, status]) => {
+    const test = document.getElementById(testId);
+    if (test && status) {
+      test.className = 'test ' + status;
+    }
+  });
+  updateProgress();
+});
+</script>
+
+</body>
+</html>

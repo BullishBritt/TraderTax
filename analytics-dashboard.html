@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Analytics Dashboard | TraderTax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf7;
+  --bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--body:#374151;--muted:#6b7280;
+  --red:#ef4444;--red-lt:#fff5f5;--amber:#d97706;--amber-lt:#fffbeb;
+  --blue:#1d4ed8;--blue-lt:#eff6ff;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;color:var(--navy);padding:24px;}
+.header{text-align:center;margin-bottom:32px;}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.subtitle{color:var(--muted);font-size:.9rem;}
+.refresh-btn{background:var(--green);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;margin-top:12px;font-family:'Syne',sans-serif;}
+.refresh-btn:hover{background:var(--green-dk);}
+.grid{display:grid;gap:16px;margin-bottom:24px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:20px;}
+.card-title{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.card-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--navy);margin-bottom:4px;}
+.card-sub{font-size:.8rem;color:var(--muted);}
+.green .card-value{color:var(--green-dk);}
+.red .card-value{color:var(--red);}
+.amber .card-value{color:var(--amber);}
+.blue .card-value{color:var(--blue);}
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin:32px 0 16px;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:24px;background:var(--green);border-radius:99px;}
+.table{width:100%;border-collapse:collapse;margin-top:8px;}
+.table th{text-align:left;padding:10px;background:var(--bg);font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.table td{padding:12px 10px;border-bottom:1px solid var(--bg);font-size:.85rem;}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:700;}
+.badge-green{background:var(--green-lt);color:var(--green-dk);}
+.badge-red{background:var(--red-lt);color:var(--red);}
+.badge-amber{background:var(--amber-lt);color:var(--amber);}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+@media(max-width:1200px){.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📊 TraderTax Analytics</h1>
+  <p class="subtitle">Real-time metrics & insights</p>
+  <button class="refresh-btn" onclick="loadAnalytics()">🔄 Refresh Data</button>
+</div>
+
+<div id="loading" class="loading">
+  <div class="spinner"></div>
+  <p>Loading analytics...</p>
+</div>
+
+<div id="dashboard" style="display:none;">
+
+<!-- OVERVIEW METRICS -->
+<div class="grid grid-4">
+  <div class="card">
+    <div class="card-title">Total Leads</div>
+    <div class="card-value" id="total-leads">0</div>
+    <div class="card-sub">All time</div>
+  </div>
+  <div class="card green">
+    <div class="card-title">Verified Leads</div>
+    <div class="card-value" id="verified-leads">0</div>
+    <div class="card-sub" id="verification-rate">0% verified</div>
+  </div>
+  <div class="card amber">
+    <div class="card-title">Unverified Leads</div>
+    <div class="card-value" id="unverified-leads">0</div>
+    <div class="card-sub" id="abandonment-rate">0% abandoned</div>
+  </div>
+  <div class="card blue">
+    <div class="card-title">Today's Leads</div>
+    <div class="card-value" id="today-leads">0</div>
+    <div class="card-sub" id="today-verified">0 verified</div>
+  </div>
+</div>
+
+<!-- SOURCE BREAKDOWN -->
+<h2 class="section-title">Lead Sources</h2>
+<div class="grid grid-3">
+  <div class="card">
+    <div class="card-title">Calculator</div>
+    <div class="card-value" id="calculator-total">0</div>
+    <div class="card-sub"><span id="calculator-verified">0</span> verified (<span id="calculator-rate">0%</span>)</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Snapshot</div>
+    <div class="card-value" id="snapshot-total">0</div>
+    <div class="card-sub"><span id="snapshot-verified">0</span> verified (<span id="snapshot-rate">0%</span>)</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Signup</div>
+    <div class="card-value" id="signup-total">0</div>
+    <div class="card-sub"><span id="signup-verified">0</span> verified (<span id="signup-rate">0%</span>)</div>
+  </div>
+</div>
+
+<!-- TIME METRICS -->
+<h2 class="section-title">Time to Verify</h2>
+<div class="grid grid-4">
+  <div class="card">
+    <div class="card-title">Average</div>
+    <div class="card-value" id="avg-time">0s</div>
+    <div class="card-sub">Time to verify</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Fastest</div>
+    <div class="card-value" id="fastest-time">0s</div>
+    <div class="card-sub">Quickest verification</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Slowest</div>
+    <div class="card-value" id="slowest-time">0s</div>
+    <div class="card-sub">Longest verification</div>
+  </div>
+  <div class="card amber">
+    <div class="card-title">Median</div>
+    <div class="card-value" id="median-time">0s</div>
+    <div class="card-sub">50th percentile</div>
+  </div>
+</div>
+
+<!-- VERIFICATION BEHAVIOR -->
+<h2 class="section-title">Verification Behavior</h2>
+<div class="grid grid-3">
+  <div class="card">
+    <div class="card-title">Avg Attempts</div>
+    <div class="card-value" id="avg-attempts">0</div>
+    <div class="card-sub">Tries before success</div>
+  </div>
+  <div class="card">
+    <div class="card-title">First Try Success</div>
+    <div class="card-value" id="first-try-rate">0%</div>
+    <div class="card-sub">Got it right first time</div>
+  </div>
+  <div class="card red">
+    <div class="card-title">Max Attempts Hit</div>
+    <div class="card-value" id="max-attempts-count">0</div>
+    <div class="card-sub">Reached 5 attempt limit</div>
+  </div>
+</div>
+
+<!-- SMS COSTS -->
+<h2 class="section-title">SMS Costs</h2>
+<div class="grid grid-4">
+  <div class="card">
+    <div class="card-title">Total SMS Sent</div>
+    <div class="card-value" id="total-sms">0</div>
+    <div class="card-sub">Verification codes</div>
+  </div>
+  <div class="card red">
+    <div class="card-title">Total Cost</div>
+    <div class="card-value" id="total-cost">$0</div>
+    <div class="card-sub">At $0.05/SMS</div>
+  </div>
+  <div class="card amber">
+    <div class="card-title">Cost Per Verified</div>
+    <div class="card-value" id="cost-per-verified">$0</div>
+    <div class="card-sub">Average</div>
+  </div>
+  <div class="card green">
+    <div class="card-title">This Month</div>
+    <div class="card-value" id="month-cost">$0</div>
+    <div class="card-sub" id="month-sms">0 SMS sent</div>
+  </div>
+</div>
+
+<!-- HOURLY TRENDS -->
+<h2 class="section-title">Hourly Trends (Last 24h)</h2>
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Hour</th>
+        <th>Leads</th>
+        <th>Verified</th>
+        <th>Rate</th>
+      </tr>
+    </thead>
+    <tbody id="hourly-table">
+      <tr><td colspan="4" style="text-align:center;color:var(--muted);">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- RECENT VERIFICATIONS -->
+<h2 class="section-title">Recent Verifications (Last 10)</h2>
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Phone</th>
+        <th>Source</th>
+        <th>Time</th>
+        <th>Attempts</th>
+      </tr>
+    </thead>
+    <tbody id="recent-table">
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- FAILED VERIFICATIONS -->
+<h2 class="section-title">Failed Verifications (Abandoned)</h2>
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Source</th>
+        <th>Submitted</th>
+        <th>Time Since</th>
+      </tr>
+    </thead>
+    <tbody id="failed-table">
+      <tr><td colspan="4" style="text-align:center;color:var(--muted);">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<script>
+const db = firebase.firestore();
+
+async function loadAnalytics() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+  
+  try {
+    // Fetch all leads
+    const leadsSnapshot = await db.collection('leads').get();
+    const allLeads = leadsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Fetch verified leads
+    const verifiedSnapshot = await db.collection('verified_leads').get();
+    const verifiedLeads = verifiedSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Calculate metrics
+    const totalLeads = allLeads.length;
+    const totalVerified = verifiedLeads.length;
+    const totalUnverified = totalLeads - totalVerified;
+    const verificationRate = totalLeads > 0 ? ((totalVerified / totalLeads) * 100).toFixed(1) : 0;
+    const abandonmentRate = totalLeads > 0 ? ((totalUnverified / totalLeads) * 100).toFixed(1) : 0;
+    
+    // Today's leads
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayLeads = allLeads.filter(l => new Date(l.createdAt) >= todayStart);
+    const todayVerified = verifiedLeads.filter(l => new Date(l.createdAt) >= todayStart);
+    
+    // Source breakdown
+    const calcLeads = allLeads.filter(l => l.source === 'Calculator Lead');
+    const snapLeads = allLeads.filter(l => l.source === 'Snapshot Lead');
+    const signupLeads = allLeads.filter(l => l.source === 'Signup Lead');
+    
+    const calcVerified = verifiedLeads.filter(l => l.source === 'Calculator - Verified');
+    const snapVerified = verifiedLeads.filter(l => l.source === 'Snapshot - Verified');
+    const signupVerified = verifiedLeads.filter(l => l.source === 'Signup - Verified');
+    
+    const calcRate = calcLeads.length > 0 ? ((calcVerified.length / calcLeads.length) * 100).toFixed(1) : 0;
+    const snapRate = snapLeads.length > 0 ? ((snapVerified.length / snapLeads.length) * 100).toFixed(1) : 0;
+    const signupRate = signupLeads.length > 0 ? ((signupVerified.length / signupLeads.length) * 100).toFixed(1) : 0;
+    
+    // Time to verify
+    const verificationTimes = verifiedLeads
+      .filter(l => l.createdAt && l.verifiedAt)
+      .map(l => (new Date(l.verifiedAt) - new Date(l.createdAt)) / 1000); // seconds
+    
+    const avgTime = verificationTimes.length > 0 
+      ? Math.round(verificationTimes.reduce((a,b) => a+b, 0) / verificationTimes.length)
+      : 0;
+    const fastestTime = verificationTimes.length > 0 ? Math.min(...verificationTimes) : 0;
+    const slowestTime = verificationTimes.length > 0 ? Math.max(...verificationTimes) : 0;
+    const medianTime = verificationTimes.length > 0 
+      ? verificationTimes.sort((a,b) => a-b)[Math.floor(verificationTimes.length / 2)]
+      : 0;
+    
+    // Verification attempts
+    const attempts = verifiedLeads
+      .filter(l => l.attempts)
+      .map(l => l.attempts);
+    const avgAttempts = attempts.length > 0
+      ? (attempts.reduce((a,b) => a+b, 0) / attempts.length).toFixed(1)
+      : 0;
+    const firstTrySuccess = attempts.filter(a => a === 1).length;
+    const firstTryRate = attempts.length > 0
+      ? ((firstTrySuccess / attempts.length) * 100).toFixed(1)
+      : 0;
+    const maxAttemptsHit = attempts.filter(a => a >= 5).length;
+    
+    // SMS costs
+    const totalSMS = totalVerified; // 1 SMS per verification minimum
+    const totalCost = (totalSMS * 0.05).toFixed(2);
+    const costPerVerified = totalVerified > 0 ? (totalSMS * 0.05 / totalVerified).toFixed(3) : 0;
+    
+    // This month's costs
+    const monthStart = new Date();
+    monthStart.setDate(1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthVerified = verifiedLeads.filter(l => new Date(l.createdAt) >= monthStart);
+    const monthSMS = monthVerified.length;
+    const monthCost = (monthSMS * 0.05).toFixed(2);
+    
+    // Update UI
+    document.getElementById('total-leads').textContent = totalLeads;
+    document.getElementById('verified-leads').textContent = totalVerified;
+    document.getElementById('verification-rate').textContent = `${verificationRate}% verified`;
+    document.getElementById('unverified-leads').textContent = totalUnverified;
+    document.getElementById('abandonment-rate').textContent = `${abandonmentRate}% abandoned`;
+    document.getElementById('today-leads').textContent = todayLeads.length;
+    document.getElementById('today-verified').textContent = `${todayVerified.length} verified`;
+    
+    document.getElementById('calculator-total').textContent = calcLeads.length;
+    document.getElementById('calculator-verified').textContent = calcVerified.length;
+    document.getElementById('calculator-rate').textContent = `${calcRate}%`;
+    
+    document.getElementById('snapshot-total').textContent = snapLeads.length;
+    document.getElementById('snapshot-verified').textContent = snapVerified.length;
+    document.getElementById('snapshot-rate').textContent = `${snapRate}%`;
+    
+    document.getElementById('signup-total').textContent = signupLeads.length;
+    document.getElementById('signup-verified').textContent = signupVerified.length;
+    document.getElementById('signup-rate').textContent = `${signupRate}%`;
+    
+    document.getElementById('avg-time').textContent = `${avgTime}s`;
+    document.getElementById('fastest-time').textContent = `${fastestTime}s`;
+    document.getElementById('slowest-time').textContent = `${slowestTime}s`;
+    document.getElementById('median-time').textContent = `${Math.round(medianTime)}s`;
+    
+    document.getElementById('avg-attempts').textContent = avgAttempts;
+    document.getElementById('first-try-rate').textContent = `${firstTryRate}%`;
+    document.getElementById('max-attempts-count').textContent = maxAttemptsHit;
+    
+    document.getElementById('total-sms').textContent = totalSMS;
+    document.getElementById('total-cost').textContent = `$${totalCost}`;
+    document.getElementById('cost-per-verified').textContent = `$${costPerVerified}`;
+    document.getElementById('month-cost').textContent = `$${monthCost}`;
+    document.getElementById('month-sms').textContent = `${monthSMS} SMS sent`;
+    
+    // Hourly trends
+    renderHourlyTrends(allLeads, verifiedLeads);
+    
+    // Recent verifications
+    renderRecentVerifications(verifiedLeads);
+    
+    // Failed verifications
+    renderFailedVerifications(allLeads, verifiedLeads);
+    
+    // Show dashboard
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    
+  } catch (error) {
+    console.error('Analytics error:', error);
+    alert('Error loading analytics: ' + error.message);
+  }
+}
+
+function renderHourlyTrends(allLeads, verifiedLeads) {
+  const hours = {};
+  const now = new Date();
+  const dayAgo = new Date(now - 24 * 60 * 60 * 1000);
+  
+  // Initialize hours
+  for (let i = 0; i < 24; i++) {
+    const hour = new Date(dayAgo);
+    hour.setHours(dayAgo.getHours() + i, 0, 0, 0);
+    const key = hour.getHours();
+    hours[key] = { total: 0, verified: 0 };
+  }
+  
+  // Count leads per hour
+  allLeads.filter(l => new Date(l.createdAt) >= dayAgo).forEach(lead => {
+    const hour = new Date(lead.createdAt).getHours();
+    if (hours[hour]) hours[hour].total++;
+  });
+  
+  verifiedLeads.filter(l => new Date(l.createdAt) >= dayAgo).forEach(lead => {
+    const hour = new Date(lead.createdAt).getHours();
+    if (hours[hour]) hours[hour].verified++;
+  });
+  
+  const tbody = document.getElementById('hourly-table');
+  tbody.innerHTML = Object.entries(hours)
+    .sort((a,b) => parseInt(a[0]) - parseInt(b[0]))
+    .map(([hour, data]) => {
+      const rate = data.total > 0 ? ((data.verified / data.total) * 100).toFixed(0) : 0;
+      return `
+        <tr>
+          <td>${hour}:00</td>
+          <td>${data.total}</td>
+          <td>${data.verified}</td>
+          <td><span class="badge ${rate >= 40 ? 'badge-green' : rate >= 25 ? 'badge-amber' : 'badge-red'}">${rate}%</span></td>
+        </tr>
+      `;
+    }).join('');
+}
+
+function renderRecentVerifications(verifiedLeads) {
+  const recent = verifiedLeads
+    .sort((a,b) => new Date(b.verifiedAt) - new Date(a.verifiedAt))
+    .slice(0, 10);
+  
+  const tbody = document.getElementById('recent-table');
+  tbody.innerHTML = recent.map(lead => {
+    const timeSince = Math.round((Date.now() - new Date(lead.verifiedAt)) / 60000); // minutes
+    return `
+      <tr>
+        <td>${lead.email}</td>
+        <td>${lead.phone}</td>
+        <td>${lead.source}</td>
+        <td>${timeSince}m ago</td>
+        <td>${lead.attempts || 1}</td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No verifications yet</td></tr>';
+}
+
+function renderFailedVerifications(allLeads, verifiedLeads) {
+  const verifiedEmails = new Set(verifiedLeads.map(l => l.email));
+  const failed = allLeads
+    .filter(l => !verifiedEmails.has(l.email))
+    .sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10);
+  
+  const tbody = document.getElementById('failed-table');
+  tbody.innerHTML = failed.map(lead => {
+    const timeSince = Math.round((Date.now() - new Date(lead.createdAt)) / 60000); // minutes
+    const timeDisplay = timeSince > 60 
+      ? `${Math.round(timeSince / 60)}h ago`
+      : `${timeSince}m ago`;
+    return `
+      <tr>
+        <td>${lead.email}</td>
+        <td>${lead.source}</td>
+        <td>${new Date(lead.createdAt).toLocaleString()}</td>
+        <td>${timeDisplay}</td>
+      </tr>
+    `;
+  }).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--muted);">No abandoned leads</td></tr>';
+}
+
+// Auto-refresh every 60 seconds
+setInterval(loadAnalytics, 60000);
+
+// Load on page load
+loadAnalytics();
+</script>
+
+</body>
+</html>

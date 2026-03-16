@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Audit Logs | TraderTax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--green:#3dba7e;--red:#ef4444;--amber:#d97706;
+  --bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--muted:#6b7280;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;padding:24px;color:var(--navy);}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.subtitle{color:var(--muted);margin-bottom:24px;}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:20px;}
+.card-title{font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.card-value{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;color:var(--navy);}
+.card-sub{font-size:.8rem;color:var(--muted);margin-top:4px;}
+.green .card-value{color:var(--green);}
+.red .card-value{color:var(--red);}
+.amber .card-value{color:var(--amber);}
+.section-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;margin:32px 0 16px;display:flex;align-items:center;gap:8px;}
+.section-title::before{content:'';width:4px;height:24px;background:var(--green);border-radius:99px;}
+.table{width:100%;border-collapse:collapse;}
+.table th{text-align:left;padding:10px;background:var(--bg);font-size:.7rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border);}
+.table td{padding:12px 10px;border-bottom:1px solid var(--bg);font-size:.85rem;}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.7rem;font-weight:700;}
+.badge-green{background:#f0fdf7;color:#15803d;}
+.badge-red{background:#fff5f5;color:#dc2626;}
+.badge-amber{background:#fffbeb;color:#d97706;}
+.badge-blue{background:#eff6ff;color:#1d4ed8;}
+.loading{text-align:center;padding:60px 20px;color:var(--muted);}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.btn{background:var(--green);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;margin-top:12px;}
+.btn:hover{background:#2ea86c;}
+.filter-tabs{display:flex;gap:8px;margin-bottom:16px;}
+.filter-tab{padding:8px 16px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);cursor:pointer;font-size:.8rem;font-weight:600;color:var(--muted);transition:all .2s;}
+.filter-tab:hover{border-color:var(--navy);color:var(--navy);}
+.filter-tab.active{background:var(--navy);color:#fff;border-color:var(--navy);}
+@media(max-width:1200px){.grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:768px){.grid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<h1>🔐 Admin Audit Logs</h1>
+<p class="subtitle">Track all admin activity and security events</p>
+
+<button class="btn" onclick="loadAuditLogs()">🔄 Refresh Logs</button>
+
+<div id="loading" class="loading" style="display:none;">
+  <div class="spinner"></div>
+  <p>Loading audit logs...</p>
+</div>
+
+<div id="dashboard" style="display:none;">
+
+<!-- OVERVIEW STATS -->
+<div class="grid">
+  <div class="card green">
+    <div class="card-title">Total Logins</div>
+    <div class="card-value" id="total-logins">0</div>
+    <div class="card-sub">All time admin access</div>
+  </div>
+  <div class="card red">
+    <div class="card-title">Failed Attempts</div>
+    <div class="card-value" id="failed-attempts">0</div>
+    <div class="card-sub">Unauthorized access blocked</div>
+  </div>
+  <div class="card">
+    <div class="card-title">Unique Admins</div>
+    <div class="card-value" id="unique-admins">0</div>
+    <div class="card-sub">Active admin users</div>
+  </div>
+  <div class="card amber">
+    <div class="card-title">Last 24 Hours</div>
+    <div class="card-value" id="recent-logins">0</div>
+    <div class="card-sub">Recent admin activity</div>
+  </div>
+</div>
+
+<!-- FILTERS -->
+<h2 class="section-title">Activity Log</h2>
+<div class="filter-tabs">
+  <div class="filter-tab active" onclick="filterLogs('all')">All Events</div>
+  <div class="filter-tab" onclick="filterLogs('admin_login')">Logins</div>
+  <div class="filter-tab" onclick="filterLogs('admin_logout')">Logouts</div>
+  <div class="filter-tab" onclick="filterLogs('access_denied')">Failed Access</div>
+  <div class="filter-tab" onclick="filterLogs('data_export')">Data Exports</div>
+</div>
+
+<!-- RECENT ACTIVITY -->
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Admin</th>
+        <th>Action</th>
+        <th>Details</th>
+        <th>IP Address</th>
+      </tr>
+    </thead>
+    <tbody id="logs-table">
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ADMIN ACTIVITY BREAKDOWN -->
+<h2 class="section-title">Activity by Admin</h2>
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Admin Email</th>
+        <th>Total Logins</th>
+        <th>Last Login</th>
+        <th>Avg Session</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="admin-breakdown-table">
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);">Loading...</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- SECURITY ALERTS -->
+<h2 class="section-title">Security Alerts</h2>
+<div class="card">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Alert Type</th>
+        <th>User</th>
+        <th>Details</th>
+        <th>Severity</th>
+      </tr>
+    </thead>
+    <tbody id="alerts-table">
+      <tr><td colspan="5" style="text-align:center;color:var(--muted);">No alerts</td></tr>
+    </tbody>
+  </table>
+</div>
+
+</div>
+
+<script>
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+let currentFilter = 'all';
+let allLogs = [];
+
+async function loadAuditLogs() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('dashboard').style.display = 'none';
+  
+  try {
+    // Fetch audit logs
+    const logsSnapshot = await db.collection('audit_logs')
+      .orderBy('timestamp', 'desc')
+      .limit(100)
+      .get();
+    
+    allLogs = logsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // Calculate stats
+    const totalLogins = allLogs.filter(l => l.action === 'admin_login').length;
+    const failedAttempts = allLogs.filter(l => l.action === 'access_denied').length;
+    
+    const uniqueAdmins = [...new Set(allLogs
+      .filter(l => l.userEmail)
+      .map(l => l.userEmail))].length;
+    
+    const dayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const recentLogins = allLogs.filter(l => 
+      l.action === 'admin_login' && 
+      new Date(l.timestamp) >= dayAgo
+    ).length;
+    
+    // Update stats
+    document.getElementById('total-logins').textContent = totalLogins;
+    document.getElementById('failed-attempts').textContent = failedAttempts;
+    document.getElementById('unique-admins').textContent = uniqueAdmins;
+    document.getElementById('recent-logins').textContent = recentLogins;
+    
+    // Render tables
+    renderLogsTable();
+    renderAdminBreakdown();
+    renderSecurityAlerts();
+    
+    // Show dashboard
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    
+  } catch (error) {
+    console.error('Audit log error:', error);
+    document.getElementById('loading').style.display = 'none';
+    alert('Error loading audit logs: ' + error.message);
+  }
+}
+
+function filterLogs(action) {
+  currentFilter = action;
+  
+  // Update active tab
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.classList.remove('active');
+  });
+  event.target.classList.add('active');
+  
+  renderLogsTable();
+}
+
+function renderLogsTable() {
+  const filtered = currentFilter === 'all' 
+    ? allLogs 
+    : allLogs.filter(l => l.action === currentFilter);
+  
+  const tbody = document.getElementById('logs-table');
+  
+  if (filtered.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No logs found</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = filtered.slice(0, 50).map(log => {
+    const time = new Date(log.timestamp).toLocaleString();
+    const action = getActionBadge(log.action);
+    const ip = log.ipAddress || 'N/A';
+    
+    return `
+      <tr>
+        <td>${time}</td>
+        <td>${log.userEmail || 'Unknown'}</td>
+        <td>${action}</td>
+        <td>${log.details || '-'}</td>
+        <td style="font-family:monospace;font-size:.75rem;">${ip}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function getActionBadge(action) {
+  const badges = {
+    'admin_login': '<span class="badge badge-green">✓ Login</span>',
+    'admin_logout': '<span class="badge badge-blue">→ Logout</span>',
+    'access_denied': '<span class="badge badge-red">✗ Denied</span>',
+    'data_export': '<span class="badge badge-amber">↓ Export</span>',
+    'view_leads': '<span class="badge badge-blue">👁 View</span>',
+    'update_lead': '<span class="badge badge-amber">✎ Update</span>'
+  };
+  return badges[action] || `<span class="badge">${action}</span>`;
+}
+
+function renderAdminBreakdown() {
+  const adminStats = {};
+  
+  allLogs.forEach(log => {
+    if (!log.userEmail) return;
+    
+    if (!adminStats[log.userEmail]) {
+      adminStats[log.userEmail] = {
+        email: log.userEmail,
+        logins: 0,
+        lastLogin: null,
+        sessions: []
+      };
+    }
+    
+    if (log.action === 'admin_login') {
+      adminStats[log.userEmail].logins++;
+      if (!adminStats[log.userEmail].lastLogin || new Date(log.timestamp) > new Date(adminStats[log.userEmail].lastLogin)) {
+        adminStats[log.userEmail].lastLogin = log.timestamp;
+      }
+    }
+  });
+  
+  const tbody = document.getElementById('admin-breakdown-table');
+  
+  if (Object.keys(adminStats).length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No admin activity</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = Object.values(adminStats).map(admin => {
+    const lastLogin = admin.lastLogin ? new Date(admin.lastLogin).toLocaleString() : 'Never';
+    const isActive = admin.lastLogin && (Date.now() - new Date(admin.lastLogin)) < 7 * 24 * 60 * 60 * 1000;
+    const status = isActive 
+      ? '<span class="badge badge-green">Active</span>'
+      : '<span class="badge">Inactive</span>';
+    
+    return `
+      <tr>
+        <td>${admin.email}</td>
+        <td>${admin.logins}</td>
+        <td>${lastLogin}</td>
+        <td>-</td>
+        <td>${status}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function renderSecurityAlerts() {
+  const alerts = allLogs.filter(l => 
+    l.action === 'access_denied' || 
+    l.action === 'suspicious_activity'
+  );
+  
+  const tbody = document.getElementById('alerts-table');
+  
+  if (alerts.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);">No security alerts</td></tr>';
+    return;
+  }
+  
+  tbody.innerHTML = alerts.slice(0, 20).map(alert => {
+    const time = new Date(alert.timestamp).toLocaleString();
+    const severity = alert.action === 'access_denied' 
+      ? '<span class="badge badge-amber">Medium</span>'
+      : '<span class="badge badge-red">High</span>';
+    
+    return `
+      <tr>
+        <td>${time}</td>
+        <td>${alert.action === 'access_denied' ? 'Access Denied' : 'Suspicious Activity'}</td>
+        <td>${alert.userEmail || 'Unknown'}</td>
+        <td>${alert.details || '-'}</td>
+        <td>${severity}</td>
+      </tr>
+    `;
+  }).join('');
+}
+
+// Auto-refresh every 30 seconds
+setInterval(loadAuditLogs, 30000);
+
+// Load on page load
+loadAuditLogs();
+</script>
+
+</body>
+</html>

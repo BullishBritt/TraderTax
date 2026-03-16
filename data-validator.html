@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Data Validator | TraderTax</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{--navy:#0a1628;--green:#3dba7e;--red:#ef4444;--amber:#d97706;--bg:#f7f8fb;--surface:#fff;--border:#e5e8ef;--muted:#6b7280;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);font-family:'DM Sans',sans-serif;padding:24px;color:var(--navy);}
+h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.subtitle{color:var(--muted);margin-bottom:24px;}
+.btn{background:var(--green);color:#fff;border:none;padding:12px 24px;border-radius:8px;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;}
+.btn:hover{background:#2ea86c;}
+.results{margin-top:24px;}
+.check{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.check-title{font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.check-desc{font-size:.85rem;color:var(--muted);margin-bottom:12px;}
+.check-result{padding:10px 12px;border-radius:8px;font-size:.85rem;margin-top:8px;}
+.pass{background:#f0fdf7;border:1px solid #bbf7d0;color:#15803d;}
+.fail{background:#fff5f5;border:1px solid #fecaca;color:#dc2626;}
+.warn{background:#fffbeb;border:1px solid #fde68a;color:#d97706;}
+.detail{font-size:.8rem;color:var(--muted);margin-top:6px;}
+.score{background:var(--navy);color:#fff;padding:20px;border-radius:12px;text-align:center;margin-top:24px;}
+.score-value{font-family:'Syne',sans-serif;font-weight:800;font-size:3rem;margin:8px 0;}
+.loading{text-align:center;padding:40px;color:var(--muted);}
+</style>
+</head>
+<body>
+
+<h1>🔍 Firestore Data Validator</h1>
+<p class="subtitle">Checks data quality and structure</p>
+
+<button class="btn" onclick="runValidation()">Run Validation</button>
+
+<div id="loading" class="loading" style="display:none;">Checking Firestore data...</div>
+
+<div id="results" class="results" style="display:none;"></div>
+
+<div id="score" class="score" style="display:none;">
+  <div>Data Quality Score</div>
+  <div class="score-value" id="score-value">0</div>
+  <div id="score-label">Calculating...</div>
+</div>
+
+<script>
+const db = firebase.firestore();
+
+async function runValidation() {
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('score').style.display = 'none';
+  
+  const checks = [];
+  let passCount = 0;
+  
+  try {
+    // Fetch data
+    const leadsSnapshot = await db.collection('leads').get();
+    const verifiedSnapshot = await db.collection('verified_leads').get();
+    const usersSnapshot = await db.collection('users').get();
+    
+    const leads = leadsSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const verifiedLeads = verifiedSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    const users = usersSnapshot.docs.map(d => ({ id: d.id, ...d.data() }));
+    
+    // CHECK 1: All leads have required fields
+    const leadsMissingFields = leads.filter(l => !l.email || !l.source || !l.createdAt);
+    if (leadsMissingFields.length === 0) {
+      checks.push({
+        title: '✅ All leads have required fields',
+        desc: 'Every lead has email, source, and createdAt',
+        status: 'pass',
+        detail: `${leads.length} leads checked`
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Missing required fields',
+        desc: 'Some leads are missing email, source, or createdAt',
+        status: 'fail',
+        detail: `${leadsMissingFields.length} leads missing fields`
+      });
+    }
+    
+    // CHECK 2: Verified leads have phoneVerified: true
+    const incorrectVerified = verifiedLeads.filter(l => l.phoneVerified !== true);
+    if (incorrectVerified.length === 0) {
+      checks.push({
+        title: '✅ All verified leads marked correctly',
+        desc: 'phoneVerified: true on all verified_leads',
+        status: 'pass',
+        detail: `${verifiedLeads.length} verified leads checked`
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Incorrect verification flags',
+        desc: 'Some verified_leads have phoneVerified !== true',
+        status: 'fail',
+        detail: `${incorrectVerified.length} records with wrong flag`
+      });
+    }
+    
+    // CHECK 3: Timestamps are valid
+    const invalidTimestamps = leads.filter(l => {
+      try {
+        new Date(l.createdAt);
+        return false;
+      } catch {
+        return true;
+      }
+    });
+    if (invalidTimestamps.length === 0) {
+      checks.push({
+        title: '✅ All timestamps are valid',
+        desc: 'Timestamps are in ISO 8601 format',
+        status: 'pass',
+        detail: 'All createdAt fields are valid dates'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Invalid timestamps',
+        desc: 'Some timestamps are not valid dates',
+        status: 'fail',
+        detail: `${invalidTimestamps.length} invalid timestamps`
+      });
+    }
+    
+    // CHECK 4: Source labels are correct
+    const validSources = ['Calculator Lead', 'Snapshot Lead', 'Signup Lead'];
+    const invalidSources = leads.filter(l => !validSources.includes(l.source));
+    if (invalidSources.length === 0) {
+      checks.push({
+        title: '✅ All source labels are valid',
+        desc: 'Sources match expected values',
+        status: 'pass',
+        detail: 'Calculator, Snapshot, or Signup'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '⚠️ Unexpected source labels',
+        desc: 'Some leads have non-standard source values',
+        status: 'warn',
+        detail: `${invalidSources.length} with unexpected sources`
+      });
+    }
+    
+    // CHECK 5: Phone format validation (verified leads only)
+    const invalidPhones = verifiedLeads.filter(l => !l.phone || !l.phone.startsWith('+'));
+    if (invalidPhones.length === 0) {
+      checks.push({
+        title: '✅ All phones in E.164 format',
+        desc: 'Phone numbers start with + (country code)',
+        status: 'pass',
+        detail: 'All verified phones have country code'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Invalid phone formats',
+        desc: 'Some phones missing country code (+)',
+        status: 'fail',
+        detail: `${invalidPhones.length} phones without +`
+      });
+    }
+    
+    // CHECK 6: Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const invalidEmails = leads.filter(l => !emailRegex.test(l.email));
+    if (invalidEmails.length === 0) {
+      checks.push({
+        title: '✅ All emails are valid',
+        desc: 'Email addresses match standard format',
+        status: 'pass',
+        detail: `${leads.length} valid emails`
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Invalid email formats',
+        desc: 'Some emails do not match expected format',
+        status: 'fail',
+        detail: `${invalidEmails.length} invalid emails`
+      });
+    }
+    
+    // CHECK 7: verifiedAt timestamp after createdAt
+    const wrongTimestampOrder = verifiedLeads.filter(l => {
+      if (!l.createdAt || !l.verifiedAt) return false;
+      return new Date(l.verifiedAt) < new Date(l.createdAt);
+    });
+    if (wrongTimestampOrder.length === 0) {
+      checks.push({
+        title: '✅ Timestamp order correct',
+        desc: 'verifiedAt is after createdAt',
+        status: 'pass',
+        detail: 'All verifications happen after creation'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Timestamp order incorrect',
+        desc: 'Some verifiedAt timestamps are before createdAt',
+        status: 'fail',
+        detail: `${wrongTimestampOrder.length} records with wrong order`
+      });
+    }
+    
+    // CHECK 8: Duplicate emails in leads (should be allowed but flagged)
+    const emailCounts = {};
+    leads.forEach(l => {
+      emailCounts[l.email] = (emailCounts[l.email] || 0) + 1;
+    });
+    const duplicates = Object.entries(emailCounts).filter(([email, count]) => count > 1);
+    if (duplicates.length === 0) {
+      checks.push({
+        title: '✅ No duplicate emails',
+        desc: 'Each email appears once',
+        status: 'pass',
+        detail: 'All leads have unique emails'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '⚠️ Duplicate emails found',
+        desc: 'Some emails submitted multiple times (OK if intentional)',
+        status: 'warn',
+        detail: `${duplicates.length} emails with multiple submissions`
+      });
+    }
+    
+    // CHECK 9: Orphaned verified_leads (no matching lead)
+    const leadEmails = new Set(leads.map(l => l.email));
+    const orphaned = verifiedLeads.filter(v => !leadEmails.has(v.email));
+    if (orphaned.length === 0) {
+      checks.push({
+        title: '✅ No orphaned verified leads',
+        desc: 'All verified_leads have matching lead',
+        status: 'pass',
+        detail: 'All verifications linked to leads'
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Orphaned verified leads',
+        desc: 'Some verified_leads have no matching lead',
+        status: 'fail',
+        detail: `${orphaned.length} orphaned records`
+      });
+    }
+    
+    // CHECK 10: Users collection integrity
+    const usersMissingFields = users.filter(u => !u.email || !u.createdAt);
+    if (usersMissingFields.length === 0) {
+      checks.push({
+        title: '✅ All users have required fields',
+        desc: 'Every user has email and createdAt',
+        status: 'pass',
+        detail: `${users.length} users checked`
+      });
+      passCount++;
+    } else {
+      checks.push({
+        title: '❌ Users missing fields',
+        desc: 'Some users are missing required fields',
+        status: 'fail',
+        detail: `${usersMissingFields.length} users missing data`
+      });
+    }
+    
+    // Calculate score
+    const score = Math.round((passCount / checks.length) * 100);
+    
+    // Render results
+    const resultsHTML = checks.map(check => `
+      <div class="check">
+        <div class="check-title">${check.title}</div>
+        <div class="check-desc">${check.desc}</div>
+        <div class="check-result ${check.status}">${check.detail}</div>
+      </div>
+    `).join('');
+    
+    document.getElementById('results').innerHTML = resultsHTML;
+    document.getElementById('results').style.display = 'block';
+    
+    document.getElementById('score-value').textContent = score;
+    document.getElementById('score-label').textContent = 
+      score >= 90 ? '🎉 Excellent!' :
+      score >= 75 ? '✅ Good' :
+      score >= 50 ? '⚠️ Needs improvement' :
+      '❌ Critical issues';
+    document.getElementById('score').style.display = 'block';
+    
+    document.getElementById('loading').style.display = 'none';
+    
+  } catch (error) {
+    document.getElementById('loading').style.display = 'none';
+    alert('Validation error: ' + error.message);
+    console.error(error);
+  }
+}
+</script>
+
+</body>
+</html>
