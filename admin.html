@@ -558,7 +558,86 @@ let activeLeadFilter = 'all', activeClientFilter = 'all';
 let leadSortField = 'date', leadSortDir = -1;
 let activeTicketId = null, assignClientId = null;
 
-(function(){const p=new URLSearchParams(window.location.search);if(p.get('key')!=='tt2025admin'){document.body.innerHTML='';window.location.replace('index.html');}})();
+// ============================================
+// SECURE ADMIN AUTHENTICATION
+// Firebase Auth + Role Check (admin only)
+// ============================================
+(async function() {
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  
+  document.body.style.display = 'none';
+  
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = 'login.html?redirect=admin&message=Admin access requires login';
+      return;
+    }
+    
+    try {
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      
+      if (!userDoc.exists) {
+        alert('Access denied. Contact hello@tradertax.net');
+        await auth.signOut();
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      const userData = userDoc.data();
+      if (userData.role !== 'admin') {
+        alert('Access denied. Admin only.\\n\\nYour role: ' + (userData.role || 'none') + '\\nRequired: admin');
+        await auth.signOut();
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      document.body.style.display = 'block';
+      const loginGate = document.getElementById('login-gate');
+      const app = document.getElementById('app');
+      if (loginGate) loginGate.style.display = 'none';
+      if (app) app.style.display = 'block';
+      
+      const topbarUser = document.querySelector('.topbar-user');
+      if (topbarUser) {
+        topbarUser.textContent = (userData.firstName || '') + ' ' + (userData.lastName || '') + ' (' + user.email + ')';
+      }
+      
+      try {
+        await db.collection('audit_logs').add({
+          action: 'admin_login',
+          userId: user.uid,
+          userEmail: user.email,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent
+        });
+      } catch (e) { console.log('Audit log:', e); }
+      
+    } catch (error) {
+      alert('Authentication error.');
+      await auth.signOut();
+      window.location.href = 'login.html';
+    }
+  });
+  
+  window.adminLogout = async function() {
+    if (confirm('Log out?')) {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          await db.collection('audit_logs').add({
+            action: 'admin_logout',
+            userId: user.uid,
+            userEmail: user.email,
+            timestamp: new Date().toISOString()
+          });
+        } catch (e) {}
+      }
+      await auth.signOut();
+      window.location.href = 'index.html';
+    }
+  };
+})();
 
 async function lgIn() {
   const email = document.getElementById('lg-email').value.trim();
