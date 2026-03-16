@@ -327,12 +327,14 @@ async function doAuth() {
   try {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     if (mode === 'login') {
-      await firebase.auth().signInWithEmailAndPassword(email, pw);
+      const result = await firebase.auth().signInWithEmailAndPassword(email, pw);
+      showMsg('Signing you in…', 'success');
+      setTimeout(() => { redirectBasedOnRole(result.user); }, 800);
     } else {
       await firebase.auth().createUserWithEmailAndPassword(email, pw);
+      showMsg('Account created! Redirecting…', 'success');
+      setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
     }
-    showMsg(mode === 'login' ? 'Signing you in…' : 'Account created! Redirecting…', 'success');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
   } catch(e) {
     btn.innerHTML = '<span id="btn-text">' + (mode === 'login' ? 'Sign In' : 'Create Account') + '</span>';
     btn.disabled = false;
@@ -348,13 +350,32 @@ async function doAuth() {
   }
 }
 
+// Role-based redirect after login
+async function redirectBasedOnRole(user) {
+  try {
+    const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+    const role = userDoc.exists ? userDoc.data().role : null;
+    
+    if (role === 'admin') {
+      window.location.href = 'admin.html';
+    } else if (role === 'cpa') {
+      window.location.href = 'cpa.html';
+    } else {
+      window.location.href = 'dashboard.html';
+    }
+  } catch (e) {
+    console.error('Role check error:', e);
+    window.location.href = 'dashboard.html';
+  }
+}
+
 async function googleAuth() {
   const provider = new firebase.auth.GoogleAuthProvider();
   try {
     await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-    await firebase.auth().signInWithPopup(provider);
+    const result = await firebase.auth().signInWithPopup(provider);
     showMsg('Signing you in…', 'success');
-    setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+    setTimeout(() => { redirectBasedOnRole(result.user); }, 800);
   } catch(e) {
     showMsg('Google sign-in failed. Please try again.', 'error');
   }
@@ -362,7 +383,7 @@ async function googleAuth() {
 
 // Redirect if already logged in
 firebase.auth().onAuthStateChanged(user => {
-  if (user) window.location.href = 'dashboard.html';
+  if (user) redirectBasedOnRole(user);
 });
 </script>
   <script src="affiliate-tracker.js"></script>
