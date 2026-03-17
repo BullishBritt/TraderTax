@@ -323,7 +323,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
               <div id="overview-ob-progress-label" style="font-size:.7rem;color:rgba(255,255,255,.45);margin-top:4px;"></div>
             </div>
           </div>
-          <button onclick="showObOverlay(userData.onboarding?.currentStep||1)" style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;" onmouseover="this.style.background='var(--green-dk)'" onmouseout="this.style.background='var(--green)'" id="overview-ob-btn">Start Onboarding →</button>
+          <button onclick="showObOverlay((window.userData&&window.userData.onboarding?.currentStep)||1)" style="padding:10px 20px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:background .15s;" onmouseover="this.style.background='var(--green-dk)'" onmouseout="this.style.background='var(--green)'" id="overview-ob-btn">Start Onboarding →</button>
         </div>
       </div>
 
@@ -561,7 +561,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 
       <!-- CTA -->
       <div style="display:flex;gap:10px;margin-top:8px;">
-        <button onclick="showObOverlay(userData.onboarding?.currentStep||1)" style="padding:11px 22px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">
+        <button onclick="showObOverlay((window.userData&&window.userData.onboarding?.currentStep)||1)" style="padding:11px 22px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">
           ✏️ Edit / Continue Onboarding
         </button>
       </div>
@@ -756,7 +756,7 @@ import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getD
 import{getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 const fbConfig={apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",authDomain:"taxtrader.firebaseapp.com",projectId:"taxtrader",storageBucket:"taxtrader.firebasestorage.app",messagingSenderId:"887085050235",appId:"1:887085050235:web:a7b8c6e6b416e413e975de"};
 const app=initializeApp(fbConfig);const auth=getAuth(app);const db=getFirestore(app);const storage=getStorage(app);
-let currentUser=null,userData={},allDocs=[];
+let currentUser=null,userData={},allDocs=[];window.userData=userData;
 let assignedCPAData=null, cpaConversationId=null, cpaMessageListener=null, userDocListener=null;
 // SECURE CLIENT DASHBOARD - Role Check
 
@@ -806,7 +806,7 @@ async function loadUser(user){
   try{
     const s=await getDoc(doc(db,'users',user.uid));
     if(s.exists()){
-      userData=s.data();
+      userData=s.data();window.userData=userData;
       // Always keep email fresh in Firestore so admin lookup works
       if(!userData.email) await setDoc(doc(db,'users',user.uid),{email:user.email,role:'client'},{merge:true});
       document.getElementById('pf-first').value=userData.firstName||'';
