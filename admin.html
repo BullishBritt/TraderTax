@@ -707,7 +707,7 @@ function renderLeads() {
   if(!leads.length){document.getElementById('leads-body').innerHTML='<div class="empty"><div class="empty-icon">📭</div>No leads match this filter.</div>';return;}
   document.getElementById('leads-body').innerHTML=leads.map(l=>{
     const p=getPriority(l); const income=totalIncome(l); const date=l.createdAt.toLocaleDateString('en-US',{month:'short',day:'numeric'}); const trades=(l.trades||'').split(',').slice(0,2).join(', ')||'—';
-    return `<div class="t-row leads-grid" onclick='openLeadModal(${JSON.stringify(l).replace(/'/g,"&#39;")})'>${priLabel(p)}<div><div class="cell-name">${l.email||'—'}</div></div><div class="cell-muted">${l.phone||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;">${income>0?'$'+income.toLocaleString():'—'}</div><div class="cell-muted">${l.state||'—'}</div><div class="cell-muted" style="font-size:.75rem;">${trades}</div><div><span style="font-size:.7rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;">${l.source}</span></div><div class="cell-muted">${date}</div></div>`;
+    return `<div class="t-row leads-grid" onclick='openLeadModal(${JSON.stringify(l).replace(/'/g,"&#39;")})'>${priLabel(p)}<div><div class="cell-name">${l.email||'—'}</div></div><div class="cell-muted">${l.phone||'—'}</div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;">${income>0?'$'+income.toLocaleString():l.incomeRange||'—'}</div><div class="cell-muted">${l.state||'—'}</div><div class="cell-muted" style="font-size:.75rem;">${trades}</div><div><span style="font-size:.7rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:3px 8px;">${l.source}</span></div><div class="cell-muted">${date}</div></div>`;
   }).join('');
 }
 
@@ -728,7 +728,7 @@ function openLeadModal(l) {
       <div class="modal-row"><span class="modal-key">Prop Firm Payouts</span><span class="modal-val">${l.prop>0?'$'+l.prop.toLocaleString():'—'}</span></div>
       <div class="modal-row"><span class="modal-key">Trading P&L</span><span class="modal-val">${l.pnl!==0?'$'+l.pnl.toLocaleString():'—'}</span></div>
       <div class="modal-row"><span class="modal-key">Futures P&L</span><span class="modal-val">${l.futuresPnl!==0?'$'+l.futuresPnl.toLocaleString():'—'}</span></div>
-      <div class="modal-row"><span class="modal-key">Total Income</span><span class="modal-val" style="font-weight:800;font-size:.9rem;">${income>0?'$'+income.toLocaleString():'—'}</span></div>
+      <div class="modal-row"><span class="modal-key">Total Income</span><span class="modal-val" style="font-weight:800;font-size:.9rem;">${income>0?'$'+income.toLocaleString():l.incomeRange||'—'}</span></div>
       <div class="modal-row"><span class="modal-key">Deductible Expenses</span><span class="modal-val" style="color:var(--green-dk);">${l.expenses>0?'-$'+l.expenses.toLocaleString():'—'}</span></div>
     </div>
     <div class="modal-sec"><div class="modal-sec-title">Tax Profile</div>
