@@ -22,14 +22,26 @@
   });
   const db = getFirestore(app);
   const auth = getAuth(app);
+
+  // FIX: unified lead save — writes to calculator_leads + all_leads + leads in one shot
   window._saveLead = async (data) => {
     try {
       const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
-      // Manual referral code takes priority
       if (data.referralCode) affPayload.affiliateCode = data.referralCode;
-      await addDoc(collection(db,"calculator_leads"),{...data, ...affPayload, createdAt:serverTimestamp()});
-
-      // If user is logged in, save calc result to their dashboard profile
+      const base = {
+        ...data,
+        ...affPayload,
+        leadSource: 'calculator',
+        source: data.source || 'Calculator Lead',
+        createdAt: serverTimestamp()
+      };
+      // Write to all three required collections simultaneously
+      await Promise.allSettled([
+        addDoc(collection(db, 'calculator_leads'), base),
+        addDoc(collection(db, 'all_leads'), base),
+        addDoc(collection(db, 'leads'), base)
+      ]);
+      // Save calc result to user dashboard profile if logged in
       const user = auth.currentUser;
       if (user) {
         const calcEntry = {
@@ -39,7 +51,7 @@
           estimatedTax: data.estimatedTax || 0,
           w2Income: data.w2 || 0,
           propIncome: data.prop || 0,
-          state: data.state || '',
+          state: data.stateCode || '',
           source: 'Calculator',
         };
         await setDoc(doc(db,'users', user.uid), {
@@ -47,9 +59,131 @@
           updatedAt: new Date().toISOString()
         }, { merge: true });
       }
-      sendLeadEmail('Calculator Lead', data.name || '', data.email, data.phone || '', data.tradingStyle || '', '');
-      console.log("Lead saved");
-    } catch(e){ console.warn("Firestore:",e); }
+      // FIX: use data.trades (correct field), call via window for cross-script access
+      if (window.sendLeadEmail) {
+        window.sendLeadEmail('Calculator Lead', data.name || '', data.email || '', data.phone || '', data.trades || '', '');
+      }
+      console.log("Lead saved to calculator_leads + all_leads + leads");
+    } catch(e){ console.warn("Firestore save error:", e); }
+  };
+
+  // Phone verification logic (module scope — has access to auth/db)
+  let phoneConfirmationResult = null;
+
+  window.showPhoneModal = function() {
+    // FIX: skip verification if already verified in this browser session
+    const alreadyVerified = sessionStorage.getItem('tt_phone_verified');
+    if (alreadyVerified) {
+      console.log('Phone already verified this session — skipping modal');
+      if (typeof go === 'function') go('results');
+      return;
+    }
+    document.getElementById('phone-modal').style.display = 'flex';
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', { 'size': 'normal' });
+      window.recaptchaVerifier.render();
+    }
+  };
+
+  function showPhoneError(message) {
+    const errorEl = document.getElementById('phone-error');
+    errorEl.textContent = message;
+    errorEl.style.display = 'block';
+    setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
+  }
+
+  window.sendVerificationCode = async function() {
+    const rawPhone = document.getElementById('phone-number-input').value.trim();
+    // Normalize: strip spaces, ensure starts with +
+    const phoneNumber = rawPhone.replace(/\s+/g,'').replace(/^\+1(\d)/, '+1$1');
+
+    if (!phoneNumber || !phoneNumber.startsWith('+')) {
+      showPhoneError('Phone number must start with + and country code (e.g. +1)');
+      return;
+    }
+
+    const btn = document.getElementById('send-code-btn');
+    btn.disabled = true;
+    btn.textContent = 'Sending...';
+
+    try {
+      phoneConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
+      document.getElementById('phone-input-step').style.display = 'none';
+      document.getElementById('code-input-step').style.display = 'block';
+      window.verifiedPhoneNumber = phoneNumber;
+    } catch (error) {
+      console.error('SMS error:', error);
+      btn.disabled = false;
+      btn.textContent = 'Send Code';
+      if (error.code === 'auth/invalid-phone-number') {
+        showPhoneError('Invalid phone number format');
+      } else if (error.code === 'auth/too-many-requests') {
+        showPhoneError('Too many attempts. Try again later.');
+      } else {
+        showPhoneError('Failed to send code. Check your number and try again.');
+      }
+    }
+  };
+
+  window.verifyCalculatorCode = async function() {
+    const code = document.getElementById('verification-code-input').value.trim();
+    if (!code || code.length !== 6) {
+      showPhoneError('Please enter the 6-digit code');
+      return;
+    }
+    const btn = document.getElementById('verify-code-btn');
+    btn.disabled = true;
+    btn.textContent = 'Verifying...';
+
+    try {
+      await phoneConfirmationResult.confirm(code);
+
+      // FIX: save verified lead to ALL required collections, not just verified_leads
+      try {
+        const verifiedData = {
+          email:        window.calculatorEmail || '',
+          phone:        window.verifiedPhoneNumber,
+          phoneVerified: true,
+          verified:     true,
+          verifiedAt:   new Date().toISOString(),
+          source:       'Calculator - Verified',
+          leadSource:   'calculator',
+          createdAt:    new Date().toISOString()
+        };
+        await Promise.allSettled([
+          addDoc(collection(db, 'verified_leads'),   verifiedData),
+          addDoc(collection(db, 'all_leads'),        verifiedData),
+          addDoc(collection(db, 'calculator_leads'), verifiedData),
+          addDoc(collection(db, 'leads'),            verifiedData)
+        ]);
+        // FIX: store in session so snapshot tool skips re-verification
+        sessionStorage.setItem('tt_phone_verified', window.verifiedPhoneNumber);
+        sessionStorage.setItem('tt_verified_email', window.calculatorEmail || '');
+      } catch (e) { console.log('Verified lead save error:', e); }
+
+      // Hide modal, show results
+      document.getElementById('phone-modal').style.display = 'none';
+      if (typeof go === 'function') go('results');
+
+    } catch (error) {
+      console.error('Verification error:', error);
+      btn.disabled = false;
+      btn.textContent = 'Verify & Continue';
+      if (error.code === 'auth/invalid-verification-code') {
+        showPhoneError('Invalid code — please try again');
+      } else if (error.code === 'auth/code-expired') {
+        showPhoneError('Code expired. Request a new one.');
+      } else {
+        showPhoneError('Verification failed. Try again.');
+      }
+    }
+  };
+
+  window.resendCode = function() {
+    document.getElementById('code-input-step').style.display = 'none';
+    document.getElementById('phone-input-step').style.display = 'block';
+    document.getElementById('send-code-btn').disabled = false;
+    document.getElementById('send-code-btn').textContent = 'Send Code';
   };
 </script>
 <style>
@@ -216,12 +350,12 @@ footer a:hover{color:#fff;}
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script type="text/javascript">
   emailjs.init("dL1qGwo32XBoAeMPB");
-  function sendLeadEmail(source, name, email, phone, traderType, message) {
+  window.sendLeadEmail = function(source, name, email, phone, traderType, message) {
     emailjs.send("service_9p67iy9", "template_vtt9a58", {
       source: source, name: name || "Unknown", email: email || "Unknown",
       phone: phone || "", trader_type: traderType || "", message: message || ""
     }).catch(function(err) { console.log("EmailJS error:", err); });
-  }
+  };
 </script>
 <style id="tt-nav-css">
 :root{--green:#3dba7e;--green-dk:#2ea86c;--navy:#0a1628;--body:#374151;--border:rgba(0,0,0,.07);--border2:#d1d5db;}
@@ -363,9 +497,6 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
     </div>
     <div class="ibox">💡 <strong>Prop firm payouts are always SE income</strong> — even if you lost money on evaluations, even if you got no 1099. The IRS sees the bank deposit. SE tax (15.3%) applies on top of income tax.</div>
     <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
-      ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
-    </div>
     <div class="snav">
       <div></div>
       <button class="btn-next" id="next1" onclick="go(2)" disabled>Next →</button>
@@ -406,11 +537,8 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
       <div class="ropt" onclick="selR(this,'entity')">LLC (disregarded)</div>
       <div class="ropt" onclick="selR(this,'entity')">S-Corp</div>
     </div>
-    <div class="ibox">🏢 <strong>S-Corp note:</strong> An S-Corp doesn't eliminate SE tax — it reduces it by splitting income between salary (SE tax applies) and distributions (no SE tax). This estimate assumes no S-Corp salary split. An actual S-Corp analysis requires a licensed professional.</div>
-    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
-      ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
-    </div>
+    <div class="ibox">🏢 <strong>S-Corp note:</strong> An S-Corp doesn't eliminate SE tax — it reduces it by splitting income between salary (SE tax applies) and distributions (no SE tax). This estimate assumes no S-Corp salary split.</div>
+    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice.</div>
     <div class="snav">
       <button class="btn-back" onclick="go(1)">← Back</button>
       <button class="btn-next" onclick="go(3)">Next →</button>
@@ -482,10 +610,7 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
       </div>
     </div>
     <div class="ibox" id="state-info">🤠 <strong>Texas:</strong> No state income tax. Your only taxes are federal and SE tax — no state burden at all.</div>
-    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice. Actual results will differ.</div>
-    <div style="margin-top:16px;font-size:.72rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:9px 12px;line-height:1.6;">
-      ⚠️ <strong>Reminder:</strong> This tool produces rough estimates only — not your actual tax liability. Results depend on simplified assumptions. Always verify with a licensed tax professional.
-    </div>
+    <div style="font-size:.68rem;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:7px;padding:7px 11px;margin-top:14px;">⚠️ Estimates only — not tax advice.</div>
     <div class="snav">
       <button class="btn-back" onclick="go(2)">← Back</button>
       <button class="btn-next btn-go" onclick="go(4)">Get My Estimate →</button>
@@ -512,21 +637,20 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
         <label>Phone (optional)</label>
         <input type="tel" id="gate-phone" placeholder="(555) 000-0000"/>
       </div>
-      <!-- Referral code — small, subtle, optional -->
       <div class="gfield" style="margin-top:2px;">
         <label style="color:#9ca3af;font-size:.62rem;">Referral code <span style="font-weight:400;">(optional)</span></label>
         <input type="text" id="gate-refcode" placeholder="e.g. APEX10" autocomplete="off" style="max-width:160px;font-size:.82rem;padding:8px 11px;border-radius:8px;"/>
         <div style="font-size:.62rem;color:#9ca3af;margin-top:3px;">Were you referred? Enter their code so they get credit.</div>
       </div>
       <button class="gate-btn" id="gate-btn" onclick="unlock()" disabled>Show My Estimate →</button>
-      <div class="gate-legal">No spam. No sales calls unless you ask. We store your inputs to generate your estimate and may follow up with tax tips. Unsubscribe anytime.</div>
+      <div class="gate-legal">No spam. No sales calls unless you ask. Unsubscribe anytime.</div>
     </div>
   </div>
 
   <!-- RESULTS -->
   <div class="step" id="step-results">
     <div class="res-est-notice">
-      ⚠️ <strong>These are estimates only — not your actual tax bill.</strong> This tool uses simplified 2025 bracket math, standardized deductions, and flat state rates. It does not account for: itemized deductions, tax credits, AMT, carry-forward losses, multiple state returns, marriage penalty, or dozens of other factors that affect real returns. <strong>Treat this as a rough ballpark, not a filing number.</strong> A licensed tax professional will produce a materially different result.
+      ⚠️ <strong>These are estimates only — not your actual tax bill.</strong> This tool uses simplified 2025 bracket math, standardized deductions, and flat state rates. It does not account for: itemized deductions, tax credits, AMT, carry-forward losses, multiple state returns, marriage penalty, or dozens of other factors that affect real returns. <strong>Treat this as a rough ballpark, not a filing number.</strong>
     </div>
     <div class="res-hd">
       <h2>📊 Your 2025 Tax Estimate</h2>
@@ -550,7 +674,7 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
     <div class="bk">
       <div class="bk-hd">🏛️ Federal Tax Calculation (Estimated)</div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Adjusted Gross Income (AGI)</div><div class="bk-sub">After SE deduction (½ of SE tax deducted from income)</div></div><div class="bk-val" id="br-agi">$0</div></div>
-      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Standard Deduction</div><div class="bk-sub" id="br-std-sub">2025 standard deduction (we assume you take this)</div></div><div class="bk-val green" id="br-std">-$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Standard Deduction</div><div class="bk-sub" id="br-std-sub">2025 standard deduction</div></div><div class="bk-val green" id="br-std">-$0</div></div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Taxable Income</div><div class="bk-sub">What federal brackets actually apply to</div></div><div class="bk-val" id="br-taxable">$0</div></div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Federal Income Tax</div><div class="bk-sub" id="br-fed-sub">2025 brackets applied to taxable income</div></div><div class="bk-val red" id="br-fed">$0</div></div>
       <div class="bk-row" id="br-niit-row" style="display:none"><div class="bk-l"><div class="bk-lbl">Net Investment Income Tax (NIIT)</div><div class="bk-sub">3.8% on investment income above $200K single / $250K MFJ</div></div><div class="bk-val red" id="br-niit">$0</div></div>
@@ -558,17 +682,17 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
     <div class="bk" id="se-section">
       <div class="bk-hd">💼 Self-Employment Tax Calculation (Estimated)</div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Total SE Income</div><div class="bk-sub">Prop firm payouts + other 1099 income − deductible expenses</div></div><div class="bk-val" id="br-se-income">$0</div></div>
-      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Tax Base (× 92.35%)</div><div class="bk-sub">IRS allows you to exclude 7.65% (employer share) before calculating</div></div><div class="bk-val" id="br-se-base">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Tax Base (× 92.35%)</div></div><div class="bk-val" id="br-se-base">$0</div></div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Social Security Tax (12.4%)</div><div class="bk-sub" id="br-ss-sub">On SE base up to $176,100 SS wage base (2025)</div></div><div class="bk-val red" id="br-ss">$0</div></div>
-      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Medicare Tax (2.9%)</div><div class="bk-sub">No wage cap on Medicare portion</div></div><div class="bk-val red" id="br-med">$0</div></div>
-      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Deduction (½ of SE tax)</div><div class="bk-sub">This amount is deducted from your AGI — reduces income tax slightly</div></div><div class="bk-val green" id="br-se-ded">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Medicare Tax (2.9%)</div></div><div class="bk-val red" id="br-med">$0</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">SE Deduction (½ of SE tax)</div></div><div class="bk-val green" id="br-se-ded">$0</div></div>
       <div class="bk-row bk-total"><div class="bk-l"><div class="bk-lbl">Total SE Tax</div></div><div class="bk-val" id="br-se-total">$0</div></div>
     </div>
     <div class="ibox" id="ss-coord-note" style="display:none;margin-bottom:14px;"></div>
     <div class="bk">
       <div class="bk-hd">🗺️ State Tax (Estimated)</div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">State</div></div><div class="bk-val" id="br-state-name">Texas</div></div>
-      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Rate Applied</div><div class="bk-sub">Simplified flat rate estimate — actual state brackets may vary</div></div><div class="bk-val" id="br-state-rate">0%</div></div>
+      <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Rate Applied</div><div class="bk-sub">Simplified flat rate estimate</div></div><div class="bk-val" id="br-state-rate">0%</div></div>
       <div class="bk-row"><div class="bk-l"><div class="bk-lbl">Estimated State Tax</div></div><div class="bk-val red" id="br-state-tax">$0</div></div>
     </div>
     <div class="how">
@@ -578,17 +702,17 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
       <div class="how-body" id="how-body">
         <div id="how-steps"></div>
         <div style="margin-top:10px;padding:10px 0;border-top:1px solid var(--border);font-size:.73rem;color:var(--muted);line-height:1.6;">
-          <strong style="color:var(--navy);">What this does NOT account for:</strong> itemized deductions, child tax credits, education credits, QBI deduction, AMT, carryforward losses, multiple state returns, part-year residency, installment sales, depreciation recapture, FBAR foreign accounts, or any other individual circumstance. A licensed tax professional will produce a more accurate number.
+          <strong style="color:var(--navy);">What this does NOT account for:</strong> itemized deductions, child tax credits, QBI deduction, AMT, carryforward losses, multiple state returns, and many other individual circumstances.
         </div>
       </div>
     </div>
     <div class="sav" id="sav-section">
       <div class="sav-title">💰 Where Your Savings Could Come From</div>
-      <div class="sav-sub">Rough estimates based on typical TraderTax strategies — actual savings depend on your specific situation.</div>
+      <div class="sav-sub">Rough estimates based on typical TraderTax strategies.</div>
       <div id="sav-items"></div>
     </div>
     <div class="disc">
-      ⚠️ <strong>Important:</strong> This estimate is for informational purposes only and does not constitute tax advice. It uses simplified 2025 federal tax brackets, assumes you take the standard deduction, applies a flat state rate estimate, and does not account for your complete financial situation. <strong>Do not use this number to make financial or tax filing decisions.</strong> TraderTax is a platform — tax services are provided by independent licensed CPAs and Enrolled Agents who will produce an accurate, personalized calculation.
+      ⚠️ <strong>Important:</strong> This estimate is for informational purposes only and does not constitute tax advice. <strong>Do not use this number to make financial or tax filing decisions.</strong>
     </div>
     <div class="res-cta">
       <h3>Want the real number — not an estimate?</h3>
@@ -603,48 +727,11 @@ nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
 
 <footer style="background:#0a1628;border-top:1px solid rgba(255,255,255,.07);padding:52px 5% 28px;color:rgba(255,255,255,.6);font-family:'DM Sans',sans-serif;">
   <div style="max-width:1100px;margin:0 auto;">
-    <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px;">
-      <div>
-        <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:16px;">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#fff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-          <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;"><span style="color:#fff;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
-        </a>
-        <p style="font-size:.85rem;line-height:1.7;margin-bottom:8px;">Taxes Built for Traders.</p>
-        <p style="font-size:.75rem;color:rgba(255,255,255,.3);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e58d8089898aa591978481809791849dcb8b8091">[email&#160;protected]</a></p>
-      </div>
-      <div>
-        <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Services</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
-          <li><a href="services.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">All Services</a></li>
-          <li><a href="prop-firm-taxes.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Prop Firm Taxes</a></li>
-          <li><a href="calculator.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Tax Calculator</a></li>
-          <li><a href="pricing.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Pricing</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Resources</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
-          <li><a href="blog.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Blog</a></li>
-          <li><a href="faq.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">FAQ</a></li>
-          <li><a href="snapshot.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Tax Snapshot</a></li>
-        </ul>
-      </div>
-      <div>
-        <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Company</h4>
-        <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px;">
-          <li><a href="about.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">About</a></li>
-          <li><a href="contact.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Contact</a></li>
-          <li><a href="privacy.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Privacy Policy</a></li>
-          <li><a href="terms.html" style="color:rgba(255,255,255,.65);text-decoration:none;font-size:.875rem;">Terms of Service</a></li>
-        </ul>
-      </div>
-    </div>
     <div style="border-top:1px solid rgba(255,255,255,.1);padding-top:20px;font-size:.75rem;color:rgba(255,255,255,.3);">&copy; 2025 TraderTax. All rights reserved. Not a licensed CPA firm — we partner with licensed CPAs to deliver services.</div>
-    <div style="margin-top:16px;font-size:.7rem;color:rgba(255,255,255,.25);line-height:1.7;text-align:center;">TraderTax is a tax preparation referral platform, not a licensed CPA firm. Tax services are performed by independent licensed CPAs and Enrolled Agents. Content is for informational purposes only.</div>
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 const S = {
   w2:0,pnl:0,futuresPnl:0,prop:0,otherSe:0,expenses:0,
   trades:[],filing:'Single',hold:'Mostly short-term (<1yr)',entity:'No Entity',
@@ -752,12 +839,10 @@ function calculate(){
   const mRate=marginalRate(Math.max(0,totalOrdinary),filing);
   const savings=[];
   if(expenses<500&&(prop>0||S.trades.includes('stocks'))){
-    const est=Math.round(2500*mRate);
-    savings.push({icon:'🖥️',name:'Unclaimed Deductions',desc:'Most traders miss $1,500–$4,000 in platform fees, eval costs, education, and home office.',amt:est});
+    savings.push({icon:'🖥️',name:'Unclaimed Deductions',desc:'Most traders miss $1,500–$4,000 in platform fees, eval costs, education, and home office.',amt:Math.round(2500*mRate)});
   }
   if(prop>60000&&S.entity==='No Entity'){
-    const scSave=Math.round(prop*0.07);
-    savings.push({icon:'🏢',name:'S-Corp Structure',desc:`With ${fmt(prop)} in prop payouts, an S-Corp salary split could reduce SE tax significantly.`,amt:scSave});
+    savings.push({icon:'🏢',name:'S-Corp Structure',desc:`With ${fmt(prop)} in prop payouts, an S-Corp salary split could reduce SE tax significantly.`,amt:Math.round(prop*0.07)});
   }
   if(S.trades.includes('futures')&&futuresPnl>5000){
     savings.push({icon:'📊',name:'Section 1256 Already Applies',desc:'Your futures gains already get 60/40 treatment. MTM election could provide additional flexibility.',amt:Math.round(futuresPnl*0.03)});
@@ -766,14 +851,14 @@ function calculate(){
   if(savings.length===0){savings.push({icon:'🔍',name:'Professional Review',desc:"A TraderTax CPA review typically finds $800–$3,000 in missed opportunities.",amt:Math.round(totalTax*0.08)});}
   const totalSavings=savings.reduce((a,s)=>a+s.amt,0);
   const howSteps=[
-    `<strong>SE Tax first:</strong> Prop firm payouts (${fmt(prop)}) + other 1099 (${fmt(otherSe)}) − expenses (${fmt(expenses)}) = <code>${fmt(netSe)} net SE income</code>. SE base = ${fmt(netSe)} × 92.35% = <code>${fmt(se.seBase)}</code>.`,
-    `<strong>W-2 SS coordination:</strong> Your W-2 (${fmt(w2)}) already paid SS tax on ${fmt(Math.min(w2,SS_WAGE_BASE_2025))}. SE SS only applies to the remaining wage base headroom.`,
+    `<strong>SE Tax first:</strong> Prop firm payouts (${fmt(prop)}) + other 1099 (${fmt(otherSe)}) − expenses (${fmt(expenses)}) = <code>${fmt(netSe)} net SE income</code>.`,
+    `<strong>W-2 SS coordination:</strong> Your W-2 (${fmt(w2)}) already paid SS tax on ${fmt(Math.min(w2,SS_WAGE_BASE_2025))}. SE SS only applies to remaining wage base headroom.`,
     `<strong>Futures 60/40 split:</strong> ${fmt(futuresPnl)} futures P&L → 40% ordinary + 60% long-term capital gains rate.`,
-    `<strong>Ordinary income stack:</strong> W-2 ${fmt(w2)} + ordinary trading + SE income − SE deduction = <code>${fmt(Math.round(totalOrdinary))} ordinary taxable income (before std deduction)</code>.`,
+    `<strong>Ordinary income stack:</strong> W-2 + ordinary trading + SE income − SE deduction = <code>${fmt(Math.round(totalOrdinary))} ordinary taxable income</code>.`,
     `<strong>Standard deduction:</strong> ${fmt(STD_DED[filing])} for ${filing} (2025).`,
-    `<strong>Federal brackets (${filing}):</strong> Applied 2025 progressive brackets. LTCG income of ${fmt(Math.round(totalLtcg))} taxed at preferential rates.`,
-    niit>0?`<strong>NIIT:</strong> Total income exceeds ${fmt(niitThreshold)} threshold. 3.8% applied to net investment income.`:`<strong>NIIT:</strong> Not applicable — total income below ${fmt(niitThreshold)} threshold.`,
-    `<strong>State tax:</strong> ${S.stateName} flat rate estimate of ${(stateRate*100).toFixed(2)}% applied to gross income of ${fmt(Math.max(0,grossIncome))}.`
+    `<strong>Federal brackets:</strong> Applied 2025 progressive brackets. LTCG income of ${fmt(Math.round(totalLtcg))} taxed at preferential rates.`,
+    niit>0?`<strong>NIIT:</strong> Total income exceeds ${fmt(niitThreshold)} threshold. 3.8% applied.`:`<strong>NIIT:</strong> Not applicable.`,
+    `<strong>State tax:</strong> ${S.stateName} flat rate estimate of ${(stateRate*100).toFixed(2)}% applied.`
   ];
   return{w2,pnl,futuresPnl,prop,otherSe,expenses,netSe,se,ordTax,ltcgTax,fedTax,niit,stateTax,totalTax,afterTax,effRate,mRate,grossIncome,totalOrdinary,totalLtcg,savings,totalSavings,howSteps,stateRate};
 }
@@ -796,17 +881,17 @@ function renderResults(){
   set('br-gross',fmt(Math.max(0,r.grossIncome)));
   set('br-agi',fmt(Math.round(r.totalOrdinary+Math.max(0,r.totalLtcg))));
   set('br-std','-'+fmt(STD_DED[S.filing]));
-  set('br-std-sub',`${S.filing} standard deduction (2025) — we assume you take this`);
+  set('br-std-sub',`${S.filing} standard deduction (2025)`);
   const taxableOrd=Math.max(0,r.totalOrdinary-STD_DED[S.filing]);
   set('br-taxable',fmt(Math.round(taxableOrd+Math.max(0,r.totalLtcg))));
   set('br-fed',fmt(r.fedTax));
-  set('br-fed-sub',`2025 brackets · marginal rate: ${Math.round(r.mRate*100)}% · LTCG: ${fmt(r.ltcgTax)} at preferential rate`);
+  set('br-fed-sub',`2025 brackets · marginal rate: ${Math.round(r.mRate*100)}% · LTCG: ${fmt(r.ltcgTax)}`);
   if(r.niit>0){document.getElementById('br-niit-row').style.display='flex';set('br-niit',fmt(r.niit));}
   if(r.netSe>0){
     document.getElementById('se-section').style.display='block';
     set('br-se-income',fmt(r.netSe));set('br-se-base',fmt(r.se.seBase));
     set('br-ss',fmt(r.se.ss));
-    set('br-ss-sub',`SS base: ${fmt(r.se.seSSSubject)} (after W-2 coordination — W-2 already covered ${fmt(r.se.w2SsAlready)} of the $176,100 cap)`);
+    set('br-ss-sub',`SS base: ${fmt(r.se.seSSSubject)} (W-2 already covered ${fmt(r.se.w2SsAlready)} of $176,100 cap)`);
     set('br-med',fmt(r.se.medicare));
     set('br-se-ded','-'+fmt(r.se.deduction)+' (deducted from AGI)');
     set('br-se-total',fmt(r.se.total));
@@ -814,7 +899,7 @@ function renderResults(){
   if(r.w2>=SS_WAGE_BASE_2025){
     const note=document.getElementById('ss-coord-note');
     note.style.display='block';
-    note.innerHTML=`💡 <strong>SS Wage Base Note:</strong> Your W-2 income (${fmt(r.w2)}) meets or exceeds the 2025 SS wage base of $176,100. Your prop firm payouts owe no Social Security tax — only Medicare (2.9%). This saves you approximately ${fmt(Math.round(Math.min(r.netSe*.9235,SS_WAGE_BASE_2025)*.124))}.`;
+    note.innerHTML=`💡 <strong>SS Wage Base Note:</strong> Your W-2 (${fmt(r.w2)}) meets or exceeds the 2025 SS wage base. Prop firm payouts owe no SS tax — only Medicare (2.9%). Saves ~${fmt(Math.round(Math.min(r.netSe*.9235,SS_WAGE_BASE_2025)*.124))}.`;
   }
   set('br-state-name',stateDisplay);
   set('br-state-rate',r.stateRate===0?'0% (no income tax)':(r.stateRate*100).toFixed(2)+'% flat estimate');
@@ -864,8 +949,6 @@ function chkGate(){
 async function unlock(){
   S.email=document.getElementById('gate-email').value;
   S.phone=document.getElementById('gate-phone').value||'';
-
-  // Referral code: manual entry takes priority over URL tracking
   const manualRefCode=(document.getElementById('gate-refcode')&&document.getElementById('gate-refcode').value.trim())||'';
 
   const btn=document.getElementById('gate-btn');
@@ -876,53 +959,46 @@ async function unlock(){
   S.stateCode=sv[0];S.stateRate=parseFloat(sv[1])||0;
   S.stateName=document.getElementById('state-sel').options[document.getElementById('state-sel').selectedIndex].text.split(' —')[0];
 
-  // Save lead to Firestore BEFORE phone verification (capture every lead!)
-  try {
-    const leadData = {
-      email:S.email,
-      phone:S.phone,
-      source:'Calculator Lead',
-      referralCode:manualRefCode,
-      w2:S.w2,
-      pnl:S.pnl,
-      futuresPnl:S.futuresPnl,
-      prop:S.prop,
-      otherSe:S.otherSe,
-      expenses:S.expenses,
-      trades:S.trades.join(','),
-      filing:S.filing,
-      hold:S.hold,
-      entity:S.entity,
-      stateCode:S.stateCode,
-      stateName:S.stateName,
-      estimatedTax:Math.round(calculate().totalTax),
-      ...(window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload()),
-      createdAt: new Date().toISOString()
-    };
-    
-    await addDoc(collection(db, 'leads'), leadData);
-    
-    // Also save via existing method if available
-    if(window._saveLead) window._saveLead(leadData);
-  } catch(e) { 
-    console.log('Lead save error:', e);
-  }
+  // FIX: Use window._saveLead (defined in module) — this correctly saves to
+  // calculator_leads + all_leads + leads in one atomic call.
+  // Previous code tried to call addDoc() here which is module-only and caused a ReferenceError.
+  const leadData = {
+    email:        S.email,
+    phone:        S.phone,
+    source:       'Calculator Lead',
+    leadSource:   'calculator',
+    referralCode: manualRefCode,
+    w2:           S.w2,
+    pnl:          S.pnl,
+    futuresPnl:   S.futuresPnl,
+    prop:         S.prop,
+    otherSe:      S.otherSe,
+    expenses:     S.expenses,
+    trades:       S.trades.join(','),
+    filing:       S.filing,
+    hold:         S.hold,
+    entity:       S.entity,
+    stateCode:    S.stateCode,
+    stateName:    S.stateName,
+    estimatedTax: Math.round(calculate().totalTax),
+    createdAt:    new Date().toISOString()
+  };
+  if (window._saveLead) window._saveLead(leadData);
 
-  // Also send to Google Sheets (backup)
+  // Google Sheets backup
   fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0tb1iteq1B4vg/exec',{
     method:'POST',mode:'no-cors',
     body:JSON.stringify({timestamp:new Date().toISOString(),email:S.email,phone:S.phone,source:'Calculator Lead',referralCode:manualRefCode,state:S.stateCode,filing:S.filing,trades:S.trades.join(','),w2:S.w2,prop:S.prop,pnl:S.pnl,futuresPnl:S.futuresPnl,estimatedTax:Math.round(calculate().totalTax)})
   }).catch(()=>{});
 
-  // Store calculator state globally for phone verification
   window.calculatorEmail = S.email;
   window.calculatorPhone = S.phone;
 
-  // Show phone modal instead of going directly to results
   setTimeout(() => {
     btn.innerHTML = 'Unlock Results →';
     btn.disabled = false;
-    showPhoneModal();
+    // showPhoneModal handles session check — if already verified, skips straight to results
+    if (window.showPhoneModal) window.showPhoneModal();
   }, 900);
 }
 
@@ -958,8 +1034,8 @@ function updateStateInfo(){
   const rate=parseFloat(sv[1])||0;
   const name=sel.options[sel.selectedIndex].text.split(' —')[0];
   const info=document.getElementById('state-info');
-  if(rate===0){info.innerHTML=`🎉 <strong>${name}:</strong> No state income tax — zero state burden on your trading income.`;}
-  else{info.innerHTML=`🗺️ <strong>${name}:</strong> Approximately ${(rate*100).toFixed(2)}% flat rate applied to your gross income.`;}
+  if(rate===0){info.innerHTML=`🎉 <strong>${name}:</strong> No state income tax.`;}
+  else{info.innerHTML=`🗺️ <strong>${name}:</strong> ~${(rate*100).toFixed(2)}% flat rate applied.`;}
 }
 
 function set(id,val){const el=document.getElementById(id);if(el)el.textContent=val;}
@@ -969,22 +1045,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('next1').disabled=true;
   updateStateInfo();
 });
-
-// Pre-fill referral code from affiliate tracker after it loads
-window.addEventListener('load', function() {
-  setTimeout(function() {
-    try {
-      var stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
-      var affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
-      if (affCode) {
-        var el = document.getElementById('refcode-input');
-        if (el && !el.value) el.value = affCode;
-      }
-    } catch(e) { /* silent */ }
-  }, 300);
-});
 </script>
-  <script src="affiliate-tracker.js"></script>
+<script src="affiliate-tracker.js"></script>
 
 <!-- Phone Verification Modal for Calculator -->
 <div id="phone-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,0.9);z-index:9999;align-items:center;justify-content:center;padding:20px;">
@@ -1000,8 +1062,11 @@ window.addEventListener('load', function() {
     </div>
 
     <div id="phone-input-step">
-      <input type="tel" id="phone-number-input" placeholder="+1 (555) 123-4567" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;"/>
-      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Include country code (e.g., +1 for US)</div>
+      <!-- FIX: Pre-filled with +1 so US users just type their 10 digits -->
+      <input type="tel" id="phone-number-input" value="+1 " placeholder="(555) 123-4567"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;"
+        onfocus="if(this.value==='+1 ')this.setSelectionRange(3,3);"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">US pre-filled with +1 — just add your 10 digits</div>
       <div id="recaptcha-container"></div>
       <button onclick="sendVerificationCode()" id="send-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:12px;">Send Code</button>
     </div>
@@ -1009,129 +1074,12 @@ window.addEventListener('load', function() {
     <div id="code-input-step" style="display:none;">
       <input type="text" id="verification-code-input" maxlength="6" placeholder="123456" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:1.1rem;font-family:'DM Sans',sans-serif;text-align:center;letter-spacing:4px;outline:none;margin-bottom:8px;"/>
       <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;text-align:center;">Didn't get it? <a href="#" onclick="resendCode();return false;" style="color:#3dba7e;font-weight:600;">Resend</a></div>
-      <button onclick="verifyCalculatorCode()" id="verify-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Verify & Continue</button>
+      <button onclick="verifyCalculatorCode()" id="verify-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Verify & See Results</button>
     </div>
 
     <div id="phone-error" style="display:none;margin-top:12px;padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:0.8rem;color:#dc2626;"></div>
   </div>
 </div>
-
-<script type="module">
-import { getAuth, RecaptchaVerifier, signInWithPhoneNumber } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const auth = getAuth();
-const db = getFirestore();
-
-let phoneConfirmationResult = null;
-
-window.showPhoneModal = function() {
-  document.getElementById('phone-modal').style.display = 'flex';
-  
-  if (!window.recaptchaVerifier) {
-    window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-      'size': 'normal'
-    });
-    window.recaptchaVerifier.render();
-  }
-};
-
-function showPhoneError(message) {
-  const errorEl = document.getElementById('phone-error');
-  errorEl.textContent = message;
-  errorEl.style.display = 'block';
-  setTimeout(() => { errorEl.style.display = 'none'; }, 5000);
-}
-
-window.sendVerificationCode = async function() {
-  const phoneNumber = document.getElementById('phone-number-input').value.trim();
-  
-  if (!phoneNumber || !phoneNumber.startsWith('+')) {
-    showPhoneError('Phone number must include country code (e.g., +1)');
-    return;
-  }
-  
-  const btn = document.getElementById('send-code-btn');
-  btn.disabled = true;
-  btn.textContent = 'Sending...';
-  
-  try {
-    phoneConfirmationResult = await signInWithPhoneNumber(auth, phoneNumber, window.recaptchaVerifier);
-    
-    document.getElementById('phone-input-step').style.display = 'none';
-    document.getElementById('code-input-step').style.display = 'block';
-    window.verifiedPhoneNumber = phoneNumber;
-    
-  } catch (error) {
-    console.error('SMS error:', error);
-    btn.disabled = false;
-    btn.textContent = 'Send Code';
-    
-    if (error.code === 'auth/invalid-phone-number') {
-      showPhoneError('Invalid phone number format');
-    } else if (error.code === 'auth/too-many-requests') {
-      showPhoneError('Too many attempts. Try again later.');
-    } else {
-      showPhoneError('Failed to send code');
-    }
-  }
-};
-
-window.verifyCalculatorCode = async function() {
-  const code = document.getElementById('verification-code-input').value.trim();
-  
-  if (!code || code.length !== 6) {
-    showPhoneError('Please enter the 6-digit code');
-    return;
-  }
-  
-  const btn = document.getElementById('verify-code-btn');
-  btn.disabled = true;
-  btn.textContent = 'Verifying...';
-  
-  try {
-    await phoneConfirmationResult.confirm(code);
-    
-    // Save verified lead
-    try {
-      await addDoc(collection(db, 'verified_leads'), {
-        email: window.calculatorEmail || '',
-        phone: window.verifiedPhoneNumber,
-        phoneVerified: true,
-        verifiedAt: new Date().toISOString(),
-        source: 'Calculator - Verified',
-        createdAt: new Date().toISOString()
-      });
-    } catch (e) { console.log('Save error:', e); }
-    
-    // Show results
-    document.getElementById('phone-modal').style.display = 'none';
-    if (typeof go === 'function') {
-      go('results');
-    }
-    
-  } catch (error) {
-    console.error('Verification error:', error);
-    btn.disabled = false;
-    btn.textContent = 'Verify & Continue';
-    
-    if (error.code === 'auth/invalid-verification-code') {
-      showPhoneError('Invalid code');
-    } else if (error.code === 'auth/code-expired') {
-      showPhoneError('Code expired. Request new one.');
-    } else {
-      showPhoneError('Verification failed');
-    }
-  }
-};
-
-window.resendCode = function() {
-  document.getElementById('code-input-step').style.display = 'none';
-  document.getElementById('phone-input-step').style.display = 'block';
-  document.getElementById('send-code-btn').disabled = false;
-  document.getElementById('send-code-btn').textContent = 'Send Code';
-};
-</script>
 
 </body>
 </html>
