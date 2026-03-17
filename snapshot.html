@@ -51,7 +51,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 
 .page{padding-top:64px;min-height:100vh;display:flex;flex-direction:column;align-items:center;}
 
-/* PROGRESS */
 .progress-wrap{width:100%;max-width:620px;padding:2rem 1.5rem .5rem;}
 .progress-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem;}
 .progress-label{font-family:'Syne',sans-serif;font-size:.72rem;font-weight:700;color:var(--green);letter-spacing:1.5px;text-transform:uppercase;}
@@ -59,7 +58,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .progress-track{height:3px;background:var(--navy-border);border-radius:99px;overflow:hidden;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--green),var(--green-light));border-radius:99px;transition:width .45s cubic-bezier(.4,0,.2,1);}
 
-/* STEP */
 .step-card{width:100%;max-width:620px;padding:1.25rem 1.5rem 2rem;animation:fadeUp .3s ease;color:#0a1628;}
 .step-eyebrow{font-size:.72rem;color:#6b7280!important;letter-spacing:1px;text-transform:uppercase;margin-bottom:.4rem;}
 .step-sub{font-size:.875rem;color:#6b7280!important;margin-bottom:1.5rem;line-height:1.5;}
@@ -95,7 +93,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .btn-next:hover:not(:disabled){background:var(--green-light);transform:translateY(-1px);}
 .btn-next:disabled{opacity:.35;cursor:not-allowed;}
 
-/* LOADING */
 .loading-screen{display:none;flex-direction:column;align-items:center;justify-content:center;padding:4rem 2rem;text-align:center;gap:1.25rem;width:100%;max-width:480px;}
 .loading-screen.active{display:flex;}
 .spinner{width:44px;height:44px;border:3px solid var(--navy-border);border-top-color:var(--green);border-radius:50%;animation:spin 1s linear infinite;}
@@ -108,7 +105,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .ai-disclaimer-loading{font-size:.78rem;color:var(--gray);border-top:1px solid var(--navy-border);padding-top:1rem;margin-top:.5rem;line-height:1.5;max-width:340px;}
 .ai-disclaimer-loading strong{color:var(--white);}
 
-/* RESULTS */
 .results-wrap{width:100%;max-width:700px;padding:1.5rem;animation:fadeUp .4s ease;}
 .results-header{text-align:center;margin-bottom:1.75rem;padding-bottom:1.75rem;border-bottom:1px solid var(--navy-border);}
 .results-badge{display:inline-flex;align-items:center;gap:.4rem;background:var(--green-dim);border:1px solid rgba(61,186,126,.3);border-radius:99px;padding:.35rem .9rem;font-size:.75rem;color:var(--green);font-weight:700;margin-bottom:.9rem;letter-spacing:.5px;text-transform:uppercase;}
@@ -144,7 +140,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .btn-restart{display:inline-block;margin-top:.75rem;font-size:.8rem;color:var(--gray);cursor:pointer;text-decoration:underline;background:none;border:none;font-family:'DM Sans',sans-serif;}
 .btn-restart:hover{color:#fff;}
 
-/* CPA PROFILE (hidden, for email/sheet) */
 #cpa-profile{display:none;}
 
 @media(max-width:600px){
@@ -154,22 +149,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
   .progress-wrap,.step-card,.results-wrap{padding-left:1rem;padding-right:1rem;}
 }
 </style>
-    <!-- EmailJS -->
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-    <script type="text/javascript">
-      emailjs.init("dL1qGwo32XBoAeMPB");
-      function sendLeadEmail(source, name, email, phone, traderType, message) {
-        emailjs.send("service_9p67iy9", "template_vtt9a58", {
-          source: source,
-          name: name || "Unknown",
-          email: email || "Unknown",
-          phone: phone || "",
-          trader_type: traderType || "",
-          message: message || ""
-        }).catch(function(err) { console.log("EmailJS error:", err); });
-      }
-    </script>
-
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script type="text/javascript">
+  emailjs.init("dL1qGwo32XBoAeMPB");
+  function sendLeadEmail(source, name, email, phone, traderType, message) {
+    emailjs.send("service_9p67iy9", "template_vtt9a58", {
+      source: source, name: name || "Unknown", email: email || "Unknown",
+      phone: phone || "", trader_type: traderType || "", message: message || ""
+    }).catch(function(err) { console.log("EmailJS error:", err); });
+  }
+</script>
 <style id="tt-nav-css">
 :root{--green:#3dba7e;--green-dk:#2ea86c;--navy:#0a1628;--body:#374151;--border:rgba(0,0,0,.07);--border2:#d1d5db;}
 nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
@@ -191,28 +180,12 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .tt-mob a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
 @media(max-width:860px){.tt-nav-links{display:none;}.tt-ham{display:flex;}}
 </style>
-<style id="tt-overflow-fix">
-html, body { overflow-x: hidden; max-width: 100%; }
-* { box-sizing: border-box; }
-</style>
+<style id="tt-overflow-fix">html,body{overflow-x:hidden;max-width:100%;}*{box-sizing:border-box;}</style>
 <style id="tt-nav-responsive">
-nav { overflow: hidden; }
-html, body { overflow-x: hidden; }
-* { box-sizing: border-box; }
-/* Hide less important nav links at medium screens */
-@media(max-width:1100px) {
-  .tt-nav-links li:nth-child(4),
-  .tt-nav-links li:nth-child(5),
-  .tt-nav-links li:nth-child(6) { display: none; }
-}
-@media(max-width:960px) {
-  .tt-nav-links li:nth-child(3),
-  .tt-nav-links li:nth-child(7) { display: none; }
-}
-@media(max-width:860px) {
-  .tt-nav-links { display: none !important; }
-  .tt-ham { display: flex !important; }
-}
+nav{overflow:hidden;}html,body{overflow-x:hidden;}*{box-sizing:border-box;}
+@media(max-width:1100px){.tt-nav-links li:nth-child(4),.tt-nav-links li:nth-child(5),.tt-nav-links li:nth-child(6){display:none;}}
+@media(max-width:960px){.tt-nav-links li:nth-child(3),.tt-nav-links li:nth-child(7){display:none;}}
+@media(max-width:860px){.tt-nav-links{display:none!important;}.tt-ham{display:flex!important;}}
 </style>
 </head>
 <body>
@@ -255,9 +228,9 @@ html, body { overflow-x: hidden; }
   <a href="login.html">Log In</a>
   <a href="signup.html">Sign Up</a>
   <a href="snapshot.html" style="background:#3dba7e;color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:10px;border-radius:8px;text-align:center;">Get My Snapshot →</a>
-</div><div class="page" id="app">
+</div>
 
-  <!-- PROGRESS BAR -->
+<div class="page" id="app">
   <div class="progress-wrap" id="progress-wrap">
     <div class="progress-header">
       <span class="progress-label" id="step-label">Step 1 of 8</span>
@@ -265,11 +238,7 @@ html, body { overflow-x: hidden; }
     </div>
     <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:12%;"></div></div>
   </div>
-
-  <!-- STEP CONTAINER -->
   <div class="step-card" id="step-container"></div>
-
-  <!-- LOADING SCREEN -->
   <div class="loading-screen" id="loading-screen">
     <div class="spinner"></div>
     <div class="loading-title">Building your snapshot…</div>
@@ -284,17 +253,11 @@ html, body { overflow-x: hidden; }
       <strong>Heads up:</strong> This summary is AI-generated based on your answers. It's meant to give you a starting point — <strong>a real licensed CPA</strong> will review everything and handle your actual filing.
     </div>
   </div>
-
-  <!-- RESULTS CONTAINER -->
   <div class="results-wrap" id="results-container" style="display:none;"></div>
-
 </div>
-
 <div id="cpa-profile"></div>
 
 <script>
-
-
 const steps = [
   {
     id: 'who',
@@ -509,27 +472,26 @@ function getLabel(stepId, indices) {
 
 async function submitForm() {
   const first = document.getElementById('f-first').value.trim();
-  const last = document.getElementById('f-last').value.trim();
+  const last  = document.getElementById('f-last').value.trim();
   const email = document.getElementById('f-email').value.trim();
   if (!first || !email) { alert('Please enter your name and email.'); return; }
 
-  const name = `${first} ${last}`.trim();
+  const name      = `${first} ${last}`.trim();
   const manualRef = (document.getElementById('f-refcode')?.value || '').trim().toUpperCase();
 
-  // Collect all answers
   const profile = {
     name,
     email,
-    phone: document.getElementById('f-phone').value.trim() || 'Not provided',
-    bestTime: document.getElementById('f-time').value || 'Anytime',
-    notes: document.getElementById('f-note').value.trim() || 'None',
-    who: getLabel('who', answers['who']),
-    instruments: getLabel('instruments', answers['instruments']),
+    phone:      document.getElementById('f-phone').value.trim() || 'Not provided',
+    bestTime:   document.getElementById('f-time').value || 'Anytime',
+    notes:      document.getElementById('f-note').value.trim() || 'None',
+    who:        getLabel('who',        answers['who']),
+    instruments:getLabel('instruments',answers['instruments']),
     profitable: getLabel('profitable', answers['profitable']),
-    income: getLabel('income', answers['income']),
-    situation: getLabel('situation', answers['situation']),
-    structure: getLabel('structure', answers['structure']),
-    needs: getLabel('needs', answers['needs']),
+    income:     getLabel('income',     answers['income']),
+    situation:  getLabel('situation',  answers['situation']),
+    structure:  getLabel('structure',  answers['structure']),
+    needs:      getLabel('needs',      answers['needs']),
   };
 
   // Show loading
@@ -538,7 +500,6 @@ async function submitForm() {
   document.getElementById('loading-screen').classList.add('active');
   window.scrollTo({top:0,behavior:'smooth'});
 
-  // Animate loading steps
   const lSteps = ['ls1','ls2','ls3','ls4','ls5'];
   for (let i = 0; i < lSteps.length; i++) {
     await new Promise(r => setTimeout(r, 900));
@@ -546,7 +507,7 @@ async function submitForm() {
     document.getElementById(lSteps[i]).className = 'load-step active';
   }
 
-  // Call Claude API
+  // Call Claude API for AI snapshot
   let aiSummary = '';
   try {
     const prompt = `You are a tax advisor for traders at TraderTax. Based on this client profile, generate a concise, personalized tax snapshot.
@@ -602,146 +563,104 @@ Return ONLY valid JSON, no markdown, no extra text.`;
     };
   }
 
-  // Submit to Google Sheet
+  // FIX: Single unified lead write — snapshot_leads + all_leads + leads.
+  // (Original had two separate leads.add() calls creating duplicate records.)
   try {
-    const formData = new FormData();
-    formData.append('name', profile.name);
-    formData.append('email', profile.email);
-    formData.append('phone', profile.phone);
-    formData.append('message', `[TAX SNAPSHOT LEAD]
-Who: ${profile.who}
-Trades: ${profile.instruments}
-Profitable: ${profile.profitable}
-Income range: ${profile.income}
-Situation: ${profile.situation}
-Structure: ${profile.structure}
-Needs: ${profile.needs}
-Best time: ${profile.bestTime}
-Notes: ${profile.notes}
-
---- CPA BRIEF ---
-${aiSummary.cpa_brief}
-Urgency: ${aiSummary.urgency_flag?.toUpperCase()}
-Estimated quote: ${aiSummary.price_low} – ${aiSummary.price_high}`);
-    formData.append('source', 'Tax Snapshot Tool');
-  } catch(e) { /* silent fail */ }
-
-  // Save to Firestore 'leads' collection so admin dashboard sees it
-  try {
-    await db.collection('leads').add({
-      email: profile.email,
-      phone: profile.phone,
-      name: profile.name,
-      who: profile.who,
-      trades: profile.instruments,
-      profitable: profile.profitable,
-      income: profile.income,
-      situation: profile.situation,
-      structure: profile.structure,
-      needs: profile.needs,
-      bestTime: profile.bestTime,
-      notes: profile.notes,
-      cpaBreif: aiSummary.cpa_brief || '',
-      urgency: aiSummary.urgency_flag || 'medium',
-      priceLow: aiSummary.price_low || '$497',
-      priceHigh: aiSummary.price_high || '$1,297',
-      source: 'Snapshot Lead',
-      ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
+    const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload()) || {};
+    const leadBase = {
+      email:         profile.email,
+      phone:         profile.phone,
+      name:          profile.name,
+      who:           profile.who,
+      trades:        profile.instruments,
+      profitable:    profile.profitable,
+      income:        profile.income,
+      situation:     profile.situation,
+      structure:     profile.structure,
+      needs:         profile.needs,
+      bestTime:      profile.bestTime,
+      notes:         profile.notes,
+      cpaBreif:      aiSummary.cpa_brief || '',
+      urgency:       aiSummary.urgency_flag || 'medium',
+      priceLow:      aiSummary.price_low || '$497',
+      priceHigh:     aiSummary.price_high || '$1,297',
+      source:        'Snapshot Lead',
+      leadSource:    'snapshot',
+      verified:      false,
+      ...affPayload,
       ...(manualRef ? { affiliateCode: manualRef } : {}),
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-    });
-  } catch(e) { /* silent fail */ }
+      createdAt:     firebase.firestore.FieldValue.serverTimestamp(),
+    };
+
+    await Promise.allSettled([
+      db.collection('snapshot_leads').add(leadBase),
+      db.collection('all_leads').add(leadBase),
+      db.collection('leads').add(leadBase)
+    ]);
+  } catch(e) { console.log('Lead save error:', e); }
 
   // Send email notification
   try {
     sendLeadEmail('Snapshot Lead', profile.name, profile.email, profile.phone, profile.instruments, profile.situation);
   } catch(e) {}
 
-  // Store snapshot in localStorage so signup page can link it to the account
+  // Store snapshot in localStorage for signup page linking
   try {
     localStorage.setItem('tt_snapshot', JSON.stringify({
-      email: profile.email,
-      name: profile.name,
-      who: profile.who,
-      instruments: profile.instruments,
-      income: profile.income,
-      situation_summary: aiSummary.situation_summary,
-      key_issues: aiSummary.key_issues,
-      top_deductions: aiSummary.top_deductions,
-      recommended_service: aiSummary.recommended_service,
-      price_low: aiSummary.price_low,
-      price_high: aiSummary.price_high,
-      cpa_brief: aiSummary.cpa_brief,
-      urgency: aiSummary.urgency_flag,
-      timestamp: new Date().toISOString()
+      email:                profile.email,
+      name:                 profile.name,
+      who:                  profile.who,
+      instruments:          profile.instruments,
+      income:               profile.income,
+      situation_summary:    aiSummary.situation_summary,
+      key_issues:           aiSummary.key_issues,
+      top_deductions:       aiSummary.top_deductions,
+      recommended_service:  aiSummary.recommended_service,
+      price_low:            aiSummary.price_low,
+      price_high:           aiSummary.price_high,
+      cpa_brief:            aiSummary.cpa_brief,
+      urgency:              aiSummary.urgency_flag,
+      timestamp:            new Date().toISOString()
     }));
-  } catch(e) { /* silent fail */ }
+  } catch(e) {}
 
-  // If user is logged in, save snapshot to their dashboard profile
+  // Save snapshot to logged-in user's profile if applicable
   try {
     const user = auth.currentUser;
     if (user) {
       const snapEntry = {
-        year: new Date().getFullYear(),
-        traderType: profile.who || 'Trader',
-        summary: aiSummary.situation_summary || '',
-        date: new Date().toISOString(),
-        priceRange: `${aiSummary.price_low} – ${aiSummary.price_high}`,
-        keyIssues: aiSummary.key_issues || [],
-        deductions: aiSummary.top_deductions || [],
+        year:               new Date().getFullYear(),
+        traderType:         profile.who || 'Trader',
+        summary:            aiSummary.situation_summary || '',
+        date:               new Date().toISOString(),
+        priceRange:         `${aiSummary.price_low} – ${aiSummary.price_high}`,
+        keyIssues:          aiSummary.key_issues || [],
+        deductions:         aiSummary.top_deductions || [],
         recommendedService: aiSummary.recommended_service || '',
-        urgency: aiSummary.urgency_flag || 'medium',
-        instruments: profile.instruments,
-        income: profile.income,
+        urgency:            aiSummary.urgency_flag || 'medium',
+        instruments:        profile.instruments,
+        income:             profile.income,
       };
       await db.collection('users').doc(user.uid).set({
         snapshots: firebase.firestore.FieldValue.arrayUnion(snapEntry),
-        snapshot: snapEntry,
+        snapshot:  snapEntry,
         snapshotLinked: true,
         updatedAt: new Date().toISOString()
       }, { merge: true });
     }
   } catch(e) { console.log('Snapshot save to profile:', e); }
 
-  // Final loading step done
   await new Promise(r => setTimeout(r, 600));
   document.getElementById(lSteps[lSteps.length-1]).className = 'load-step done';
   await new Promise(r => setTimeout(r, 400));
 
-  // Save lead to Firestore BEFORE phone verification (capture every lead!)
-  try {
-    await db.collection('leads').add({
-      name: profile.name,
-      email: profile.email,
-      phone: profile.phone,
-      source: 'Snapshot Lead',
-      who: profile.who,
-      instruments: profile.instruments,
-      profitable: profile.profitable,
-      income: profile.income,
-      situation: profile.situation,
-      structure: profile.structure,
-      needs: profile.needs,
-      bestTime: profile.bestTime,
-      notes: profile.notes,
-      ...(window.TTAffiliate && window.TTAffiliate.getPayload()),
-      createdAt: new Date().toISOString()
-    });
-  } catch(e) { console.log('Lead save error:', e); }
+  // Store for use after verification
+  window.snapshotProfile    = profile;
+  window.snapshotAiSummary  = aiSummary;
 
-  // Store data for after phone verification
-  window.snapshotProfile = profile;
-  window.snapshotAiSummary = aiSummary;
-
-  // Show phone verification modal instead of results
+  // Hide loading, show phone modal (or skip if already verified)
   document.getElementById('loading-screen').classList.remove('active');
   showPhoneModal();
-}
-
-function urgencyColor(flag) {
-  if (flag === 'high') return '#ff6b6b';
-  if (flag === 'medium') return '#ffc84d';
-  return '#3dba7e';
 }
 
 function showResults(profile, ai) {
@@ -816,7 +735,7 @@ function showResults(profile, ai) {
         <div style="font-size:.72rem;color:rgba(255,255,255,.25);margin-top:8px;">Already have one? <a href="login.html" style="color:var(--green);text-decoration:none;">Log in</a></div>
       </div>
       <div class="cta-disclaimer">
-        <strong>Real people. Real CPAs.</strong> This snapshot was AI-assisted, but your taxes will be handled by a licensed CPA who specializes in traders. No bots filing your return.
+        <strong>Real people. Real CPAs.</strong> This snapshot was AI-assisted, but your taxes will be handled by a licensed CPA who specializes in traders.
       </div>
     </div>
 
@@ -826,19 +745,17 @@ function showResults(profile, ai) {
   `;
 }
 
-// Init
 renderStep();
 </script>
-  <script src="affiliate-tracker.js"></script>
-  <script>
-    // Pre-fill referral code if affiliate tracker captured one
-    setTimeout(() => {
-      const stored = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
-      const affCode = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
-      const el = document.getElementById('f-refcode');
-      if (el && affCode && !el.value) el.value = affCode;
-    }, 300);
-  </script>
+<script src="affiliate-tracker.js"></script>
+<script>
+  setTimeout(() => {
+    const stored   = localStorage.getItem('tt_affiliate_ref') || localStorage.getItem('tt_ref') || '';
+    const affCode  = (window.TTAffiliate && window.TTAffiliate.getPayload && window.TTAffiliate.getPayload().affiliateCode) || stored;
+    const el = document.getElementById('f-refcode');
+    if (el && affCode && !el.value) el.value = affCode;
+  }, 300);
+</script>
 
 <!-- Phone Verification Modal for Snapshot -->
 <div id="phone-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,0.9);z-index:9999;align-items:center;justify-content:center;padding:20px;">
@@ -854,8 +771,11 @@ renderStep();
     </div>
 
     <div id="phone-input-step">
-      <input type="tel" id="phone-number-input" placeholder="+1 (555) 123-4567" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;"/>
-      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Include country code (e.g., +1 for US)</div>
+      <!-- FIX: Pre-filled with +1 for US users -->
+      <input type="tel" id="phone-number-input" value="+1 " placeholder="(555) 123-4567"
+        style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;font-family:'DM Sans',sans-serif;outline:none;margin-bottom:8px;"
+        onfocus="if(this.value==='+1 ')this.setSelectionRange(3,3);"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">US pre-filled with +1 — just add your 10 digits</div>
       <div id="recaptcha-container"></div>
       <button onclick="sendVerificationCode()" id="send-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;margin-top:12px;">Send Code</button>
     </div>
@@ -863,7 +783,7 @@ renderStep();
     <div id="code-input-step" style="display:none;">
       <input type="text" id="verification-code-input" maxlength="6" placeholder="123456" style="width:100%;padding:12px 14px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:1.1rem;font-family:'DM Sans',sans-serif;text-align:center;letter-spacing:4px;outline:none;margin-bottom:8px;"/>
       <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;text-align:center;">Didn't get it? <a href="#" onclick="resendCode();return false;" style="color:#3dba7e;font-weight:600;">Resend</a></div>
-      <button onclick="verifySnapshotCode()" id="verify-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Verify & Continue</button>
+      <button onclick="verifySnapshotCode()" id="verify-code-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.9rem;cursor:pointer;">Verify & See Snapshot</button>
     </div>
 
     <div id="phone-error" style="display:none;margin-top:12px;padding:10px 12px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:0.8rem;color:#dc2626;"></div>
@@ -871,26 +791,29 @@ renderStep();
 </div>
 
 <script>
-// Phone Verification System for Snapshot
 let phoneConfirmationResult = null;
-
-// RATE LIMITING VARIABLES
-let verificationAttempts = 0;
-const MAX_ATTEMPTS = 5;
-
-let resendCount = 0;
-const MAX_RESENDS = 3;
-
-let lastResendTime = 0;
-const RESEND_COOLDOWN = 60000; // 60 seconds
+let verificationAttempts    = 0;
+const MAX_ATTEMPTS          = 5;
+let resendCount             = 0;
+const MAX_RESENDS           = 3;
+let lastResendTime          = 0;
+const RESEND_COOLDOWN       = 60000;
 
 function showPhoneModal() {
-  document.getElementById('phone-modal').style.display = 'flex';
-  
-  // Reset counters
+  // FIX: If user already verified their phone in this browser session, skip the modal entirely
+  const alreadyVerified = sessionStorage.getItem('tt_phone_verified');
+  if (alreadyVerified) {
+    console.log('Phone already verified this session — skipping modal');
+    if (window.snapshotProfile && window.snapshotAiSummary) {
+      showResults(window.snapshotProfile, window.snapshotAiSummary);
+    }
+    return;
+  }
+
   verificationAttempts = 0;
-  resendCount = 0;
-  
+  resendCount          = 0;
+  document.getElementById('phone-modal').style.display = 'flex';
+
   if (!window.recaptchaVerifier) {
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
       'size': 'normal'
@@ -907,127 +830,121 @@ function showPhoneError(message) {
 }
 
 async function sendVerificationCode() {
-  const phoneNumber = document.getElementById('phone-number-input').value.trim();
-  
+  const rawPhone    = document.getElementById('phone-number-input').value.trim();
+  const phoneNumber = rawPhone.replace(/\s+/g,'');
+
   if (!phoneNumber || !phoneNumber.startsWith('+')) {
-    showPhoneError('Phone number must include country code (e.g., +1)');
+    showPhoneError('Phone number must start with + and country code (e.g. +1)');
     return;
   }
-  
-  // Check cooldown
-  const now = Date.now();
+
+  const now               = Date.now();
   const timeSinceLastResend = now - lastResendTime;
-  
   if (lastResendTime > 0 && timeSinceLastResend < RESEND_COOLDOWN) {
-    const waitSeconds = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000);
-    showPhoneError('Please wait ' + waitSeconds + ' seconds before resending.');
-    startResendCooldownTimer(waitSeconds);
+    const wait = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000);
+    showPhoneError('Please wait ' + wait + ' seconds before resending.');
     return;
   }
-  
-  // Check max resends
   if (resendCount >= MAX_RESENDS) {
     showPhoneError('Maximum resends reached (' + MAX_RESENDS + '). Please try again later.');
     return;
   }
-  
+
   const btn = document.getElementById('send-code-btn');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Sending...';
-  
+
   try {
     phoneConfirmationResult = await firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier);
-    
     resendCount++;
-    lastResendTime = now;
+    lastResendTime       = now;
     verificationAttempts = 0;
-    
     document.getElementById('phone-input-step').style.display = 'none';
-    document.getElementById('code-input-step').style.display = 'block';
+    document.getElementById('code-input-step').style.display  = 'block';
     window.verifiedPhoneNumber = phoneNumber;
-    
   } catch (error) {
     console.error('SMS error:', error);
-    btn.disabled = false;
+    btn.disabled    = false;
     btn.textContent = 'Send Code';
-    
     if (error.code === 'auth/invalid-phone-number') {
       showPhoneError('Invalid phone number format');
     } else if (error.code === 'auth/too-many-requests') {
       showPhoneError('Too many attempts. Try again later.');
     } else {
-      showPhoneError('Failed to send code');
+      showPhoneError('Failed to send code. Check your number and try again.');
     }
   }
 }
 
 async function verifySnapshotCode() {
   const code = document.getElementById('verification-code-input').value.trim();
-  
   if (!code || code.length !== 6) {
     showPhoneError('Please enter the 6-digit code');
     return;
   }
-  
-  // Check attempt limit
   if (verificationAttempts >= MAX_ATTEMPTS) {
-    showPhoneError('Too many attempts (' + MAX_ATTEMPTS + '). Request a new code.');
-    document.getElementById('code-input-step').style.display = 'none';
+    showPhoneError('Too many attempts. Request a new code.');
+    document.getElementById('code-input-step').style.display  = 'none';
     document.getElementById('phone-input-step').style.display = 'block';
     verificationAttempts = 0;
     return;
   }
-  
+
   const btn = document.getElementById('verify-code-btn');
-  btn.disabled = true;
+  btn.disabled    = true;
   btn.textContent = 'Verifying...';
-  
   verificationAttempts++;
-  
+
   try {
     await phoneConfirmationResult.confirm(code);
-    
-    // Save verified lead
+
+    // FIX: write to all required collections + set sessionStorage to skip future verifications
     try {
-      await db.collection('verified_leads').add({
-        email: window.snapshotProfile ? window.snapshotProfile.email : '',
-        phone: window.verifiedPhoneNumber,
+      const profile = window.snapshotProfile || {};
+      const verifiedData = {
+        email:         profile.email || '',
+        phone:         window.verifiedPhoneNumber,
+        name:          profile.name  || '',
         phoneVerified: true,
-        verifiedAt: new Date().toISOString(),
-        source: 'Snapshot - Verified',
-        attempts: verificationAttempts,
-        createdAt: new Date().toISOString()
-      });
-    } catch (e) { console.log('Save error:', e); }
-    
-    // Show results
+        verified:      true,
+        verifiedAt:    new Date().toISOString(),
+        source:        'Snapshot - Verified',
+        leadSource:    'snapshot',
+        createdAt:     new Date().toISOString()
+      };
+      await Promise.allSettled([
+        db.collection('verified_leads').add(verifiedData),
+        db.collection('snapshot_leads').add(verifiedData),
+        db.collection('all_leads').add(verifiedData),
+        db.collection('leads').add(verifiedData)
+      ]);
+      // FIX: set sessionStorage so calculator skips verification if user goes there next
+      sessionStorage.setItem('tt_phone_verified', window.verifiedPhoneNumber);
+      sessionStorage.setItem('tt_verified_email',  profile.email || '');
+    } catch (e) { console.log('Verified lead save error:', e); }
+
     document.getElementById('phone-modal').style.display = 'none';
     if (window.snapshotProfile && window.snapshotAiSummary) {
       showResults(window.snapshotProfile, window.snapshotAiSummary);
     }
-    
+
   } catch (error) {
     console.error('Verification error:', error);
-    btn.disabled = false;
-    btn.textContent = 'Verify & Continue';
-    
+    btn.disabled    = false;
+    btn.textContent = 'Verify & See Snapshot';
     const remaining = MAX_ATTEMPTS - verificationAttempts;
-    
     if (error.code === 'auth/invalid-verification-code') {
-      if (remaining > 0) {
-        showPhoneError('Invalid code. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
-      } else {
-        showPhoneError('Invalid code. Maximum attempts reached.');
-      }
+      showPhoneError(remaining > 0
+        ? 'Invalid code. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.'
+        : 'Invalid code. Maximum attempts reached.');
     } else if (error.code === 'auth/code-expired') {
       showPhoneError('Code expired. Request a new one.');
     } else {
-      showPhoneError('Verification failed. ' + remaining + ' attempt' + (remaining > 1 ? 's' : '') + ' remaining.');
+      showPhoneError('Verification failed. ' + remaining + ' attempt' + (remaining !== 1 ? 's' : '') + ' remaining.');
     }
-    
     if (remaining <= 0) {
       setTimeout(() => {
-        document.getElementById('code-input-step').style.display = 'none';
+        document.getElementById('code-input-step').style.display  = 'none';
         document.getElementById('phone-input-step').style.display = 'block';
         verificationAttempts = 0;
       }, 2000);
@@ -1036,44 +953,21 @@ async function verifySnapshotCode() {
 }
 
 function resendCode() {
-  const now = Date.now();
+  const now               = Date.now();
   const timeSinceLastResend = now - lastResendTime;
-  
   if (timeSinceLastResend < RESEND_COOLDOWN) {
-    const waitSeconds = Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000);
-    showPhoneError('Please wait ' + waitSeconds + ' seconds before resending.');
+    showPhoneError('Please wait ' + Math.ceil((RESEND_COOLDOWN - timeSinceLastResend) / 1000) + ' seconds before resending.');
     return;
   }
-  
   if (resendCount >= MAX_RESENDS) {
     showPhoneError('Maximum resends reached (' + MAX_RESENDS + ').');
     return;
   }
-  
-  document.getElementById('code-input-step').style.display = 'none';
+  document.getElementById('code-input-step').style.display  = 'none';
   document.getElementById('phone-input-step').style.display = 'block';
-  document.getElementById('send-code-btn').disabled = false;
-  document.getElementById('send-code-btn').textContent = 'Send New Code';
-}
-
-function startResendCooldownTimer(seconds) {
   const btn = document.getElementById('send-code-btn');
-  let remainingSeconds = seconds;
-  
-  btn.disabled = true;
-  btn.textContent = 'Wait ' + remainingSeconds + 's';
-  
-  const countdown = setInterval(() => {
-    remainingSeconds--;
-    
-    if (remainingSeconds <= 0) {
-      clearInterval(countdown);
-      btn.disabled = false;
-      btn.textContent = 'Send Code';
-    } else {
-      btn.textContent = 'Wait ' + remainingSeconds + 's';
-    }
-  }, 1000);
+  btn.disabled    = false;
+  btn.textContent = 'Send New Code';
 }
 </script>
 
