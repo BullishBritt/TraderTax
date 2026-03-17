@@ -274,6 +274,8 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
     <div class="sidebar-link" onclick="showTab('support')" id="tab-support"><span class="icon">🎧</span>Support</div>
     <div class="sidebar-link" onclick="showTab('snapshots')" id="tab-snapshots"><span class="icon">✨</span>Tax Snapshots</div>
     <div class="sidebar-link" onclick="showTab('profile')" id="tab-profile"><span class="icon">👤</span>Profile</div>
+    <div class="sidebar-link" onclick="showTab('onboarding')" id="tab-onboarding"><span class="icon">📋</span>My Onboarding</div>
+    <div class="sidebar-link" onclick="showTab('checklist')" id="tab-checklist"><span class="icon">✅</span>Smart Checklist</div>
     <div class="sidebar-section">Resources</div>
     <div class="sidebar-link" onclick="window.location.href='snapshot.html'"><span class="icon">🔍</span>New Snapshot</div>
     <div class="sidebar-link" onclick="window.location.href='calculator.html'"><span class="icon">🧮</span>Tax Calculator</div>
@@ -500,6 +502,76 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
         <button onclick="sendPasswordReset()" style="padding:9px 18px;border:1.5px solid var(--border);border-radius:8px;background:none;font-family:'DM Sans',sans-serif;font-weight:600;font-size:.82rem;cursor:pointer;color:var(--navy);">Send Reset Email</button>
         <div id="pw-reset-msg" style="font-size:.8rem;margin-top:8px;color:var(--green);"></div>
       </div>
+    </div>
+
+  <!-- ONBOARDING TAB -->
+    <div class="content-section" id="section-onboarding">
+      <div class="page-title">My Onboarding</div>
+      <div class="page-sub">Your tax profile — saved and always editable. Pick up right where you left off.</div>
+
+      <!-- Status banner -->
+      <div id="ob-tab-status-banner" style="border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;"></div>
+
+      <!-- Progress bar -->
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;">Profile Completion</div>
+          <div id="ob-tab-pct" style="font-size:.82rem;font-weight:700;color:var(--green);">0%</div>
+        </div>
+        <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden;">
+          <div id="ob-tab-bar" style="height:100%;background:var(--green);border-radius:99px;transition:width .4s;width:0%;"></div>
+        </div>
+        <div id="ob-tab-steps" style="display:flex;justify-content:space-between;margin-top:8px;">
+          <span style="font-size:.68rem;color:var(--muted);">Welcome</span>
+          <span style="font-size:.68rem;color:var(--muted);">Trading</span>
+          <span style="font-size:.68rem;color:var(--muted);">Income</span>
+          <span style="font-size:.68rem;color:var(--muted);">Checklist</span>
+          <span style="font-size:.68rem;color:var(--muted);">Upload</span>
+          <span style="font-size:.68rem;color:var(--muted);">Done</span>
+        </div>
+      </div>
+
+      <!-- Answers summary -->
+      <div id="ob-tab-answers" style="display:none;">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:12px;">Your Trading Profile</div>
+        <div id="ob-tab-answers-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;"></div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:12px;">Income & Situation</div>
+        <div id="ob-tab-income-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;"></div>
+      </div>
+
+      <!-- CTA -->
+      <div style="display:flex;gap:10px;margin-top:8px;">
+        <button onclick="showObOverlay(userData.onboarding?.currentStep||1)" style="padding:11px 22px;background:var(--navy);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;">
+          ✏️ Edit / Continue Onboarding
+        </button>
+      </div>
+    </div>
+
+    <!-- SMART CHECKLIST TAB -->
+    <div class="content-section" id="section-checklist">
+      <div class="page-title">Smart Checklist</div>
+      <div class="page-sub">Based on your trading profile — here's exactly what you'll need to file your taxes.</div>
+
+      <!-- Info banner -->
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;gap:10px;align-items:flex-start;">
+        <span style="font-size:1.1rem;flex-shrink:0;">💡</span>
+        <div style="font-size:.83rem;color:#92400e;line-height:1.55;">
+          <strong>You will most likely need everything on this list.</strong> Don't worry if you can't find it all at once — upload what you have and come back for the rest. Every item includes instructions on exactly where to find it inside your broker, exchange, or platform.
+        </div>
+      </div>
+
+      <!-- Not started state -->
+      <div id="cl-tab-empty" style="display:none;">
+        <div class="empty">
+          <div class="empty-icon">📋</div>
+          <h3>Complete your onboarding first</h3>
+          <p>Answer a few quick questions about how you trade and we'll build your personalized checklist.</p>
+          <button class="btn-g" onclick="showObOverlay(1)">Start Onboarding →</button>
+        </div>
+      </div>
+
+      <!-- Checklist content -->
+      <div id="cl-tab-content"></div>
     </div>
 
   </main>
@@ -884,7 +956,7 @@ function renderSnapshots(snapshots){
 window.saveProfile=async function(){const msg=document.getElementById('profile-msg');try{await setDoc(doc(db,'users',currentUser.uid),{...userData,firstName:document.getElementById('pf-first').value.trim(),lastName:document.getElementById('pf-last').value.trim(),phone:document.getElementById('pf-phone').value.trim(),state:document.getElementById('pf-state').value.trim(),updatedAt:new Date().toISOString()},{merge:true});msg.textContent='✓ Saved';msg.style.color='var(--green)';}catch(e){msg.textContent='Error saving.';msg.style.color='#dc2626';}setTimeout(()=>msg.textContent='',3000);};
 window.sendPasswordReset=async function(){try{await sendPasswordResetEmail(auth,currentUser.email);document.getElementById('pw-reset-msg').textContent='✓ Reset email sent';}catch(e){document.getElementById('pw-reset-msg').textContent='Error sending reset email.';}};
 window.handleLogout=async function(){await signOut(auth);window.location.href='index.html';};
-window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');if(tab==='messages')loadCPAMessages();};
+window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');if(tab==='messages')loadCPAMessages();if(tab==='onboarding')renderOnboardingTab();if(tab==='checklist')renderChecklistTab();};
 
 // ── REAL-TIME USER DOC LISTENER (detects instant CPA assignment) ──
 function setupUserListener(user) {
@@ -983,6 +1055,148 @@ function loadCPAMessages() {
     }).join('');
     container.scrollTop = container.scrollHeight;
   }, ()=>{});
+}
+
+// ══════════════════════════════════════════════════════════════
+// ONBOARDING TAB + SMART CHECKLIST TAB
+// ══════════════════════════════════════════════════════════════
+
+function renderOnboardingTab() {
+  const ob = userData.onboarding || {};
+  const status = ob.status || 'not_started';
+  const step = ob.currentStep || 1;
+  const answers = ob.answers || {};
+
+  // Status banner
+  const banner = document.getElementById('ob-tab-status-banner');
+  if (banner) {
+    if (status === 'complete') {
+      banner.style.cssText = 'background:var(--green-lt);border:1px solid rgba(61,186,126,.35);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
+      banner.innerHTML = '<span style="font-size:1.2rem;">✅</span><div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Complete</div><div style="font-size:.78rem;color:var(--muted);">Your profile is saved. You can edit it anytime.</div></div>';
+    } else if (status === 'in_progress') {
+      banner.style.cssText = 'background:var(--amber-lt);border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
+      banner.innerHTML = '<span style="font-size:1.2rem;">⏳</span><div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding In Progress — Step '+step+' of 6</div><div style="font-size:.78rem;color:var(--muted);">Pick up where you left off — your answers are saved.</div></div>';
+    } else {
+      banner.style.cssText = 'background:var(--blue-lt);border:1px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
+      banner.innerHTML = '<span style="font-size:1.2rem;">👋</span><div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Not Started</div><div style="font-size:.78rem;color:var(--muted);">Complete your profile so we can build your personalized checklist.</div></div><button onclick="showObOverlay(1)" style="padding:8px 15px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;">Start Now →</button>';
+    }
+  }
+
+  // Progress bar
+  const pct = status === 'complete' ? 100 : Math.round(((step-1)/5)*100);
+  const bar = document.getElementById('ob-tab-bar');
+  const pctEl = document.getElementById('ob-tab-pct');
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+
+  // Answers summary
+  if (Object.keys(answers).length > 0) {
+    const answersSection = document.getElementById('ob-tab-answers');
+    if (answersSection) answersSection.style.display = 'block';
+
+    const tradingGrid = document.getElementById('ob-tab-answers-grid');
+    if (tradingGrid) {
+      const tradeTypes = (answers.tradeTypes||[]).join(', ') || '—';
+      const brokers = (answers.brokers||[]).join(', ') || '—';
+      tradingGrid.innerHTML = [
+        ['What You Trade', tradeTypes],
+        ['Brokers / Platforms', brokers],
+        ['Trading Software', answers.tradingSoftware ? '✓ Yes' : 'No'],
+        ['Home Office', answers.homeOffice ? '✓ Yes' : 'No'],
+        ['Internet Deduction', answers.internetUsage ? '✓ Yes' : 'No'],
+        ['Equipment', answers.equipment ? '✓ Yes' : 'No'],
+      ].map(([k,v]) => `<div style="background:var(--bg);border-radius:9px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${k}</div><div style="font-weight:600;font-size:.86rem;color:var(--navy);">${v}</div></div>`).join('');
+    }
+
+    const incomeGrid = document.getElementById('ob-tab-income-grid');
+    if (incomeGrid) {
+      const lifeChanges = (answers.lifeChanges||[]).join(', ') || 'None';
+      incomeGrid.innerHTML = [
+        ['W-2 Job', answers.w2Job ? '✓ Yes' : 'No'],
+        ['1099 / Freelance', answers.income1099 ? '✓ Yes' : 'No'],
+        ['Business Owner', answers.ownsBusiness ? '✓ Yes' : 'No'],
+        ['Rental Income', answers.rentalIncome ? '✓ Yes' : 'No'],
+        ['LLC / Entity', answers.hasEntity ? '✓ Yes' : 'No'],
+        ['Prior Year Return', answers.priorReturn ? '✓ Available' : 'No'],
+        ['Life Changes', lifeChanges],
+      ].map(([k,v]) => `<div style="background:var(--bg);border-radius:9px;padding:12px 14px;border:1px solid var(--border);"><div style="font-size:.62rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;">${k}</div><div style="font-weight:600;font-size:.86rem;color:${v.startsWith('✓')?'var(--green-dk)':'var(--navy)'};">${v}</div></div>`).join('');
+    }
+  }
+}
+
+function renderChecklistTab() {
+  const ob = userData.onboarding || {};
+  const checklist = ob.checklist || [];
+  const emptyEl = document.getElementById('cl-tab-empty');
+  const contentEl = document.getElementById('cl-tab-content');
+
+  if (!checklist.length) {
+    if (emptyEl) emptyEl.style.display = 'block';
+    if (contentEl) contentEl.style.display = 'none';
+    return;
+  }
+
+  if (emptyEl) emptyEl.style.display = 'none';
+  if (!contentEl) return;
+
+  // Group by category
+  const grouped = {};
+  checklist.forEach(item => {
+    if (!grouped[item.cat || item.category]) grouped[item.cat || item.category] = [];
+    grouped[item.cat || item.category].push(item);
+  });
+
+  const req = checklist.filter(i => i.required).length;
+  const opt = checklist.filter(i => !i.required).length;
+
+  let html = `
+    <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;">
+      <span style="background:#fee2e2;color:#dc2626;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:99px;">${req} Required</span>
+      <span style="background:var(--amber-lt);color:var(--amber);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:99px;">${opt} Optional but Helpful</span>
+      <span style="background:var(--green-lt);color:var(--green-dk);font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:99px;">${checklist.length} Total Items</span>
+    </div>`;
+
+  Object.entries(grouped).forEach(([cat, items]) => {
+    html += `<div style="margin-bottom:20px;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--border);">${cat}</div>`;
+
+    items.forEach(item => {
+      const isReq = item.required;
+      const badge = isReq
+        ? '<span style="background:#fee2e2;color:#dc2626;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Required</span>'
+        : '<span style="background:var(--amber-lt);color:var(--amber);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Optional</span>';
+      const where = item.where || item.whereToFind || '';
+      const note = item.note || item.cpaNote || '';
+      const itemId = 'cl-where-' + (item.id || Math.random().toString(36).slice(2));
+
+      html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px;margin-bottom:8px;">
+        <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+          <div style="flex:1;font-weight:600;font-size:.86rem;color:var(--navy);">${item.label}</div>
+          ${badge}
+        </div>
+        ${note ? `<div style="font-size:.76rem;color:var(--muted);background:var(--bg);border-radius:6px;padding:5px 8px;margin-bottom:7px;">🏦 ${note}</div>` : ''}
+        <button onclick="document.getElementById('${itemId}').classList.toggle('show');this.textContent=document.getElementById('${itemId}').classList.contains('show')?'▾ Hide instructions':'▸ Where do I find this?'" 
+          style="background:none;border:none;cursor:pointer;font-size:.75rem;color:var(--blue);font-weight:600;font-family:'DM Sans',sans-serif;padding:2px 0;">
+          ▸ Where do I find this?
+        </button>
+        ${where ? `<div id="${itemId}" class="ob-where-box" style="display:none;background:#f0f9ff;border:1px solid #bae6fd;border-radius:7px;padding:9px 11px;margin-top:6px;font-size:.76rem;color:#0369a1;line-height:1.55;">📍 ${where}</div>` : ''}
+        <div style="margin-top:8px;">
+          <button onclick="document.getElementById('file-input').click();window._currentChecklistItem='${item.id || ''}'" 
+            style="font-size:.75rem;font-weight:600;padding:5px 12px;border:1.5px solid var(--green);border-radius:7px;background:none;color:var(--green-dk);cursor:pointer;font-family:'DM Sans',sans-serif;">
+            📎 Upload this document
+          </button>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  html += `<div style="background:var(--green-lt);border:1px solid rgba(61,186,126,.3);border-radius:12px;padding:14px 18px;margin-top:8px;font-size:.82rem;color:#166534;">
+    ✅ <strong>Can't find everything right now?</strong> That's completely normal. Upload what you have, your specialist will follow up on anything missing.
+  </div>`;
+
+  contentEl.innerHTML = html;
+  contentEl.style.display = 'block';
 }
 
 // ══════════════════════════════════════════════════════════════
