@@ -204,6 +204,44 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
   .ticket-list{min-height:180px;}
 }
 @media(max-width:500px){.stats-grid,.billing-summary{grid-template-columns:1fr;}.doc-grid{grid-template-columns:1fr;}.support-grid{grid-template-columns:1fr;}}
+/* ── ONBOARDING WIZARD ─────────────────────── */
+#ob-overlay{position:fixed;inset:0;background:rgba(10,22,40,.75);backdrop-filter:blur(5px);z-index:500;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto;}
+.ob-card{background:var(--surface);border-radius:18px;width:100%;max-width:620px;box-shadow:0 24px 80px rgba(10,22,40,.4);margin:0 auto;}
+.ob-hdr{background:var(--navy);padding:16px 22px;border-radius:18px 18px 0 0;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.ob-skip{font-size:.72rem;color:rgba(255,255,255,.4);background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;padding:3px 6px;border-radius:5px;transition:color .15s;white-space:nowrap;flex-shrink:0;margin-top:2px;}
+.ob-skip:hover{color:rgba(255,255,255,.65);}
+.ob-body{padding:24px 24px 16px;}
+.ob-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.18rem;color:var(--navy);margin-bottom:4px;}
+.ob-sub{font-size:.83rem;color:var(--muted);margin-bottom:18px;line-height:1.55;}
+.ob-label{font-size:.62rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:14px 0 8px;display:block;}
+.ob-chips{display:flex;flex-wrap:wrap;gap:7px;}
+.ob-chip{display:inline-flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;border:2px solid var(--border);cursor:pointer;font-size:.81rem;font-weight:500;transition:all .15s;background:var(--surface);color:var(--navy);font-family:'DM Sans',sans-serif;user-select:none;}
+.ob-chip:hover{border-color:#9ca3af;}
+.ob-chip.sel{border-color:var(--navy);background:#eef3f9;color:var(--navy);}
+.ob-tog-row{display:flex;align-items:center;justify-content:space-between;padding:10px 13px;border-radius:9px;border:1px solid var(--border);background:var(--surface);margin-bottom:6px;cursor:pointer;gap:12px;user-select:none;transition:border-color .15s;}
+.ob-tog-row:hover{border-color:#9ca3af;}
+.ob-tog{width:38px;height:21px;border-radius:11px;background:var(--border);position:relative;transition:background .2s;flex-shrink:0;}
+.ob-tog.on{background:var(--green);}
+.ob-tog::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:white;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.18);}
+.ob-tog.on::after{transform:translateX(17px);}
+.ob-foot{padding:14px 22px;border-top:1px solid var(--border);background:var(--bg);border-radius:0 0 18px 18px;display:flex;align-items:center;justify-content:space-between;}
+.ob-btn{padding:9px 20px;border-radius:9px;font-size:.84rem;font-weight:700;cursor:pointer;font-family:'Syne',sans-serif;border:none;transition:all .15s;}
+.ob-btn-n{background:var(--navy);color:#fff;}
+.ob-btn-n:hover{background:#0d1f3c;}
+.ob-btn-n:disabled{opacity:.35;cursor:not-allowed;}
+.ob-btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border);font-family:'DM Sans',sans-serif;}
+.ob-btn-g:hover{border-color:#9ca3af;color:var(--navy);}
+.ob-cl-item{border:1px solid var(--border);border-radius:10px;padding:12px 13px;margin-bottom:6px;background:var(--surface);transition:all .2s;}
+.ob-cl-item.up{border-color:#86efac;background:var(--green-lt);}
+.ob-where-btn{background:none;border:none;cursor:pointer;font-size:.73rem;color:var(--blue);font-weight:600;font-family:'DM Sans',sans-serif;padding:3px 0;display:inline-flex;align-items:center;gap:3px;}
+.ob-where-box{background:#f0f9ff;border:1px solid #bae6fd;border-radius:7px;padding:8px 10px;margin-top:6px;font-size:.73rem;color:#0369a1;line-height:1.5;display:none;}
+.ob-where-box.show{display:block;}
+.ob-dz{border:2px dashed var(--border);border-radius:8px;padding:10px;text-align:center;cursor:pointer;transition:all .2s;margin-top:7px;font-size:.78rem;color:var(--muted);}
+.ob-dz:hover{border-color:var(--green);background:var(--green-lt);}
+.ob-dz.done{border-color:#86efac;background:var(--green-lt);color:var(--green-dk);font-weight:600;}
+.ob-prog{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:5px 0 1px;}
+.ob-prog-fill{height:100%;background:var(--green);border-radius:99px;transition:width .35s;}
+.ob-resume-banner{background:var(--amber-lt);border:1px solid #fde68a;border-radius:12px;padding:13px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
 </style>
 </head>
 <body>
@@ -413,7 +451,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="page-sub">Get help from our team. We respond within 24 hours — usually faster.</div>
       <div class="support-grid">
         <div class="sup-card" onclick="focusNewMessage()"><div class="sup-card-icon">💬</div><div class="sup-card-title">Message Our Team</div><div class="sup-card-sub">Ask about your return, documents, or account</div></div>
-        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub">support@tradertax.net</div></div>
+        <div class="sup-card" onclick="window.location.href='mailto:support@tradertax.net'"><div class="sup-card-icon">📧</div><div class="sup-card-title">Email Support</div><div class="sup-card-sub"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="73000603031c01073307011217160107120b5d1d1607">[email&#160;protected]</a></div></div>
         <div class="sup-card" onclick="window.location.href='contact.html'"><div class="sup-card-icon">📞</div><div class="sup-card-title">Book a Call</div><div class="sup-card-sub">Schedule with your specialist</div></div>
       </div>
       <div class="chat-layout">
@@ -466,9 +504,160 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 
   </main>
 </div>
+
+<!-- ═══════════════════════════════════════════════════
+     ONBOARDING WIZARD OVERLAY
+     Triggers automatically on first login.
+     Saves answers to Firestore in real time.
+     Permanently hidden once step 6 is completed.
+     ═══════════════════════════════════════════════════ -->
+<div id="ob-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,22,40,.75);backdrop-filter:blur(5px);z-index:500;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto;">
+  <div class="ob-card">
+    <!-- Header: step dots + skip -->
+    <div class="ob-hdr">
+      <div id="ob-indicators" style="display:flex;align-items:flex-start;gap:0;flex:1;"></div>
+      <button class="ob-skip" onclick="obDismiss()">Save &amp; finish later ×</button>
+    </div>
+
+    <!-- STEP 1: WELCOME -->
+    <div id="ob-s1">
+      <div class="ob-body">
+        <div style="font-size:2.4rem;margin-bottom:10px;">🧾</div>
+        <div class="ob-title">Let's get your taxes done right.</div>
+        <div class="ob-sub">Answer a few quick questions about how you trade. We'll build a personalized checklist and show you exactly where to find every document you need — no guessing.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px;">
+          <div style="background:var(--bg);border-radius:10px;padding:11px;text-align:center;border:1px solid var(--border);"><div style="font-size:1.25rem;margin-bottom:5px;">🎯</div><div style="font-weight:700;font-size:.78rem;color:var(--navy);margin-bottom:2px;">Guided</div><div style="font-size:.7rem;color:var(--muted);line-height:1.4;">Step-by-step, built for traders</div></div>
+          <div style="background:var(--bg);border-radius:10px;padding:11px;text-align:center;border:1px solid var(--border);"><div style="font-size:1.25rem;margin-bottom:5px;">📋</div><div style="font-weight:700;font-size:.78rem;color:var(--navy);margin-bottom:2px;">Personalized</div><div style="font-size:.7rem;color:var(--muted);line-height:1.4;">Your checklist, your situation</div></div>
+          <div style="background:var(--bg);border-radius:10px;padding:11px;text-align:center;border:1px solid var(--border);"><div style="font-size:1.25rem;margin-bottom:5px;">🏦</div><div style="font-weight:700;font-size:.78rem;color:var(--navy);margin-bottom:2px;">CPA-Ready</div><div style="font-size:.7rem;color:var(--muted);line-height:1.4;">Clean packet for your specialist</div></div>
+        </div>
+        <div style="background:var(--green-lt);border:1px solid rgba(61,186,126,.35);border-radius:9px;padding:11px 13px;font-size:.81rem;color:#166534;display:flex;gap:9px;line-height:1.45;">
+          <span>✅</span><span><strong>Takes about 5 minutes.</strong> You'll know exactly what to gather and where to find each document — no guessing required.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: TRADING PROFILE -->
+    <div id="ob-s2" style="display:none;">
+      <div class="ob-body">
+        <div class="ob-title">How do you trade?</div>
+        <div class="ob-sub">Select everything that applies — your checklist is built around your exact setup.</div>
+        <span class="ob-label">What do you trade?</span>
+        <div class="ob-chips" id="ob-chips-tradeTypes">
+          <div class="ob-chip" data-field="tradeTypes" data-val="stocks" onclick="obToggleChip(this)">Stocks <span style="font-size:.7rem;color:var(--muted);">Shares &amp; ETFs</span></div>
+          <div class="ob-chip" data-field="tradeTypes" data-val="options" onclick="obToggleChip(this)">Options <span style="font-size:.7rem;color:var(--muted);">Calls &amp; puts</span></div>
+          <div class="ob-chip" data-field="tradeTypes" data-val="futures" onclick="obToggleChip(this)">Futures <span style="font-size:.7rem;color:var(--muted);">/ES, /NQ</span></div>
+          <div class="ob-chip" data-field="tradeTypes" data-val="crypto" onclick="obToggleChip(this)">Crypto <span style="font-size:.7rem;color:var(--muted);">BTC, ETH…</span></div>
+          <div class="ob-chip" data-field="tradeTypes" data-val="forex" onclick="obToggleChip(this)">Forex <span style="font-size:.7rem;color:var(--muted);">Currency pairs</span></div>
+          <div class="ob-chip" data-field="tradeTypes" data-val="propFirm" onclick="obToggleChip(this)">Prop Firm <span style="font-size:.7rem;color:var(--muted);">Funded payouts</span></div>
+        </div>
+        <div id="ob-broker-section" style="display:none;">
+          <span class="ob-label">Which brokers / platforms?</span>
+          <div class="ob-chips">
+            <div class="ob-chip" data-field="brokers" data-val="robinhood" onclick="obToggleChip(this)">Robinhood</div>
+            <div class="ob-chip" data-field="brokers" data-val="webull" onclick="obToggleChip(this)">Webull</div>
+            <div class="ob-chip" data-field="brokers" data-val="tdAmeritrade" onclick="obToggleChip(this)">TD Ameritrade</div>
+            <div class="ob-chip" data-field="brokers" data-val="schwab" onclick="obToggleChip(this)">Schwab</div>
+            <div class="ob-chip" data-field="brokers" data-val="fidelity" onclick="obToggleChip(this)">Fidelity</div>
+            <div class="ob-chip" data-field="brokers" data-val="etrade" onclick="obToggleChip(this)">E*TRADE</div>
+            <div class="ob-chip" data-field="brokers" data-val="ibkr" onclick="obToggleChip(this)">IBKR</div>
+            <div class="ob-chip" data-field="brokers" data-val="tastytrade" onclick="obToggleChip(this)">Tastytrade</div>
+            <div class="ob-chip" data-field="brokers" data-val="tradestation" onclick="obToggleChip(this)">TradeStation</div>
+            <div class="ob-chip" data-field="brokers" data-val="other" onclick="obToggleChip(this)">Other</div>
+          </div>
+        </div>
+        <span class="ob-label" style="margin-top:18px;">Trading deductions — do any apply to you?</span>
+        <div class="ob-tog-row" onclick="obToggleBool('tradingSoftware')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I pay for trading tools or subscriptions</div><div style="font-size:.72rem;color:var(--muted);margin-top:1px;">Flow tools, charting, screeners, data feeds</div></div><div class="ob-tog" id="ob-tog-tradingSoftware"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('homeOffice')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I have a dedicated trading space at home</div><div style="font-size:.72rem;color:var(--muted);margin-top:1px;">Used exclusively for trading — not the kitchen table</div></div><div class="ob-tog" id="ob-tog-homeOffice"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('internetUsage')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">My internet is primarily for trading</div><div style="font-size:.72rem;color:var(--muted);margin-top:1px;">A portion of your monthly bill may be deductible</div></div><div class="ob-tog" id="ob-tog-internetUsage"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('equipment')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I bought equipment for trading in 2024</div><div style="font-size:.72rem;color:var(--muted);margin-top:1px;">Monitors, computer, peripherals</div></div><div class="ob-tog" id="ob-tog-equipment"></div></div>
+      </div>
+    </div>
+
+    <!-- STEP 3: FULL INCOME PICTURE -->
+    <div id="ob-s3" style="display:none;">
+      <div class="ob-body">
+        <div class="ob-title">Your full tax picture</div>
+        <div class="ob-sub">Trading is only part of your return. Let's capture everything — missing income sources cause delays and amendments.</div>
+        <div style="background:var(--amber-lt);border:1px solid #fde68a;border-radius:8px;padding:9px 12px;font-size:.78rem;color:#92400e;margin-bottom:14px;">⚡ <strong>Most traders have W-2 or other income.</strong> Don't skip this step.</div>
+        <span class="ob-label">Other income sources</span>
+        <div class="ob-tog-row" onclick="obToggleBool('w2Job')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I had a W-2 job in 2024</div><div style="font-size:.72rem;color:var(--muted);">Part-time or full-time employer</div></div><div class="ob-tog" id="ob-tog-w2Job"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('income1099')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I had freelance or 1099 income</div><div style="font-size:.72rem;color:var(--muted);">Consulting, gigs, contract work</div></div><div class="ob-tog" id="ob-tog-income1099"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('ownsBusiness')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I own or operate a business</div><div style="font-size:.72rem;color:var(--muted);">LLC, sole proprietor, S-Corp</div></div><div class="ob-tog" id="ob-tog-ownsBusiness"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('rentalIncome')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I received rental income</div><div style="font-size:.72rem;color:var(--muted);">Renting property, a unit, or a room</div></div><div class="ob-tog" id="ob-tog-rentalIncome"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('hasEntity')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I have an LLC or business entity</div><div style="font-size:.72rem;color:var(--muted);">Trading through or holding assets in an entity</div></div><div class="ob-tog" id="ob-tog-hasEntity"></div></div>
+        <div class="ob-tog-row" onclick="obToggleBool('priorReturn')"><div><div style="font-weight:500;font-size:.84rem;color:var(--navy);">I have my prior year return (2023)</div><div style="font-size:.72rem;color:var(--muted);">Strongly recommended — helps catch carryover losses</div></div><div class="ob-tog" id="ob-tog-priorReturn"></div></div>
+        <span class="ob-label" style="margin-top:18px;">Major life changes in 2024? <span style="text-transform:none;font-size:.72rem;font-weight:400;letter-spacing:0;color:var(--muted);">(select all that apply)</span></span>
+        <div class="ob-chips">
+          <div class="ob-chip" data-field="lifeChanges" data-val="movedState" onclick="obToggleChip(this)">Moved states</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="married" onclick="obToggleChip(this)">Got married</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="divorced" onclick="obToggleChip(this)">Got divorced</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="child" onclick="obToggleChip(this)">Had a child</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="boughtHome" onclick="obToggleChip(this)">Bought a home</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="startedBiz" onclick="obToggleChip(this)">Started a business</div>
+          <div class="ob-chip" data-field="lifeChanges" data-val="none" onclick="obToggleChip(this)">None of these</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: DYNAMIC CHECKLIST -->
+    <div id="ob-s4" style="display:none;">
+      <div class="ob-body">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:4px;">
+          <div><div class="ob-title">Your Personalized Checklist</div><div class="ob-sub" style="margin-bottom:0;">Based on your answers — here's exactly what you need.</div></div>
+          <div style="background:var(--bg);border-radius:9px;padding:7px 11px;text-align:center;flex-shrink:0;border:1px solid var(--border);"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.35rem;color:var(--navy);" id="ob-cl-count">0</div><div style="font-size:.6rem;color:var(--muted);font-weight:700;text-transform:uppercase;">Items</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;">
+          <span style="background:#fee2e2;color:#dc2626;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;" id="ob-cl-req-badge">0 Required</span>
+          <span style="background:var(--amber-lt);color:var(--amber);font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:99px;" id="ob-cl-opt-badge">0 Optional</span>
+        </div>
+        <div id="ob-checklist-content" style="max-height:320px;overflow-y:auto;padding-right:4px;"></div>
+        <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:9px;padding:9px 12px;margin-top:10px;font-size:.77rem;color:#0369a1;">📧 We'll email you this full checklist with step-by-step instructions after you complete onboarding.</div>
+      </div>
+    </div>
+
+    <!-- STEP 5: DOCUMENT UPLOAD -->
+    <div id="ob-s5" style="display:none;">
+      <div class="ob-body">
+        <div class="ob-title">Upload Your Documents</div>
+        <div class="ob-sub">Upload what you have now. You can always log back in to add more — you're never locked out.</div>
+        <div style="background:var(--bg);border-radius:9px;padding:10px 13px;margin-bottom:12px;border:1px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;margin-bottom:5px;font-size:.79rem;"><span style="font-weight:600;color:var(--muted);">Upload Progress</span><span style="font-weight:700;color:var(--navy);" id="ob-prog-label">0 of 0 · 0%</span></div>
+          <div class="ob-prog"><div class="ob-prog-fill" id="ob-prog-fill" style="width:0%;"></div></div>
+        </div>
+        <div id="ob-upload-content" style="max-height:340px;overflow-y:auto;padding-right:4px;"></div>
+      </div>
+    </div>
+
+    <!-- STEP 6: COMPLETE -->
+    <div id="ob-s6" style="display:none;">
+      <div class="ob-body" style="text-align:center;">
+        <div style="font-size:2.8rem;margin-bottom:11px;">🎉</div>
+        <div class="ob-title">You're all set!</div>
+        <div class="ob-sub">Onboarding complete. Our team will review your documents and assign a specialist within 24–48 hours.</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:16px;">
+          <div style="background:var(--bg);border-radius:10px;padding:11px;border:1px solid var(--border);"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);" id="ob-stat-docs">0/0</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Docs Uploaded</div></div>
+          <div style="background:var(--bg);border-radius:10px;padding:11px;border:1px solid var(--border);"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);" id="ob-stat-pct">0%</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Complete</div></div>
+          <div style="background:var(--bg);border-radius:10px;padding:11px;border:1px solid var(--border);"><div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;color:var(--navy);">48 hrs</div><div style="font-size:.7rem;color:var(--muted);margin-top:2px;">Specialist ETA</div></div>
+        </div>
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:11px;padding:13px;text-align:left;margin-bottom:12px;">
+          <div style="font-size:.65rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">📦 Your CPA Packet — Auto-Generated</div>
+          <div id="ob-packet-summary" style="font-size:.79rem;color:var(--body);line-height:1.75;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="ob-foot">
+      <button class="ob-btn ob-btn-g" id="ob-back-btn" onclick="obStep(-1)" style="visibility:hidden;">← Back</button>
+      <div style="font-size:.7rem;color:var(--muted);font-weight:500;" id="ob-step-label">Step 1 of 6</div>
+      <button class="ob-btn ob-btn-n" id="ob-next-btn" onclick="obStep(1)">Get Started →</button>
+    </div>
+  </div>
 </div>
 
-<script type="module">
+</div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import{getAuth,onAuthStateChanged,signOut,sendPasswordResetEmail}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import{getFirestore,doc,getDoc,setDoc,addDoc,collection,query,where,orderBy,getDocs,updateDoc,arrayUnion,serverTimestamp,onSnapshot}from"https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -506,6 +695,7 @@ onAuthStateChanged(auth,async user=>{
     document.body.style.display = 'block';
     currentUser=user;
     await loadUser(user);
+    checkOnboarding();
     loadDocuments(user);loadReturn(user);loadBilling(user);loadMessages(user);
     setupUserListener(user);
   } catch(e) { console.error('Dashboard init error:', e); }
@@ -795,6 +985,386 @@ function loadCPAMessages() {
   }, ()=>{});
 }
 
+// ══════════════════════════════════════════════════════════════
+// ONBOARDING WIZARD — Full Logic
+// ══════════════════════════════════════════════════════════════
+let obCurrentStep = 1;
+const OB_TOTAL = 6;
+let obAnswers = {
+  tradeTypes:[], brokers:[], lifeChanges:[],
+  tradingSoftware:false, homeOffice:false, internetUsage:false, equipment:false,
+  w2Job:false, income1099:false, ownsBusiness:false, rentalIncome:false,
+  hasEntity:false, priorReturn:false,
+};
+let obChecklist = [];
+let obUploaded = {};
+
+const OB_WHERE = {
+  robinhood:'Robinhood App → Account (bottom right) → Statements & History → Tax Documents → Download 1099',
+  webull:'Webull App → Menu (≡) → Account → Documents → Tax Documents → Download 1099-B',
+  tdAmeritrade:'TDA.com or thinkorswim → Client Services → My Profile → Statements → Tax Forms',
+  schwab:'Schwab.com → Accounts → Statements → Tax Forms (available by Feb 15)',
+  fidelity:'Fidelity.com → Accounts & Trade → Statements → Tax Documents',
+  etrade:'ETRADE.com → Tax Center → Download Consolidated 1099',
+  ibkr:'IBKR Portal → Reports → Flex Queries → Annual Activity Statement',
+  tastytrade:'tastytrade.com → Menu → Documents → Tax Documents → Download 1099',
+  tradestation:'TradeStation → Account → Statements → Tax Documents',
+  other:'Log in to your brokerage → Account or Settings → Tax Documents → Download 1099',
+  crypto:'Exchange → Settings or Account → Reports/History → Export Transaction History as CSV. Do this for EVERY exchange you used.',
+  propFirm:'Your prop firm payout dashboard (FTMO, The5ers, MyFundedFutures, etc.) → Payment History or Withdrawals. Also check email confirmations.',
+  w2:'HR portal (ADP, Workday, Gusto, Rippling) → Tax Documents → Download W-2. Employers must issue by Jan 31.',
+  prior_return:'IRS.gov/account (free account) → Transcripts, or your prior CPA, or TurboTax/H&R Block account → Prior Returns.',
+  entity:'Secretary of State website for your state → Business Search → your entity → Download Articles of Organization. Or check your formation service (LegalZoom, Stripe Atlas).',
+};
+const OB_BROKERS = [
+  {id:'robinhood',label:'Robinhood'},{id:'webull',label:'Webull'},
+  {id:'tdAmeritrade',label:'TD Ameritrade'},{id:'schwab',label:'Schwab'},
+  {id:'fidelity',label:'Fidelity'},{id:'etrade',label:'E*TRADE'},
+  {id:'ibkr',label:'IBKR'},{id:'tastytrade',label:'Tastytrade'},
+  {id:'tradestation',label:'TradeStation'},{id:'other',label:'Other Broker'},
+];
+
+function obGenerateChecklist(ans) {
+  const items = [];
+  const push = (id,cat,label,required,where,note) => items.push({id,cat,label,required,where,note});
+
+  if (ans.tradeTypes.some(t=>['stocks','options'].includes(t))) {
+    const brokers = ans.brokers.length > 0 ? ans.brokers : ['other'];
+    brokers.forEach(b => {
+      const bl = OB_BROKERS.find(x=>x.id===b);
+      push(`1099b_${b}`,'📊 Trading Documents',`1099-B — ${bl?.label||b}`,true,OB_WHERE[b]||OB_WHERE.other,'Shows all realized gains & losses. Core document.');
+    });
+  }
+  if (ans.tradeTypes.includes('futures'))
+    push('futures_stmt','📊 Trading Documents','Futures Year-End Statement / 1099-B',true,'Your futures broker → Account → Year-End Tax Statement or Annual Report','Section 1256 contracts — 60% long-term / 40% short-term treatment regardless of holding period.');
+  if (ans.tradeTypes.includes('crypto')) {
+    push('crypto_csv','📊 Trading Documents','Crypto Transaction History (all exchanges)',true,OB_WHERE.crypto,'Need complete history from every exchange — every buy, sell, swap, and transfer.');
+    push('crypto_1099','📊 Trading Documents','1099-DA or 1099-B from Exchange (if issued)',false,'Exchange → Account → Tax Documents (not all exchanges issue this)','Some exchanges like Coinbase now issue this new form.');
+  }
+  if (ans.tradeTypes.includes('propFirm')) {
+    push('propfirm_payouts','📊 Trading Documents','Prop Firm Payout Records',true,OB_WHERE.propFirm,'Prop payouts = self-employment income subject to SE tax. Need ALL payment records for the year.');
+    push('propfirm_1099','📊 Trading Documents','1099-NEC from Prop Firm (if issued)',false,'Email from your prop firm by Jan 31, or their dashboard','Issued if payouts exceeded $600.');
+  }
+  if (ans.w2Job)
+    push('w2','💼 Income Documents','W-2 from Employer(s)',true,OB_WHERE.w2,'One per employer. Need all of them if you had multiple jobs in 2024.');
+  if (ans.income1099)
+    push('1099_nec','💼 Income Documents','1099-NEC / 1099-MISC (Freelance Income)',true,'From each client who paid you $600+. Also check IRS.gov/account for any 1099s filed against your SSN.','Any consulting, gig, or freelance income — goes on Schedule C.');
+  if (ans.ownsBusiness) {
+    push('biz_pl','💼 Income Documents','Business Profit & Loss Statement',true,'Accounting software (QuickBooks, Wave, FreshBooks) or compile from bank statements','Total revenue minus expenses for the year.');
+    push('biz_exp','💼 Income Documents','Business Expense Records',true,'Accounting software exports, credit card statements, or organized receipts','All deductible business expenses.');
+  }
+  if (ans.rentalIncome)
+    push('rental','💼 Income Documents','Rental Income & Expense Records',true,'Bank statements showing rent deposits + receipts for repairs and management fees. Include 1098 if property is financed.','Goes on Schedule E.');
+  if (ans.tradingSoftware)
+    push('software','💡 Deductions','Trading Software & Subscription Receipts',false,'Check email for receipts (TradingView, Benzinga, etc.) or download credit card statements','Flow tools, charting platforms, data feeds — all potentially deductible.');
+  if (ans.homeOffice) {
+    push('home_sqft','💡 Deductions','Home Office Details (sq ft, exclusive use)',false,'Measure your dedicated trading space. Total home sq ft is on your lease or property records.','Must be EXCLUSIVELY used for trading.');
+    push('rent_mortgage','💡 Deductions','Rent Payments or Mortgage Statement (1098)',false,'Bank statements or your lender portal. 1098 mailed by your mortgage servicer by Jan 31.','Used to calculate the proportional home office deduction.');
+  }
+  if (ans.internetUsage)
+    push('internet','💡 Deductions','Monthly Internet Bills (Full Year)',false,'Your ISP billing portal → Billing History → Download monthly statements','Business-use percentage is deductible.');
+  if (ans.equipment)
+    push('equipment','💡 Deductions','Equipment Purchase Receipts',false,'Email receipts, Amazon order history, or credit card statements from 2024','Computers, monitors, peripherals — may qualify for Section 179 full deduction.');
+  if (ans.hasEntity) {
+    push('articles','🏢 Entity Documents','LLC / Entity Formation Documents',true,OB_WHERE.entity,'Articles of Organization + Operating Agreement.');
+    push('ein','🏢 Entity Documents','EIN Confirmation Letter (IRS SS-4)',true,'Emailed when you applied at IRS.gov, or check your formation service','Your business tax ID — required for entity return.');
+  }
+  if (ans.lifeChanges.includes('movedState'))
+    push('state_move','📁 Prior Year','Move Date Documentation',true,"Lease start date, utility transfer date, or new state driver's license date",'Part-year returns required for both states — exact date is critical.');
+  if (ans.lifeChanges.includes('boughtHome'))
+    push('closing','💡 Deductions','Closing Disclosure (HUD-1 or CD)',true,'Your title company provided this at closing — also in your email or home purchase files','Documents closing costs, property taxes, and establishes your cost basis.');
+  // Prior year — always add
+  push('prior_return','📁 Prior Year','Prior Year Tax Return (2023)',false,OB_WHERE.prior_return,'Helps identify carryover losses, prior elections, and deferred items. Strongly recommended.');
+  return items;
+}
+
+function checkOnboarding() {
+  const status = userData.onboarding?.status;
+  if (status === 'complete') return; // never show again
+  if (userData.onboarding?.answers) {
+    obAnswers = Object.assign(obAnswers, userData.onboarding.answers);
+  }
+  const resumeStep = userData.onboarding?.currentStep || 1;
+  showObOverlay(resumeStep);
+  if (status === 'in_progress') showObResumeBanner(resumeStep);
+}
+
+function showObOverlay(step) {
+  const el = document.getElementById('ob-overlay');
+  if (!el) return;
+  el.style.display = 'flex';
+  obRestoreState();
+  obGoTo(step || 1);
+}
+
+function obRestoreState() {
+  // Restore chip selections
+  document.querySelectorAll('.ob-chip[data-field]').forEach(el => {
+    const f = el.dataset.field, v = el.dataset.val;
+    if (Array.isArray(obAnswers[f]) && obAnswers[f].includes(v)) el.classList.add('sel');
+  });
+  // Restore toggles
+  ['tradingSoftware','homeOffice','internetUsage','equipment','w2Job','income1099','ownsBusiness','rentalIncome','hasEntity','priorReturn'].forEach(f => {
+    const el = document.getElementById('ob-tog-'+f);
+    if (el && obAnswers[f]) el.classList.add('on');
+  });
+  // Show broker section if trade types are selected
+  if (obAnswers.tradeTypes.length > 0) {
+    const bs = document.getElementById('ob-broker-section');
+    if (bs) bs.style.display = 'block';
+  }
+}
+
+function obGoTo(n) {
+  for (let i = 1; i <= OB_TOTAL; i++) {
+    const s = document.getElementById('ob-s'+i);
+    if (s) s.style.display = 'none';
+  }
+  obCurrentStep = Math.max(1, Math.min(n, OB_TOTAL));
+  const stepEl = document.getElementById('ob-s'+obCurrentStep);
+  if (stepEl) stepEl.style.display = 'block';
+  obUpdateIndicators();
+  const backBtn = document.getElementById('ob-back-btn');
+  const nextBtn = document.getElementById('ob-next-btn');
+  const stepLabel = document.getElementById('ob-step-label');
+  if (backBtn) backBtn.style.visibility = obCurrentStep > 1 ? 'visible' : 'hidden';
+  if (stepLabel) stepLabel.textContent = 'Step '+obCurrentStep+' of '+OB_TOTAL;
+  if (nextBtn) {
+    if (obCurrentStep === OB_TOTAL) { nextBtn.textContent = 'Close Dashboard →'; nextBtn.onclick = () => obComplete(); }
+    else if (obCurrentStep === 1) { nextBtn.textContent = 'Get Started →'; nextBtn.onclick = () => obStep(1); }
+    else { nextBtn.textContent = 'Continue →'; nextBtn.onclick = () => obStep(1); }
+  }
+  if (obCurrentStep === 4) { obChecklist = obGenerateChecklist(obAnswers); renderObChecklist(); }
+  if (obCurrentStep === 5) { if (!obChecklist.length) obChecklist = obGenerateChecklist(obAnswers); renderObUploads(); }
+  if (obCurrentStep === 6) obPopulateComplete();
+}
+
+function obUpdateIndicators() {
+  const c = document.getElementById('ob-indicators');
+  if (!c) return;
+  const labels = ['Welcome','Trading','Income','Checklist','Upload','Done'];
+  let html = '';
+  for (let i = 1; i <= OB_TOTAL; i++) {
+    const done = i < obCurrentStep, active = i === obCurrentStep;
+    html += `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+      <div style="width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;background:${done?'var(--green)':active?'#fff':'rgba(255,255,255,.2)'};color:${(done||active)?'var(--navy)':'rgba(255,255,255,.35)'};transition:all .25s;">${done?'✓':i}</div>
+      <div style="font-size:.53rem;font-weight:600;white-space:nowrap;color:${active?'rgba(255,255,255,.9)':'rgba(255,255,255,.35)'};">${labels[i-1]}</div>
+    </div>`;
+    if (i < OB_TOTAL) html += `<div style="width:16px;height:2px;background:${done?'var(--green)':'rgba(255,255,255,.15)'};margin:0 2px;margin-bottom:14px;flex-shrink:0;transition:background .25s;"></div>`;
+  }
+  c.innerHTML = html;
+}
+
+function obStep(dir) {
+  const next = obCurrentStep + dir;
+  if (next < 1 || next > OB_TOTAL) return;
+  saveObAnswers();
+  obGoTo(next);
+}
+
+window.obToggleChip = function(el) {
+  const f = el.dataset.field, v = el.dataset.val;
+  if (!Array.isArray(obAnswers[f])) obAnswers[f] = [];
+  if (el.classList.contains('sel')) { el.classList.remove('sel'); obAnswers[f] = obAnswers[f].filter(x=>x!==v); }
+  else { el.classList.add('sel'); obAnswers[f].push(v); }
+  if (f === 'tradeTypes') {
+    const bs = document.getElementById('ob-broker-section');
+    if (bs) bs.style.display = obAnswers.tradeTypes.length > 0 ? 'block' : 'none';
+  }
+};
+
+window.obToggleBool = function(field) {
+  obAnswers[field] = !obAnswers[field];
+  const el = document.getElementById('ob-tog-'+field);
+  if (el) el.classList.toggle('on', obAnswers[field]);
+};
+
+function renderObChecklist() {
+  const c = document.getElementById('ob-checklist-content');
+  if (!c) return;
+  const req = obChecklist.filter(i=>i.required).length;
+  const opt = obChecklist.filter(i=>!i.required).length;
+  const cnt = document.getElementById('ob-cl-count'); if (cnt) cnt.textContent = obChecklist.length;
+  const rb = document.getElementById('ob-cl-req-badge'); if (rb) rb.textContent = req+' Required';
+  const ob2 = document.getElementById('ob-cl-opt-badge'); if (ob2) ob2.textContent = opt+' Optional';
+  const grouped = {};
+  obChecklist.forEach(item => { if (!grouped[item.cat]) grouped[item.cat]=[]; grouped[item.cat].push(item); });
+  let html = '';
+  Object.entries(grouped).forEach(([cat,items]) => {
+    html += `<div style="font-size:.66rem;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;margin-top:10px;">${cat}</div>`;
+    items.forEach(item => {
+      const badge = item.required
+        ? '<span style="background:#fee2e2;color:#dc2626;font-size:.64rem;font-weight:700;padding:1px 7px;border-radius:99px;">Required</span>'
+        : '<span style="background:var(--amber-lt);color:var(--amber);font-size:.64rem;font-weight:700;padding:1px 7px;border-radius:99px;">Optional</span>';
+      html += `<div class="ob-cl-item"><div style="font-weight:600;font-size:.82rem;color:var(--navy);margin-bottom:5px;">${item.label}</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${badge}<span style="font-size:.71rem;color:var(--muted);background:var(--bg);padding:2px 6px;border-radius:5px;">🏦 ${item.note}</span></div></div>`;
+    });
+  });
+  c.innerHTML = html;
+}
+
+function renderObUploads() {
+  const c = document.getElementById('ob-upload-content');
+  if (!c || !obChecklist.length) return;
+  const grouped = {};
+  obChecklist.forEach(item => { if (!grouped[item.cat]) grouped[item.cat]=[]; grouped[item.cat].push(item); });
+  let html = '';
+  Object.entries(grouped).forEach(([cat,items]) => {
+    html += `<div style="font-size:.66rem;font-weight:700;color:var(--muted);border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:6px;margin-top:10px;">${cat}</div>`;
+    items.forEach(item => {
+      const isUp = !!obUploaded[item.id];
+      const badge = item.required
+        ? '<span style="background:#fee2e2;color:#dc2626;font-size:.64rem;font-weight:700;padding:1px 7px;border-radius:99px;flex-shrink:0;">Required</span>'
+        : '<span style="background:var(--amber-lt);color:var(--amber);font-size:.64rem;font-weight:700;padding:1px 7px;border-radius:99px;flex-shrink:0;">Optional</span>';
+      html += `<div class="ob-cl-item${isUp?' up':''}" id="ob-item-${item.id}">
+        <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
+          <div style="width:16px;height:16px;border-radius:50%;background:${isUp?'var(--green)':'var(--border)'};display:flex;align-items:center;justify-content:center;font-size:.58rem;color:white;font-weight:800;flex-shrink:0;">${isUp?'✓':''}</div>
+          <div style="font-weight:600;font-size:.82rem;color:var(--navy);flex:1;">${item.label}</div>${badge}
+        </div>
+        <button class="ob-where-btn" onclick="obToggleWhere('${item.id}')">▸ Where do I find this?</button>
+        <div class="ob-where-box" id="ob-where-${item.id}">📍 ${item.where}</div>
+        <div class="ob-dz${isUp?' done':''}" onclick="obUploadItem('${item.id}')">
+          ${isUp?'✓ Uploaded — click to remove':'<span style="font-size:.88rem;">📎</span> Click to upload or drag &amp; drop<br><span style="font-size:.7rem;color:var(--muted);">PDF, PNG, JPG — up to 25MB</span>'}
+        </div>
+        <input type="file" id="ob-file-${item.id}" accept=".pdf,.png,.jpg,.jpeg,.csv" style="display:none;" onchange="obHandleFileUpload('${item.id}',this)"/>
+      </div>`;
+    });
+  });
+  c.innerHTML = html;
+  obUpdateUploadProgress();
+}
+
+window.obToggleWhere = function(itemId) {
+  const box = document.getElementById('ob-where-'+itemId);
+  const btn = box ? box.previousElementSibling : null;
+  if (!box) return;
+  const show = !box.classList.contains('show');
+  box.classList.toggle('show', show);
+  if (btn) btn.textContent = (show?'▾':'▸')+' Where do I find this?';
+};
+
+window.obUploadItem = function(itemId) {
+  if (obUploaded[itemId]) { obUploaded[itemId] = false; renderObUploads(); return; }
+  const inp = document.getElementById('ob-file-'+itemId);
+  if (inp) inp.click();
+};
+
+window.obHandleFileUpload = async function(itemId, inputEl) {
+  const file = inputEl.files[0];
+  if (!file || !currentUser) return;
+  const yr = '2024';
+  const path = `clients/${currentUser.uid}/${yr}/ob_${itemId}_${Date.now()}_${file.name}`;
+  try {
+    const task = uploadBytesResumable(ref(storage, path), file);
+    task.on('state_changed', null, e => console.error('OB upload:', e), async () => {
+      const url = await getDownloadURL(task.snapshot.ref);
+      await addDoc(collection(db,'client_documents'), {
+        uid:currentUser.uid, clientEmail:currentUser.email, fileName:file.name,
+        fileUrl:url, storagePath:path, taxYear:yr, fileType:file.type,
+        fileSize:file.size, uploadedAt:serverTimestamp(), status:'submitted',
+        checklistItemId:itemId, source:'onboarding',
+      });
+      obUploaded[itemId] = true;
+      renderObUploads();
+      loadDocuments(currentUser);
+    });
+  } catch(e) { console.error('OB upload error:', e); }
+};
+
+function obUpdateUploadProgress() {
+  const total = obChecklist.length;
+  const done = Object.values(obUploaded).filter(Boolean).length;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  const lbl = document.getElementById('ob-prog-label'); if (lbl) lbl.textContent = `${done} of ${total} · ${pct}%`;
+  const fill = document.getElementById('ob-prog-fill'); if (fill) fill.style.width = pct+'%';
+}
+
+function obPopulateComplete() {
+  const total = obChecklist.length;
+  const done = Object.values(obUploaded).filter(Boolean).length;
+  const pct = total > 0 ? Math.round(done/total*100) : 0;
+  const ds = document.getElementById('ob-stat-docs'); if (ds) ds.textContent = done+'/'+total;
+  const ps = document.getElementById('ob-stat-pct'); if (ps) ps.textContent = pct+'%';
+  const sum = document.getElementById('ob-packet-summary');
+  if (sum) {
+    sum.innerHTML = [
+      ['Trade Types', obAnswers.tradeTypes.join(', ')||'—'],
+      ['Brokers', obAnswers.brokers.length>0 ? obAnswers.brokers.length+' connected' : '—'],
+      ['W-2 Income', obAnswers.w2Job?'Yes':'No'],
+      ['Entity / LLC', (obAnswers.hasEntity||obAnswers.ownsBusiness)?'Yes':'No'],
+      ['Home Office', obAnswers.homeOffice?'Claimed':'No'],
+      ['Docs Uploaded', done+' / '+total],
+    ].map(([k,v])=>`<div><span style="color:var(--muted);">${k}: </span><strong style="color:var(--navy);">${v}</strong></div>`).join('');
+    // Flag any missing required
+    const missing = obChecklist.filter(i=>i.required && !obUploaded[i.id]);
+    if (missing.length) {
+      sum.innerHTML += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border);"><div style="font-size:.66rem;font-weight:700;color:var(--red);margin-bottom:3px;">⚠️ MISSING REQUIRED (${missing.length})</div>${missing.slice(0,3).map(i=>`<div style="font-size:.73rem;color:var(--muted);">· ${i.label}</div>`).join('')}</div>`;
+    }
+  }
+}
+
+function showObResumeBanner(step) {
+  const overview = document.getElementById('section-overview');
+  if (!overview) return;
+  const existing = document.getElementById('ob-resume-banner');
+  if (existing) existing.remove();
+  const pct = step > 1 ? Math.round(((step-1)/(OB_TOTAL-1))*100) : 0;
+  const banner = document.createElement('div');
+  banner.id = 'ob-resume-banner';
+  banner.className = 'ob-resume-banner';
+  banner.innerHTML = `<span style="font-size:1.2rem;">📋</span>
+    <div style="flex:1;">
+      <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.87rem;color:var(--navy);margin-bottom:2px;">Complete Your Onboarding — ${pct}% done</div>
+      <div style="font-size:.74rem;color:var(--muted);">Your personalized tax checklist is waiting. Only ${OB_TOTAL-step+1} more step${OB_TOTAL-step+1!==1?'s':''} to go.</div>
+    </div>
+    <button onclick="showObOverlay(${step})" style="padding:8px 15px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;white-space:nowrap;transition:background .15s;" onmouseover="this.style.background='#0d1f3c'" onmouseout="this.style.background='var(--navy)'">Continue →</button>`;
+  const greeting = document.getElementById('greeting');
+  if (greeting && greeting.parentNode === overview) overview.insertBefore(banner, greeting);
+  else overview.insertBefore(banner, overview.firstChild);
+}
+
+async function saveObAnswers() {
+  if (!currentUser) return;
+  try {
+    await setDoc(doc(db,'users',currentUser.uid), {
+      onboarding: { status:'in_progress', currentStep:obCurrentStep, answers:obAnswers, updatedAt:new Date().toISOString() }
+    }, {merge:true});
+  } catch(e) { console.error('OB save error:', e); }
+}
+
+window.obDismiss = function() {
+  saveObAnswers();
+  const el = document.getElementById('ob-overlay');
+  if (el) el.style.display = 'none';
+  showObResumeBanner(obCurrentStep);
+};
+
+async function obComplete() {
+  if (!currentUser) return;
+  const cl = obChecklist.length ? obChecklist : obGenerateChecklist(obAnswers);
+  try {
+    await setDoc(doc(db,'users',currentUser.uid), {
+      onboarding: {
+        status:'complete', completedAt:new Date().toISOString(),
+        currentStep:OB_TOTAL, answers:obAnswers, checklist:cl,
+        uploadedCount:Object.values(obUploaded).filter(Boolean).length,
+        totalItems:cl.length,
+      }
+    }, {merge:true});
+  } catch(e) { console.error('OB complete error:', e); }
+  const el = document.getElementById('ob-overlay');
+  if (el) el.style.display = 'none';
+  const banner = document.getElementById('ob-resume-banner');
+  if (banner) banner.remove();
+  const toast = document.createElement('div');
+  toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:13px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(10,22,40,.2);z-index:9999;font-size:.86rem;font-family:"Syne",sans-serif;font-weight:700;';
+  toast.textContent = '✅ Onboarding complete! Your specialist will be in touch soon.';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+}
+// ══════════════════════════════════════════════════════════════
+// END ONBOARDING WIZARD
+// ══════════════════════════════════════════════════════════════
+
 window.sendCPAMessage = async function() {
   const input = document.getElementById('cpa-chat-input');
   const body = input.value.trim();
@@ -813,12 +1383,4 @@ window.sendCPAMessage = async function() {
     setDoc(doc(db,'notifications',assignedCPAData.uid), {lastMessage:ts},{merge:true}).catch(()=>{});
     addDoc(collection(db,'notifications',assignedCPAData.uid,'items'), {
       type:'new_message', clientUid:currentUser.uid, clientEmail:currentUser.email,
-      message:'New message from '+(myName.trim()||currentUser.email)+': '+body.slice(0,60),
-      read:false, createdAt:ts
-    }).catch(()=>{});
-  } catch(e) { console.error('Send message:', e); }
-};
-</script>
-  <script src="affiliate-tracker.js"></script>
-</body>
-</html>
+      message:'New message from '+(myName
