@@ -667,7 +667,7 @@ const app=initializeApp(fbConfig);const auth=getAuth(app);const db=getFirestore(
 let currentUser=null,userData={},allDocs=[];
 let assignedCPAData=null, cpaConversationId=null, cpaMessageListener=null, userDocListener=null;
 // SECURE CLIENT DASHBOARD - Role Check
-document.body.style.display = 'none';
+
 onAuthStateChanged(auth,async user=>{
   if(!user){window.location.href='login.html';return;}
   
@@ -692,7 +692,7 @@ onAuthStateChanged(auth,async user=>{
     }
     
     // User authenticated with correct role
-    document.body.style.display = 'block';
+
     currentUser=user;
     await loadUser(user);
     checkOnboarding();
