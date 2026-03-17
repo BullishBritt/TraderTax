@@ -322,8 +322,8 @@ function checkStrength(pw) {
     </div>
 
     <div id="signup-phone-input">
-      <input type="tel" id="signup-phone-number" placeholder="+1 (555) 123-4567" style="width:100%;padding:12px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;outline:none;margin-bottom:8px;"/>
-      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">Include +1 for US</div>
+      <input type="tel" id="signup-phone-number" placeholder="(555) 123-4567" value="+1" style="width:100%;padding:12px;border:1.5px solid #e5e8ef;border-radius:10px;font-size:0.95rem;outline:none;margin-bottom:8px;" oninput="if(!this.value.startsWith('+1')){this.value='+1'+this.value.replace(/^\+1/,'');}" onfocus="if(this.value==='+1'){var len=this.value.length;setTimeout(()=>{this.setSelectionRange(len,len)},0);}"/>
+      <div style="font-size:0.72rem;color:#6b7280;margin-bottom:12px;">+1 added automatically — just enter your 10-digit number</div>
       <div id="signup-recaptcha"></div>
       <button onclick="sendSignupCode()" id="signup-send-btn" style="width:100%;padding:13px;background:#3dba7e;color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;cursor:pointer;margin-top:12px;">Send Code</button>
       <button onclick="skipPhoneVerification()" style="width:100%;padding:10px;background:none;color:#6b7280;border:none;font-size:0.8rem;cursor:pointer;margin-top:6px;text-decoration:underline;">Skip for now</button>
@@ -371,10 +371,12 @@ window.showSignupPhoneModal = function() {
 };
 
 window.sendSignupCode = async function() {
-  const phoneNumber = document.getElementById('signup-phone-number').value.trim();
-  
-  if (!phoneNumber || !phoneNumber.startsWith('+')) {
-    showSignupPhoneError('Phone must include +1');
+  let phoneNumber = document.getElementById('signup-phone-number').value.trim();
+  // Strip spaces, dashes, parens then ensure +1 prefix
+  phoneNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+  if (!phoneNumber.startsWith('+1')) phoneNumber = '+1' + phoneNumber.replace(/^\+?1?/, '');
+  if (phoneNumber.length < 12) {
+    showSignupPhoneError('Please enter a valid 10-digit US phone number');
     return;
   }
   
