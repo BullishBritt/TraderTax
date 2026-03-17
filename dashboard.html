@@ -1383,4 +1383,128 @@ window.sendCPAMessage = async function() {
     setDoc(doc(db,'notifications',assignedCPAData.uid), {lastMessage:ts},{merge:true}).catch(()=>{});
     addDoc(collection(db,'notifications',assignedCPAData.uid,'items'), {
       type:'new_message', clientUid:currentUser.uid, clientEmail:currentUser.email,
-      message:'New message from '+(myName
+      message:'New message from '+(myName.trim()||currentUser.email),
+      read:false, createdAt:new Date().toISOString()
+    }).catch(()=>{});
+  } catch(e) { console.error('Send message error:',e); }
+};
+
+window.handleLogout = async function() {
+  try { await signOut(auth); } catch(e) {}
+  window.location.href = 'index.html';
+};
+
+window.sendPasswordReset = async function() {
+  const msg = document.getElementById('pw-reset-msg');
+  try {
+    await sendPasswordResetEmail(auth, currentUser.email);
+    if (msg) { msg.style.color='var(--green)'; msg.textContent='Reset email sent! Check your inbox.'; }
+  } catch(e) {
+    if (msg) { msg.style.color='var(--red)'; msg.textContent='Error sending reset email.'; }
+  }
+};
+
+window.saveProfile = async function() {
+  const msg = document.getElementById('profile-msg');
+  try {
+    await setDoc(doc(db,'users',currentUser.uid), {
+      firstName: document.getElementById('pf-first').value.trim(),
+      lastName: document.getElementById('pf-last').value.trim(),
+      phone: document.getElementById('pf-phone').value.trim(),
+      state: document.getElementById('pf-state').value.trim(),
+    }, {merge:true});
+    if (msg) { msg.style.color='var(--green)'; msg.textContent='Profile saved!'; setTimeout(()=>msg.textContent='',3000); }
+  } catch(e) {
+    if (msg) { msg.style.color='var(--red)'; msg.textContent='Error saving profile.'; }
+  }
+};
+
+window.showTab = function(tab) {
+  document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  const section = document.getElementById('section-'+tab);
+  const link = document.getElementById('tab-'+tab);
+  if (section) section.classList.add('active');
+  if (link) link.classList.add('active');
+  if (tab === 'messages') loadCPAMessages();
+};
+
+window.focusNewMessage = function() { showTab('support'); };
+window.openNewTicket = function() { showTab('support'); };
+
+function renderSnapshots(snaps) {
+  const ov = document.getElementById('overview-snapshots');
+  const sl = document.getElementById('snapshots-list');
+  if (!snaps || !snaps.length) {
+    if (ov) ov.innerHTML = '<div class="empty"><div class="empty-icon">✨</div><h3>No snapshots yet</h3><p>Run a Tax Snapshot to get a personalized 2026 analysis.</p><a class="btn-g" href="snapshot.html">Get My Snapshot →</a></div>';
+    if (sl) sl.innerHTML = '<div class="empty"><div class="empty-icon">✨</div><h3>No snapshots yet</h3><p>Run a Tax Snapshot to get a personalized 2026 analysis.</p><a class="btn-g" href="snapshot.html">Get My Snapshot →</a></div>';
+    return;
+  }
+  const html = snaps.slice(0,3).map(s=>`
+    <div class="snapshot-card">
+      <div class="snap-type">${s.traderType||'Trader'} · ${s.year||'2025'}</div>
+      <div style="font-size:.88rem;color:var(--navy);font-weight:600;margin-bottom:6px;">${s.summary||'Tax Snapshot'}</div>
+      ${s.priceRange?`<div style="font-size:.78rem;color:var(--muted);margin-bottom:10px;">Est. service range: ${s.priceRange}</div>`:''}
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="snap-btn primary" onclick="showTab('documents')">Upload Documents →</button>
+      </div>
+    </div>`).join('');
+  if (ov) ov.innerHTML = html;
+  if (sl) sl.innerHTML = html;
+}
+
+async function loadBilling(user) {
+  try {
+    const q = query(collection(db,'payments'), where('clientUid','==',user.uid));
+    const s = await getDocs(q);
+    const payments = s.docs.map(d=>({id:d.id,...d.data()}));
+    let totalPaid=0, totalDue=0;
+    const rows = payments.map(p=>{
+      if(p.status==='paid') totalPaid+=p.amount||0;
+      else totalDue+=p.amount||0;
+      const isPaid=p.status==='paid';
+      return `<div class="invoice-row">
+        <div class="inv-icon ${isPaid?'paid':'unpaid'}">${isPaid?'✅':'⏳'}</div>
+        <div style="flex:1;"><div class="inv-name">${p.description||'Tax Service'}</div><div class="inv-meta">${p.createdAt?new Date(p.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''}</div></div>
+        <div style="text-align:right;"><div class="inv-amount">$${(p.amount||0).toLocaleString()}</div><div class="inv-badge ${isPaid?'paid':'unpaid'}">${isPaid?'Paid':'Due'}</div></div>
+        ${!isPaid?`<button class="pay-btn">Pay Now</button>`:''}
+      </div>`;
+    });
+    document.getElementById('bill-paid').textContent='$'+totalPaid.toLocaleString();
+    document.getElementById('bill-due').textContent='$'+totalDue.toLocaleString();
+    document.getElementById('bill-count').textContent=payments.length;
+    if (rows.length) document.getElementById('invoice-list').innerHTML=rows.join('');
+  } catch(e) { console.log('Billing:',e); }
+}
+
+function setupUserListener(user) {
+  if (userDocListener) userDocListener();
+  userDocListener = onSnapshot(doc(db,'users',user.uid), snap => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    if (data.assigned && data.assignedCPA) {
+      assignedCPAData = data.assignedCPA;
+      cpaConversationId = [user.uid, data.assignedCPA.uid].sort().join('_');
+      showCPACard(data.assignedCPA);
+    }
+  }, ()=>{});
+  const notifRef = collection(db,'notifications',user.uid,'items');
+  onSnapshot(notifRef, (snap) => {
+    const unread = snap.docs.filter(d => !d.data().read);
+    const dot = document.getElementById('msg-notif-dot');
+    if (dot) dot.style.display = unread.length ? 'inline-block' : 'none';
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added') {
+        const d = change.doc.data();
+        if (d.type === 'cpa_assigned' && !d.read) {
+          showAssignmentToast(d);
+          change.doc.ref.update({read: true}).catch(()=>{});
+        }
+      }
+    });
+  }, ()=>{});
+}
+
+</script>
+</body>
+</html>
