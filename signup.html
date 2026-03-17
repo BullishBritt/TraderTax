@@ -213,14 +213,11 @@ function checkStrength(pw) {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let isSigningUp = false;
-
   onAuthStateChanged(auth, user => {
-    if (user && !isSigningUp) window.location.href = 'dashboard.html';
+    if (user) window.location.href = 'dashboard.html';
   });
 
   window.handleSignup = async function() {
-    isSigningUp = true;
     const firstName = document.getElementById('firstName').value.trim();
     const lastName = document.getElementById('lastName').value.trim();
     const email = document.getElementById('email').value.trim();
@@ -234,7 +231,6 @@ function checkStrength(pw) {
     if (password.length < 8) return showMsg('Password must be at least 8 characters.', 'error');
     if (password !== confirm) return showMsg('Passwords do not match.', 'error');
 
-    signingUp = true;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Creating account...';
 
@@ -249,7 +245,6 @@ function checkStrength(pw) {
         email,
         createdAt: new Date().toISOString(),
         taxYear: new Date().getFullYear(),
-        role: 'client',
         snapshots: [],
       };
 
@@ -290,7 +285,6 @@ function checkStrength(pw) {
       showMsg('Account created! Please verify your phone number...', 'success');
       setTimeout(() => showSignupPhoneModal(), 1000);
     } catch (e) {
-      isSigningUp = false;
       btn.disabled = false;
       btn.textContent = 'Create Account →';
       const msgs = {
@@ -467,8 +461,7 @@ window.verifySignupCode = async function() {
           createdAt: new Date().toISOString(),
           uid: user.uid
         });
-      } catch (e) {
-      isSigningUp = false; console.log('Verified lead save error:', e); }
+      } catch (e) { console.log('Verified lead save error:', e); }
     }
     
     window.location.href = 'dashboard.html';
