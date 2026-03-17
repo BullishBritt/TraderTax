@@ -290,7 +290,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
         <div class="stat-card"><div class="stat-label">Documents</div><div class="stat-val" id="stat-docs">0</div><div class="stat-note">Uploaded this year</div></div>
         <div class="stat-card"><div class="stat-label">Member Since</div><div class="stat-val" id="stat-since" style="font-size:1.1rem;padding-top:8px;">—</div><div class="stat-note">TraderTax account</div></div>
       </div>
-      <div id="return-banner" style="display:none;background:var(--navy);border-radius:12px;padding:16px 20px;margin-bottom:22px;display:flex;align-items:center;gap:14px;">
+      <div id="return-banner" style="display:none;background:var(--navy);border-radius:12px;padding:16px 20px;margin-bottom:22px;align-items:center;gap:14px;">
         <span style="font-size:1.3rem;">📋</span>
         <div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;font-size:.95rem;margin-bottom:2px;">Tax Return In Progress</div><div style="font-size:.8rem;color:rgba(255,255,255,.6);" id="banner-txt">Your specialist is working on your return.</div></div>
         <button onclick="showTab('return')" style="padding:8px 16px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;white-space:nowrap;">View →</button>
@@ -1085,8 +1085,11 @@ function checkOnboarding() {
     obAnswers = Object.assign(obAnswers, userData.onboarding.answers);
   }
   const resumeStep = userData.onboarding?.currentStep || 1;
-  showObOverlay(resumeStep);
-  if (status === 'in_progress') showObResumeBanner(resumeStep);
+  // Small delay to ensure DOM is fully ready
+  setTimeout(() => {
+    showObOverlay(resumeStep);
+    if (status === 'in_progress') showObResumeBanner(resumeStep);
+  }, 600);
 }
 
 function showObOverlay(step) {
