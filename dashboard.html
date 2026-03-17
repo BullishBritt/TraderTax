@@ -775,7 +775,7 @@ onAuthStateChanged(auth,async user=>{
   document.getElementById('app').style.display='block';
 });
 async function loadUser(user){
-  const name=user.displayName||user.email;
+  const name=user.displayName||user.email||'';
   const ini=name.split(/\s+/).map(n=>n[0]).join('').toUpperCase().slice(0,2);
   document.getElementById('nav-avatar').textContent=ini;
   document.getElementById('nav-name').textContent=(user.displayName||user.email.split('@')[0]);
@@ -1306,7 +1306,7 @@ function checkOnboarding() {
   }, 600);
 }
 
-function showObOverlay(step) {
+window.showObOverlay = function showObOverlay(step) {
   const el = document.getElementById('ob-overlay');
   if (!el) return;
   el.style.display = 'flex';
@@ -1372,7 +1372,7 @@ function obUpdateIndicators() {
   c.innerHTML = html;
 }
 
-function obStep(dir) {
+window.obStep = function obStep(dir) {
   const next = obCurrentStep + dir;
   if (next < 1 || next > OB_TOTAL) return;
   saveObAnswers();
@@ -1555,7 +1555,7 @@ window.obDismiss = function() {
   showObResumeBanner(obCurrentStep);
 };
 
-async function obComplete() {
+window.obComplete = async function obComplete() {
   if (!currentUser) return;
   const cl = obChecklist.length ? obChecklist : obGenerateChecklist(obAnswers);
   try {
