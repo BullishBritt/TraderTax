@@ -1072,13 +1072,13 @@ function renderOnboardingTab() {
   if (banner) {
     if (status === 'complete') {
       banner.style.cssText = 'background:var(--green-lt);border:1px solid rgba(61,186,126,.35);border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
-      banner.innerHTML = '<span style="font-size:1.2rem;">✅</span><div><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Complete</div><div style="font-size:.78rem;color:var(--muted);">Your profile is saved. You can edit it anytime.</div></div>';
+      banner.innerHTML = '<span style="font-size:1.2rem;">✅</span><div><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Complete</div><div style="font-size:.78rem;color:var(--muted);">Your profile is saved. You can edit it anytime.</div></div>';
     } else if (status === 'in_progress') {
       banner.style.cssText = 'background:var(--amber-lt);border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
-      banner.innerHTML = '<span style="font-size:1.2rem;">⏳</span><div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding In Progress — Step '+step+' of 6</div><div style="font-size:.78rem;color:var(--muted);">Pick up where you left off — your answers are saved.</div></div>';
+      banner.innerHTML = '<span style="font-size:1.2rem;">⏳</span><div style="flex:1;"><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding In Progress — Step '+step+' of 6</div><div style="font-size:.78rem;color:var(--muted);">Pick up where you left off — your answers are saved.</div></div>';
     } else {
       banner.style.cssText = 'background:var(--blue-lt);border:1px solid #bfdbfe;border-radius:12px;padding:14px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;';
-      banner.innerHTML = '<span style="font-size:1.2rem;">👋</span><div style="flex:1;"><div style="font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Not Started</div><div style="font-size:.78rem;color:var(--muted);">Complete your profile so we can build your personalized checklist.</div></div><button onclick="showObOverlay(1)" style="padding:8px 15px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;">Start Now →</button>';
+      banner.innerHTML = '<span style="font-size:1.2rem;">👋</span><div style="flex:1;"><div style="font-family:\'Syne\',sans-serif;font-weight:700;font-size:.88rem;color:var(--navy);">Onboarding Not Started</div><div style="font-size:.78rem;color:var(--muted);">Complete your profile so we can build your personalized checklist.</div></div><button onclick="showObOverlay(1)" style="padding:8px 15px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-family:\'Syne\',sans-serif;font-weight:700;font-size:.75rem;cursor:pointer;">Start Now →</button>';
     }
   }
 
