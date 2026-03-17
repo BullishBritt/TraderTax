@@ -790,7 +790,7 @@ function uploadFiles(files){
     async()=>{
       try {
         const url=await getDownloadURL(task.snapshot.ref);
-        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,clientEmail:currentUser.email,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
+        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,clientUid:currentUser.uid,clientEmail:currentUser.email,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
         const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='✓';
         setTimeout(()=>{const e=document.getElementById(pid);if(e)e.remove();},2000);
         loadDocuments(currentUser);
@@ -1258,7 +1258,7 @@ window.obHandleFileUpload = async function(itemId, inputEl) {
     task.on('state_changed', null, e => console.error('OB upload:', e), async () => {
       const url = await getDownloadURL(task.snapshot.ref);
       await addDoc(collection(db,'client_documents'), {
-        uid:currentUser.uid, clientEmail:currentUser.email, fileName:file.name,
+        uid:currentUser.uid, clientUid:currentUser.uid, clientEmail:currentUser.email, fileName:file.name,
         fileUrl:url, storagePath:path, taxYear:yr, fileType:file.type,
         fileSize:file.size, uploadedAt:serverTimestamp(), status:'submitted',
         checklistItemId:itemId, source:'onboarding',
