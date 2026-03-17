@@ -127,6 +127,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(
 .fsub{width:100%;padding:13px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:800;font-size:.95rem;cursor:pointer;transition:all .2s;margin-top:4px;}
 .fsub:hover{background:var(--green-dk);transform:translateY(-1px);}
 .fnote{font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px;}
+/* FIX: rev elements visible immediately, animate in as scroll reaches them */
 .rev{opacity:0;transform:translateY(14px);transition:opacity .5s,transform .5s;}
 .rev.vis{opacity:1;transform:translateY(0);}
 </style>
@@ -171,7 +172,6 @@ html,body{overflow-x:hidden;}
 <script>
   emailjs.init("dL1qGwo32XBoAeMPB");
   function sendLeadEmail(source, name, email, phone, traderType, message) {
-    /* FIXED: now uses template_8j3dkw5 → sends to partnerships@tradertax.net */
     emailjs.send("service_9p67iy9", "template_8j3dkw5", {
       source: source, name: name||"Unknown", email: email||"Unknown",
       phone: phone||"", trader_type: traderType||"", message: message||""
@@ -309,10 +309,10 @@ html,body{overflow-x:hidden;}
         <div class="pt-type">CPA Partner</div>
         <div class="pt-name">CPAs &amp; Tax Professionals</div>
         <div class="pt-commission"><span class="pt-commission-num">Two-Way</span><div class="pt-commission-label">refer out &amp; receive referrals<br>revenue sharing available</div></div>
-        <p class="pt-desc">Too complex for your practice? Refer them to us and earn a finders fee. Or join a licensed tax professional network and we&rsquo;ll send you pre-qualified trader clients ready to file.</p>
+        <p class="pt-desc">Too complex for your practice? Refer them to us and earn a finders fee. Or join our licensed tax professional network and we&rsquo;ll send you pre-qualified trader clients ready to file.</p>
         <ul class="pt-perks">
           <li>Refer complex trader clients &rarr; earn 10% finder&rsquo;s fee</li>
-          <li>Join a licensed tax professional network &rarr; receive inbound trader referrals</li>
+          <li>Join our licensed tax professional network &rarr; receive inbound trader referrals</li>
           <li>Pre-qualified clients with Tax Snapshot already completed</li>
           <li>You set your own pricing; we handle lead gen</li>
           <li>Access to TraderTax training materials &amp; resources</li>
@@ -393,7 +393,7 @@ html,body{overflow-x:hidden;}
   <div class="eyebrow">Apply Now</div>
   <h2>Ready to <span class="ac">Get Paid?</span></h2>
   <p>Fill out the form below and we&rsquo;ll get back to you within 48 hours with your link, your code, and everything you need to start earning.</p>
-  <div class="apply-form">
+  <div class="apply-form" id="partner-form-wrap">
     <div style="margin-bottom:20px;">
       <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;color:var(--navy);margin-bottom:4px;">Partner Application</div>
       <div style="font-size:.82rem;color:var(--muted);">We review every application within 48 hours.</div>
@@ -414,12 +414,12 @@ html,body{overflow-x:hidden;}
     <div class="ff"><label>Platform / Website / Community Name</label><input type="text" id="p-platform" placeholder="e.g. TraderHub Discord, @yourtradertips, FundedTraders.io"/></div>
     <div class="ff"><label>Approximate Audience / Community Size</label><select id="p-audience"><option>Under 1,000</option><option>1,000 &ndash; 5,000</option><option>5,000 &ndash; 25,000</option><option>25,000 &ndash; 100,000</option><option>100,000+</option></select></div>
     <div class="ff"><label>Tell us about your audience and why you&rsquo;d be a good fit</label><textarea id="p-notes" placeholder="e.g. I run a 12K member Discord for NQ futures traders. They constantly ask about Apex taxes and I&rsquo;d love to point them somewhere trustworthy..."></textarea></div>
-    <button class="fsub" onclick="submitPartner()">Submit Application &rarr;</button>
-    <div class="fnote"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="98e8f9eaecf6fdeaebf0f1e8ebd8eceaf9fcfdeaecf9e0b6f6fdec">[email&#160;protected]</a> &middot; We reply within 48 hours</div>
+    <button class="fsub" id="partner-submit-btn" onclick="window.submitPartner()">Submit Application &rarr;</button>
+    <div class="fnote">partnerships@tradertax.net &middot; We reply within 48 hours</div>
   </div>
   <div style="margin-top:32px;">
     <div style="font-size:.82rem;color:rgba(255,255,255,.4);margin-bottom:6px;">Prefer to reach out directly?</div>
-    <div class="apply-email"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="91e1f0e3e5fff4e3e2f9f8e1e2d1e5e3f0f5f4e3e5f0e9bffff4e5">[email&#160;protected]</a></div>
+    <div class="apply-email">partnerships@tradertax.net</div>
     <div class="apply-email-note">CPA inquiries, prop firm partnerships, and sponsorship deals welcome</div>
   </div>
 </section>
@@ -434,7 +434,7 @@ html,body{overflow-x:hidden;}
           <span style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;"><span style="color:#fff;">Trader</span><span style="color:#3dba7e;">Tax</span></span>
         </a>
         <p style="font-size:.85rem;line-height:1.7;margin-bottom:8px;">Taxes Built for Traders. Independent, licensed tax professionals who understand prop firms, futures, options, and crypto taxation.</p>
-        <p style="font-size:.75rem;color:rgba(255,255,255,.3);"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="6c04090000032c181e0d08091e180d1442020918">[email&#160;protected]</a></p>
+        <p style="font-size:.75rem;color:rgba(255,255,255,.3);">hello@tradertax.net</p>
       </div>
       <div>
         <h4 style="font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;letter-spacing:.6px;text-transform:uppercase;color:rgba(255,255,255,.4);margin-bottom:14px;">Services</h4>
@@ -474,9 +474,18 @@ html,body{overflow-x:hidden;}
   </div>
 </footer>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-const ro=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('vis');ro.unobserve(e.target);}});},{threshold:0.1});
-document.querySelectorAll('.rev').forEach(el=>ro.observe(el));
+<script>
+// FIX: threshold:0 so elements animate in as soon as ANY pixel is visible (fixes blank white sections)
+const ro = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('vis');
+      ro.unobserve(e.target);
+    }
+  });
+}, { threshold: 0, rootMargin: '0px 0px -20px 0px' });
+
+document.querySelectorAll('.rev').forEach(el => ro.observe(el));
 
 const fbApp = firebase.initializeApp({
   apiKey: "AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
@@ -488,43 +497,76 @@ const fbApp = firebase.initializeApp({
 }, 'partners');
 const db = firebase.firestore(fbApp);
 
-async function submitPartner(){
-  const firstName=document.getElementById('p-first').value.trim();
-  const lastName=document.getElementById('p-last').value.trim();
-  const email=document.getElementById('p-email').value.trim();
-  const type=document.getElementById('p-type').value;
-  const platform=document.getElementById('p-platform').value.trim();
-  const audience=document.getElementById('p-audience').value;
-  const notes=document.getElementById('p-notes').value.trim();
-  const btn=document.querySelector('.fsub');
+window.submitPartner = async function() {
+  const firstName = document.getElementById('p-first').value.trim();
+  const lastName  = document.getElementById('p-last').value.trim();
+  const email     = document.getElementById('p-email').value.trim();
+  const type      = document.getElementById('p-type').value;
+  const platform  = document.getElementById('p-platform').value.trim();
+  const audience  = document.getElementById('p-audience').value;
+  const notes     = document.getElementById('p-notes').value.trim();
+  const btn       = document.getElementById('partner-submit-btn');
 
-  if(!firstName){alert('Please enter your first name.');return;}
-  if(!email){alert('Please enter your email.');return;}
-  if(!type){alert('Please select a partner type.');return;}
+  if (!firstName) { alert('Please enter your first name.'); return; }
+  if (!email)     { alert('Please enter your email.'); return; }
+  if (!type)      { alert('Please select a partner type.'); return; }
 
-  btn.disabled=true;
-  btn.textContent='Submitting...';
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
 
-  const data={
-    timestamp:new Date().toISOString(),
-    firstName,lastName,email,
-    partnerType:type,
-    platform,audience,notes,
-    source:'Partner Application',
-    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  const data = {
+    timestamp:   new Date().toISOString(),
+    firstName,
+    lastName,
+    email,
+    partnerType: type,
+    platform,
+    audience,
+    notes,
+    source:      'Partner Application',
+    createdAt:   firebase.firestore.FieldValue.serverTimestamp()
   };
 
+  const affPayload = (window.TTAffiliate && window.TTAffiliate.getPayload) ? window.TTAffiliate.getPayload() : {};
+
+  // FIX: write to affiliate_applications, leads, AND all_leads
   try {
-    await db.collection('affiliate_applications').add({...data, status:'pending', ...(window.TTAffiliate && window.TTAffiliate.getPayload())});
-    await db.collection('leads').add({...data, ...(window.TTAffiliate && window.TTAffiliate.getPayload())});
-  } catch(e){ console.log('Firestore error:', e); }
+    await Promise.allSettled([
+      db.collection('affiliate_applications').add({ ...data, status: 'pending', ...affPayload }),
+      db.collection('leads').add({ ...data, ...affPayload }),
+      db.collection('all_leads').add({ ...data, leadSource: 'partner_application', ...affPayload })
+    ]);
+  } catch(e) { console.log('Firestore error:', e); }
 
+  // Send email notification
   try {
-    sendLeadEmail('Partner Application', firstName+' '+lastName, email, '', type, platform+' | '+notes);
-  } catch(e){}
+    sendLeadEmail('Partner Application', firstName + ' ' + lastName, email, '', type, platform + ' | ' + notes);
+  } catch(e) {}
 
-  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec',{
-    method:'POST', mode:'no-cors', body:JSON.stringify(data)
-  }).catch(()=>{});
+  // Google Sheets backup
+  fetch('https://script.google.com/macros/s/AKfycbzPo7URJhhCwn9Nq-KNUAOoENUQr_VCDhtOdRqkr3npkMrhXI3Eev-2S0th1iteq1B4vg/exec', {
+    method: 'POST', mode: 'no-cors', body: JSON.stringify(data)
+  }).catch(() => {});
 
-  document.querySelector('.apply-form').innerHTML='<div style="text-align:center;padding:40px 0;"><div style="
+  // FIX: Complete success state with redirect option
+  document.getElementById('partner-form-wrap').innerHTML = `
+    <div style="text-align:center;padding:40px 20px;">
+      <div style="font-size:3.5rem;margin-bottom:16px;">✅</div>
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--navy);margin-bottom:10px;">Application Received!</div>
+      <div style="font-size:.9rem;color:var(--muted);line-height:1.75;max-width:380px;margin:0 auto 24px;">
+        We review every application within 48 hours. Check your inbox — we'll send your unique tracking link, promo code, and onboarding info.
+      </div>
+      <div style="font-size:.82rem;color:var(--muted);margin-bottom:20px;">Submitted for: <strong style="color:var(--navy);">${email}</strong></div>
+      <a href="index.html" style="display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.9rem;padding:12px 24px;border-radius:9px;text-decoration:none;transition:all .2s;">
+        Back to Home &rarr;
+      </a>
+      <div style="margin-top:14px;font-size:.78rem;color:var(--muted);">
+        Questions? <a href="mailto:partnerships@tradertax.net" style="color:var(--green);font-weight:600;">partnerships@tradertax.net</a>
+      </div>
+    </div>
+  `;
+};
+</script>
+<script src="affiliate-tracker.js"></script>
+</body>
+</html>
