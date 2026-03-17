@@ -213,8 +213,9 @@ function checkStrength(pw) {
   const auth = getAuth(app);
   const db = getFirestore(app);
 
+  let isSigningUp = false;
   onAuthStateChanged(auth, user => {
-    if (user) window.location.href = 'dashboard.html';
+    if (user && !isSigningUp) window.location.href = 'dashboard.html';
   });
 
   window.handleSignup = async function() {
@@ -231,6 +232,7 @@ function checkStrength(pw) {
     if (password.length < 8) return showMsg('Password must be at least 8 characters.', 'error');
     if (password !== confirm) return showMsg('Passwords do not match.', 'error');
 
+    isSigningUp = true;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span>Creating account...';
 
