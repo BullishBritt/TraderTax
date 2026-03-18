@@ -216,6 +216,118 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
 
 <div id="toast" class="toast"></div>
 
+<!-- ══════════════════════════════════════
+     CPA ONBOARDING FLOW
+══════════════════════════════════════ -->
+<div id="cpa-onboard" style="display:none;">
+  <div class="ob-card">
+
+    <!-- STEP 1: Welcome -->
+    <div id="ob-step-1">
+      <div class="ob-header">
+        <div class="ob-logo">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/><path d="M12 11 L15.5 24 L20 15 L24.5 24 L28 11" stroke="#3dba7e" stroke-width="4" stroke-linecap="butt" fill="none"/><line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/><path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none"/></svg>
+          <div class="ob-logo-txt">Trader<span>Tax</span></div>
+        </div>
+        <div class="ob-tag">Specialist Onboarding</div>
+        <h2>Welcome to your workspace.</h2>
+        <p>Before you dive in, take 2 minutes to understand how TraderTax works and what we need from you. This keeps everything running smoothly for both you and your clients.</p>
+        <div class="ob-progress"><div class="ob-pip done"></div><div class="ob-pip"></div><div class="ob-pip"></div><div class="ob-pip"></div></div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">What you're joining</div>
+        <div class="ob-item"><div class="ob-icon green">🎯</div><div class="ob-item-text"><strong>You focus on the tax work</strong>TraderTax handles client acquisition, onboarding, document collection, and billing. You get assigned clients who are ready — so you can go straight to preparing returns.</div></div>
+        <div class="ob-item"><div class="ob-icon navy">📋</div><div class="ob-item-text"><strong>Everything lives in the platform</strong>Documents, messages, notes, and return uploads all happen here. This keeps the client relationship organized and protects everyone.</div></div>
+        <div class="ob-item"><div class="ob-icon amber">💰</div><div class="ob-item-text"><strong>You earn 65% of every engagement</strong>TraderTax handles billing and pays you on a regular schedule. No chasing invoices, no billing headaches.</div></div>
+        <div class="ob-btn-row">
+          <div class="ob-step-label">Step 1 of 4</div>
+          <button class="ob-btn-next" onclick="obNext(2)">Got it, Next →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: How it works -->
+    <div id="ob-step-2" style="display:none;">
+      <div class="ob-header">
+        <div class="ob-logo"><div class="ob-logo-txt">Trader<span>Tax</span></div></div>
+        <div class="ob-tag">Your Workflow</div>
+        <h2>Here's how your workflow runs.</h2>
+        <p>Each client moves through a clear process. Your job is to keep them moving forward.</p>
+        <div class="ob-progress"><div class="ob-pip done"></div><div class="ob-pip done"></div><div class="ob-pip"></div><div class="ob-pip"></div></div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">The client journey</div>
+        <div class="ob-item"><div class="ob-icon green" style="font-size:.8rem;font-family:'Syne',sans-serif;font-weight:800;color:#0a1628;">01</div><div class="ob-item-text"><strong>Client is assigned to you</strong>You'll get a notification. The client's profile, documents, and snapshot appear in your workspace immediately.</div></div>
+        <div class="ob-item"><div class="ob-icon green" style="font-size:.8rem;font-family:'Syne',sans-serif;font-weight:800;color:#0a1628;">02</div><div class="ob-item-text"><strong>Review their documents</strong>Check what's uploaded. Request anything missing using the platform's built-in request tool — no external emails needed.</div></div>
+        <div class="ob-item"><div class="ob-icon green" style="font-size:.8rem;font-family:'Syne',sans-serif;font-weight:800;color:#0a1628;">03</div><div class="ob-item-text"><strong>Prepare and upload the return</strong>Use your preferred tax software. When ready, upload the completed return directly to the client's workspace.</div></div>
+        <div class="ob-item"><div class="ob-icon green" style="font-size:.8rem;font-family:'Syne',sans-serif;font-weight:800;color:#0a1628;">04</div><div class="ob-item-text"><strong>Mark as complete</strong>Update the status to Filed. The client gets notified and the engagement is closed. You get paid.</div></div>
+        <div class="ob-btn-row">
+          <button class="ob-btn-back" onclick="obNext(1)">← Back</button>
+          <div style="display:flex;align-items:center;gap:12px;"><div class="ob-step-label">Step 2 of 4</div><button class="ob-btn-next" onclick="obNext(3)">Next →</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: Communication -->
+    <div id="ob-step-3" style="display:none;">
+      <div class="ob-header">
+        <div class="ob-logo"><div class="ob-logo-txt">Trader<span>Tax</span></div></div>
+        <div class="ob-tag">Communication Standards</div>
+        <h2>Communicating with clients.</h2>
+        <p>We keep things simple — platform-first. Here's what that means in practice.</p>
+        <div class="ob-progress"><div class="ob-pip done"></div><div class="ob-pip done"></div><div class="ob-pip done"></div><div class="ob-pip"></div></div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-section-title">How to handle client contact</div>
+        <div class="ob-item"><div class="ob-icon green">💬</div><div class="ob-item-text"><strong>Use the platform messenger for day-to-day</strong>Questions, document requests, status updates — all handled through the built-in chat. This keeps a clean record for both of you.</div></div>
+        <div class="ob-item"><div class="ob-icon amber">📞</div><div class="ob-item-text"><strong>Calls are allowed when needed</strong>If a client needs a strategy call or has complex questions, that's fine. Just log the call reason and any follow-up notes in the workspace so there's a record.</div></div>
+        <div class="ob-item"><div class="ob-icon navy">🔒</div><div class="ob-item-text"><strong>Keep client relationships on-platform</strong>Client relationships are managed through TraderTax. All tax work, billing, and ongoing engagement should stay within the platform.</div></div>
+        <div class="ob-btn-row">
+          <button class="ob-btn-back" onclick="obNext(2)">← Back</button>
+          <div style="display:flex;align-items:center;gap:12px;"><div class="ob-step-label">Step 3 of 4</div><button class="ob-btn-next" onclick="obNext(4)">Next →</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4: Acknowledgment -->
+    <div id="ob-step-4" style="display:none;">
+      <div class="ob-header">
+        <div class="ob-logo"><div class="ob-logo-txt">Trader<span>Tax</span></div></div>
+        <div class="ob-tag">One Last Step</div>
+        <h2>Quick acknowledgment.</h2>
+        <p>Check all four boxes and you're in. This takes about 10 seconds.</p>
+        <div class="ob-progress"><div class="ob-pip done"></div><div class="ob-pip done"></div><div class="ob-pip done"></div><div class="ob-pip done"></div></div>
+      </div>
+      <div class="ob-body">
+        <div class="ob-ack-item" id="ack1" onclick="obToggleAck(1)">
+          <div class="ob-ack-check" id="ack1-check"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" style="display:none;" id="ack1-mark"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ob-ack-label">I understand TraderTax manages the client relationship and onboarding process.</div>
+        </div>
+        <div class="ob-ack-item" id="ack2" onclick="obToggleAck(2)">
+          <div class="ob-ack-check" id="ack2-check"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" style="display:none;" id="ack2-mark"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ob-ack-label">I understand client communication should stay within TraderTax unless otherwise directed.</div>
+        </div>
+        <div class="ob-ack-item" id="ack3" onclick="obToggleAck(3)">
+          <div class="ob-ack-check" id="ack3-check"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" style="display:none;" id="ack3-mark"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ob-ack-label">I understand calls may happen when needed, and I will log reason and follow-up notes in the platform.</div>
+        </div>
+        <div class="ob-ack-item" id="ack4" onclick="obToggleAck(4)">
+          <div class="ob-ack-check" id="ack4-check"><svg width="11" height="11" viewBox="0 0 12 12" fill="none" style="display:none;" id="ack4-mark"><polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="ob-ack-label">I agree to follow platform workflow, confidentiality, and documentation standards.</div>
+        </div>
+        <div class="ob-agreement-link">By continuing you also agree to the <a href="/TraderTax_CPA_Independent_Contractor_Agreement.docx" target="_blank">full CPA Platform Agreement</a>.</div>
+        <div class="ob-btn-row">
+          <button class="ob-btn-back" onclick="obNext(3)">← Back</button>
+          <div style="display:flex;align-items:center;gap:12px;"><div class="ob-step-label">Step 4 of 4</div><button class="ob-btn-next" id="ob-finish-btn" onclick="obFinish()" disabled>Accept &amp; Enter Workspace →</button></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+
 <!-- LOGIN -->
 <div id="login-gate">
   <div class="login-box">
@@ -274,6 +386,18 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
     <div class="content-section active" id="section-clients">
       <div class="page-title">My Clients</div>
       <div class="page-sub">All clients assigned to you. Click any card to open their workspace.</div>
+
+      <!-- TODAY'S FOCUS BANNER -->
+      <div class="focus-banner" id="focus-banner" style="display:none;">
+        <div class="focus-left">
+          <div class="focus-icon">⚡</div>
+          <div>
+            <div class="focus-title">Today's Focus</div>
+            <div class="focus-sub" id="focus-sub">Loading your priority clients...</div>
+          </div>
+        </div>
+        <div class="focus-chips" id="focus-chips"></div>
+      </div>
 
       <div class="stats-row" id="cpa-stats">
         <div class="stat-card"><div class="stat-lbl">Active Clients</div><div class="stat-val green" id="s-active">—</div><div class="stat-note">Assigned to you</div></div>
@@ -595,6 +719,7 @@ function showApp(user) {
     console.log('Loading clients...');
     loadClients();
     setupCPANotifications(user);
+    checkOnboarding();
     console.log('App shown successfully');
   } catch(e) {
     console.error('Error in showApp:', e);
@@ -731,27 +856,151 @@ function renderClients() {
   const statusLabels = {received:'📥 New',assigned:'👤 Assigned',review:'🔍 In Review',completed:'✅ Completed',filed:'📄 Filed'};
   const statusClass = {received:'received',assigned:'assigned',review:'review',completed:'completed',filed:'filed'};
 
+  // Update focus banner
+  updateFocusBanner(clients);
+
   document.getElementById('client-grid').innerHTML = clients.map(c => {
-    const name = (c.firstName||'')+' '+(c.lastName||'') || c.email || 'Client';
-    const ini = name.trim().split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) || '?';
+    const name = ((c.firstName||'')+' '+(c.lastName||'')).trim() || c.email || 'Client';
+    const ini = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2) || '?';
     const st = c.returnStatus || 'received';
     const label = statusLabels[st] || st;
     const cls = statusClass[st] || 'received';
+    const nextAction = getNextAction(st, c);
+    const traderType = c.traderType || c.snapshot?.traderType || '';
+    const createdDate = c.createdAt ? new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : '—';
     return `<div class="client-card ${activeClientId===c.id?'selected':''}" onclick="openClient('${c.id}')">
-      <div class="cc-top">
-        <div class="cc-avatar">${ini}</div>
-        <div class="cc-status ${cls}">${label}</div>
+      <div class="cc-header">
+        <div class="cc-top-row">
+          <div class="cc-avatar">${ini}</div>
+          <div class="cc-status-badge ${cls}">${label}</div>
+        </div>
+        <div class="cc-name">${name}</div>
+        <div class="cc-email">${c.email||'—'}</div>
       </div>
-      <div class="cc-name">${name}</div>
-      <div class="cc-email">${c.email||'—'}</div>
-      <div class="cc-meta">
-        <span class="cc-chip">📅 Tax Year ${c.taxYear||2025}</span>
-        ${c.state?`<span class="cc-chip">📍 ${c.state}</span>`:''}
-        ${c.docCount?`<span class="cc-chip">📁 ${c.docCount} docs</span>`:''}
+      <div class="cc-body">
+        <div class="cc-next-action">
+          <span style="font-size:1rem;">⚡</span>
+          <div>
+            <div class="cc-next-label">Next Action</div>
+            <div class="cc-next-text">${nextAction}</div>
+          </div>
+        </div>
+        <div class="cc-meta-row">
+          <span class="cc-chip">📅 ${c.taxYear||2025}</span>
+          ${traderType?`<span class="cc-chip">📈 ${traderType}</span>`:''}
+          ${c.state?`<span class="cc-chip">📍 ${c.state}</span>`:''}
+          ${c.docCount?`<span class="cc-chip">📁 ${c.docCount} docs</span>`:''}
+        </div>
+        <div class="cc-footer">
+          <div class="cc-last-activity">Added ${createdDate}</div>
+          <button class="cc-open-btn">Open workspace →</button>
+        </div>
       </div>
-      <div class="cc-action">Open →</div>
     </div>`;
   }).join('');
+}
+
+
+/* ── NEXT ACTION HELPER ── */
+function getNextAction(status, client) {
+  const actions = {
+    received:  'Review documents & start return',
+    assigned:  'Review documents & start return',
+    review:    'Complete review and upload return',
+    completed: 'Upload final return for client review',
+    filed:     'Engagement complete ✓'
+  };
+  return actions[status] || 'Review client and take next step';
+}
+
+/* ── FOCUS BANNER ── */
+function updateFocusBanner(clients) {
+  const banner = document.getElementById('focus-banner');
+  if (!clients.length) { banner.style.display='none'; return; }
+  banner.style.display = 'flex';
+  const needsAction = clients.filter(c => !['completed','filed'].includes(c.returnStatus||'received'));
+  const sub = document.getElementById('focus-sub');
+  const chips = document.getElementById('focus-chips');
+  if (!needsAction.length) {
+    sub.textContent = 'All clients are up to date. Great work!';
+    chips.innerHTML = '<div class="focus-chip green">✓ All caught up</div>';
+    return;
+  }
+  sub.textContent = `${needsAction.length} client${needsAction.length>1?'s':''} need${needsAction.length===1?'s':''} your attention today.`;
+  const inReview = clients.filter(c=>(c.returnStatus||'')===('review')).length;
+  const newClients = clients.filter(c=>!c.returnStatus||c.returnStatus==='received'||c.returnStatus==='assigned').length;
+  chips.innerHTML = [
+    newClients ? `<div class="focus-chip amber">📥 ${newClients} new</div>` : '',
+    inReview   ? `<div class="focus-chip">🔍 ${inReview} in review</div>` : '',
+    clients.length ? `<div class="focus-chip">👥 ${clients.length} total</div>` : ''
+  ].filter(Boolean).join('');
+}
+
+/* ── ONBOARDING FLOW ── */
+let obChecked = new Set();
+
+function obNext(step) {
+  document.querySelectorAll('[id^="ob-step-"]').forEach(el => el.style.display='none');
+  const el = document.getElementById('ob-step-'+step);
+  if (el) el.style.display='block';
+}
+
+function obToggleAck(n) {
+  const item = document.getElementById('ack'+n);
+  const check = document.getElementById('ack'+n+'-check');
+  const mark = document.getElementById('ack'+n+'-mark');
+  if (obChecked.has(n)) {
+    obChecked.delete(n);
+    item.classList.remove('checked');
+    check.style.background='';
+    check.style.borderColor='';
+    mark.style.display='none';
+  } else {
+    obChecked.add(n);
+    item.classList.add('checked');
+    check.style.background='#3dba7e';
+    check.style.borderColor='#3dba7e';
+    mark.style.display='block';
+  }
+  const btn = document.getElementById('ob-finish-btn');
+  btn.disabled = obChecked.size < 4;
+  if (!btn.disabled) {
+    btn.style.background='#3dba7e';
+    btn.style.color='#fff';
+    btn.style.cursor='pointer';
+  } else {
+    btn.style.background='#d1d5db';
+    btn.style.color='#9ca3af';
+    btn.style.cursor='not-allowed';
+  }
+}
+
+async function obFinish() {
+  const btn = document.getElementById('ob-finish-btn');
+  btn.textContent = 'Saving...';
+  btn.disabled = true;
+  try {
+    const uid = myCpasDocId || currentUser.uid;
+    const record = {
+      acceptedPlatformGuidelines: true,
+      acceptedAt: new Date().toISOString(),
+      agreementVersion: '1.0'
+    };
+    await Promise.all([
+      db.collection('users').doc(currentUser.uid).update(record),
+      myCpasDocId ? db.collection('cpas').doc(myCpasDocId).update(record) : Promise.resolve()
+    ]);
+  } catch(e) { console.warn('Onboarding save failed:', e); }
+  document.getElementById('cpa-onboard').style.display='none';
+}
+
+function checkOnboarding() {
+  // Check if CPA has completed onboarding
+  const accepted = cpaData?.acceptedPlatformGuidelines;
+  if (!accepted) {
+    document.getElementById('cpa-onboard').style.display='flex';
+    document.getElementById('ob-step-1').style.display='block';
+  }
 }
 
 window.filterClients = function(filter, btn) {
