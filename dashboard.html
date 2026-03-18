@@ -777,9 +777,15 @@ onAuthStateChanged(auth,async user=>{
     const userRole = userDoc.data().role;
     
     if (userRole && userRole !== 'client') {
-      alert('Access denied. Client dashboard only.\\n\\nYour role: ' + (userRole || 'none'));
-      await signOut(auth);
-      window.location.href = 'index.html';
+      if (userRole === 'cpa') {
+        window.location.href = 'cpa-portal.html';
+      } else if (userRole === 'admin') {
+        window.location.href = 'admin.html?key=tt2025admin';
+      } else {
+        alert('Access denied. Contact hello@tradertax.net');
+        await signOut(auth);
+        window.location.href = 'index.html';
+      }
       return;
     }
     
