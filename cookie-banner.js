@@ -36,7 +36,7 @@
     }
     #tt-cookie-banner p {
       font-size: 13px;
-      color: rgba(255,255,255,0.72);
+      color: #ffffff;
       flex: 1;
       min-width: 200px;
       line-height: 1.55;
