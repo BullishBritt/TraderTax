@@ -155,7 +155,7 @@ html, body { overflow-x: hidden; }
       </div>
     </div>
 
-    <button class="btn" id="signup-btn" onclick="handleSignup()">Create Account →</button>
+    <button class="btn" id="signup-btn" onclick="checkTermsThenSignup()">Create Account →</button>
     <p class="terms">By creating an account you agree to our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>.</p>
     <div class="bottom">Already have an account? <a href="login.html">Log in →</a></div>
   </div>
@@ -529,6 +529,168 @@ function startSignupCooldownTimer(seconds) {
     }
   }, 1000);
 }
+</script>
+
+<!-- ═══════════════════════════════════════════
+     TERMS AGREEMENT MODAL
+     Fires before Firebase account creation.
+     Matches TraderTax UI exactly.
+════════════════════════════════════════════ -->
+<div id="tt-terms-overlay" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(10,22,40,0.92);z-index:9998;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);">
+  <div style="background:#fff;border-radius:16px;padding:32px;max-width:440px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.35);animation:tt-rise 0.35s cubic-bezier(0.34,1.4,0.64,1);">
+
+    <!-- Header -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <div style="width:44px;height:44px;background:linear-gradient(135deg,#0a1628,#1a2e5a);border-radius:11px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3dba7e" stroke-width="2.5" stroke-linecap="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3 style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.25rem;color:#0a1628;margin-bottom:6px;">Before we create your account</h3>
+      <p style="font-size:0.85rem;color:#6b7280;line-height:1.5;">Please review and agree to our terms.</p>
+    </div>
+
+    <!-- Agreement checkbox box -->
+    <div style="background:#f0f9ff;border:1.5px solid #bae6fd;border-radius:12px;padding:16px 18px;margin-bottom:16px;">
+      <label style="display:flex;align-items:flex-start;gap:12px;cursor:pointer;">
+        <div style="position:relative;flex-shrink:0;margin-top:2px;">
+          <input type="checkbox" id="tt-terms-chk" onchange="ttUpdateBtn()" style="opacity:0;position:absolute;width:20px;height:20px;cursor:pointer;margin:0;z-index:1;"/>
+          <div id="tt-chk-box" style="width:20px;height:20px;border:2px solid #7dd3fc;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;transition:all 0.18s;pointer-events:none;">
+            <svg id="tt-chk-mark" width="11" height="11" viewBox="0 0 12 12" fill="none" style="display:none;">
+              <polyline points="1.5,6 4.5,9 10.5,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+        <span style="font-size:0.88rem;color:#0369a1;line-height:1.6;">
+          I agree to the <a href="terms.html" target="_blank" style="color:#0a1628;font-weight:700;text-decoration:underline;text-underline-offset:2px;">Terms of Service</a> and <a href="privacy.html" target="_blank" style="color:#0a1628;font-weight:700;text-decoration:underline;text-underline-offset:2px;">Privacy Policy</a>. I understand that <strong>TraderTax is a technology platform, not a CPA firm</strong>, and all tax services are performed by independent professionals.
+        </span>
+      </label>
+    </div>
+
+    <!-- Arbitration note -->
+    <p style="font-size:0.72rem;color:#9ca3af;text-align:center;margin-bottom:20px;line-height:1.55;">
+      By continuing you waive the right to a jury trial and agree to <a href="terms.html#s13" target="_blank" style="color:#6b7280;text-decoration:underline;">binding arbitration</a>. Class actions are not permitted.
+    </p>
+
+    <!-- Agree button -->
+    <button id="tt-agree-btn" onclick="ttHandleAgree()" disabled
+      style="width:100%;padding:13px;background:#d1d5db;color:#9ca3af;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:0.93rem;cursor:not-allowed;transition:all 0.2s;letter-spacing:0.2px;">
+      Agree &amp; Create Account →
+    </button>
+
+    <!-- Decline -->
+    <button onclick="ttHandleDecline()"
+      style="width:100%;padding:9px;background:none;border:none;color:#9ca3af;font-family:'DM Sans',sans-serif;font-size:0.8rem;cursor:pointer;margin-top:8px;">
+      I do not agree
+    </button>
+  </div>
+</div>
+
+<style>
+@keyframes tt-rise {
+  from { opacity:0; transform:translateY(20px) scale(0.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+</style>
+
+<script>
+// ── Terms gate ──────────────────────────────────────────────
+const TT_TERMS_KEY = "tt_terms_v1";
+const TT_TERMS_VER = "1.0";
+
+// Intercept: validate form first, then show modal if needed
+window.checkTermsThenSignup = function() {
+  // Run form validation first (re-use existing checks)
+  const firstName = document.getElementById('firstName').value.trim();
+  const lastName  = document.getElementById('lastName').value.trim();
+  const email     = document.getElementById('email').value.trim();
+  const password  = document.getElementById('password').value;
+  const confirm   = document.getElementById('confirmPassword').value;
+
+  if (!firstName || !lastName) return ttShowFormMsg('Please enter your first and last name.', 'error');
+  if (!email)     return ttShowFormMsg('Please enter your email address.', 'error');
+  if (password.length < 8) return ttShowFormMsg('Password must be at least 8 characters.', 'error');
+  if (password !== confirm) return ttShowFormMsg('Passwords do not match.', 'error');
+
+  // Already accepted this version? Go straight to signup
+  const existing = localStorage.getItem(TT_TERMS_KEY);
+  if (existing && JSON.parse(existing).version === TT_TERMS_VER) {
+    window.handleSignup();
+    return;
+  }
+
+  // Show terms modal
+  const overlay = document.getElementById('tt-terms-overlay');
+  overlay.style.display = 'flex';
+};
+
+function ttShowFormMsg(html, type) {
+  const el = document.getElementById('msg');
+  el.innerHTML = html;
+  el.className = 'msg ' + type + ' show';
+}
+
+// Checkbox toggle
+window.ttUpdateBtn = function() {
+  const checked = document.getElementById('tt-terms-chk').checked;
+  const btn  = document.getElementById('tt-agree-btn');
+  const box  = document.getElementById('tt-chk-box');
+  const mark = document.getElementById('tt-chk-mark');
+
+  if (checked) {
+    box.style.background  = '#3dba7e';
+    box.style.borderColor = '#3dba7e';
+    mark.style.display    = 'block';
+    btn.style.background  = '#3dba7e';
+    btn.style.color       = '#fff';
+    btn.style.cursor      = 'pointer';
+    btn.disabled          = false;
+  } else {
+    box.style.background  = '#fff';
+    box.style.borderColor = '#7dd3fc';
+    mark.style.display    = 'none';
+    btn.style.background  = '#d1d5db';
+    btn.style.color       = '#9ca3af';
+    btn.style.cursor      = 'not-allowed';
+    btn.disabled          = true;
+  }
+};
+
+// Agree clicked → log + proceed to Firebase signup
+window.ttHandleAgree = async function() {
+  const ts = new Date();
+  const record = {
+    version:   TT_TERMS_VER,
+    timestamp: ts.toISOString(),
+    userAgent: navigator.userAgent
+  };
+
+  // Store locally
+  localStorage.setItem(TT_TERMS_KEY, JSON.stringify(record));
+
+  // Hide modal
+  document.getElementById('tt-terms-overlay').style.display = 'none';
+
+  // Log to Firestore (Firebase is already loaded on this page)
+  try {
+    const { getFirestore, collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+    const { getAuth } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js");
+    const db = getFirestore();
+    await addDoc(collection(db, 'clickwrap_acceptances'), {
+      ...record,
+      email: document.getElementById('email').value.trim(),
+      userId: 'pre-signup'
+    });
+  } catch(e) { console.warn('Clickwrap log failed:', e); }
+
+  // Now run the actual signup
+  window.handleSignup();
+};
+
+// Decline
+window.ttHandleDecline = function() {
+  if (confirm('You need to agree to create an account. Cancel signup?')) {
+    document.getElementById('tt-terms-overlay').style.display = 'none';
+  }
+};
 </script>
 
 </body>
