@@ -258,7 +258,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
 <div id="toast" class="toast"></div>
 
 <!-- CPA ONBOARDING OVERLAY -->
-<div id="cpa-onboard">
+<div id="cpa-onboard" style="display:none;">
   <div class="ob-wrap">
 
     <!-- STEP 1 -->
@@ -813,12 +813,20 @@ window.handleLogout = function() { auth.signOut(); location.reload(); };
 /* ── CLIENTS ── */
 async function loadClients() {
   try {
-    // Load from all three sources in parallel
-    const [usersSnap, assignSnap, retSnap] = await Promise.all([
-      db.collection('users').where('assignedCPA.uid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('assignments').where('assignedCPA.uid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]})),
-      db.collection('tax_returns').where('cpaUid','==',myCpasDocId||currentUser.uid).get().catch(()=>({docs:[]}))
-    ]);
+    // Query by BOTH cpas doc ID and auth UID to catch any ID mismatch
+    const ids = [...new Set([myCpasDocId, currentUser.uid].filter(Boolean))];
+    const allSnapshots = await Promise.all(
+      ids.flatMap(id => [
+        db.collection('users').where('assignedCPA.uid','==',id).get().catch(()=>({docs:[]})),
+        db.collection('assignments').where('assignedCPA.uid','==',id).get().catch(()=>({docs:[]})),
+        db.collection('tax_returns').where('cpaUid','==',id).get().catch(()=>({docs:[]}))
+      ])
+    );
+    const [usersSnap, assignSnap, retSnap] = [
+      {docs: allSnapshots.filter((_,i)=>i%3===0).flatMap(s=>s.docs)},
+      {docs: allSnapshots.filter((_,i)=>i%3===1).flatMap(s=>s.docs)},
+      {docs: allSnapshots.filter((_,i)=>i%3===2).flatMap(s=>s.docs)}
+    ];
 
     // Build client list — prefer users doc data, supplement with assignments data
     const clientMap = new Map();
@@ -846,6 +854,10 @@ async function loadClients() {
     
     myClients = [...clientMap.values()];
     document.getElementById('sb-client-count').textContent = myClients.length;
+    // Sync clientCount to cpas collection
+    if (myCpasDocId && myClients.length > 0) {
+      db.collection('cpas').doc(myCpasDocId).update({ clientCount: myClients.length }).catch(() => {});
+    }
 
     // Populate upload-client-select
     const sel = document.getElementById('upload-client-select');
@@ -1017,8 +1029,12 @@ function checkOnboarding() {
   const accepted = cpaData?.acceptedPlatformGuidelines;
   if (!accepted) {
     const ob = document.getElementById('cpa-onboard');
-    ob.style.display='flex';
-    document.getElementById('ob-step-1').style.display='block';
+    ob.style.display = 'flex';
+    ob.style.alignItems = 'center';
+    ob.style.justifyContent = 'center';
+    // Hide all steps first, show step 1
+    document.querySelectorAll('[id^="ob-step-"]').forEach(el => el.style.display='none');
+    document.getElementById('ob-step-1').style.display = 'block';
   }
 }
 
