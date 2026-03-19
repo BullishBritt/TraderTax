@@ -242,6 +242,40 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
 .ob-prog{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:5px 0 1px;}
 .ob-prog-fill{height:100%;background:var(--green);border-radius:99px;transition:width .35s;}
 .ob-resume-banner{background:var(--amber-lt);border:1px solid #fde68a;border-radius:12px;padding:13px 18px;margin-bottom:20px;display:flex;align-items:center;gap:12px;}
+
+/* ── ONBOARDING LIVE CHECKLIST PANEL ── */
+#ob-overlay.with-panel { justify-content: center; align-items: flex-start; padding: 28px 16px; }
+.ob-layout { display: flex; gap: 20px; width: 100%; max-width: 1040px; margin: 0 auto; align-items: flex-start; }
+.ob-layout .ob-card { flex: 0 0 620px; max-width: 620px; margin: 0; }
+.ob-live-panel {
+  flex: 1;
+  background: var(--surface);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(10,22,40,.25);
+  overflow: hidden;
+  max-height: 85vh;
+  overflow-y: auto;
+  display: none;
+}
+@media(max-width:900px) { .ob-live-panel { display: none !important; } .ob-layout { max-width: 620px; } }
+.ob-live-panel.visible { display: block; }
+.ob-panel-hdr { background: var(--navy); padding: 16px 18px; }
+.ob-panel-hdr-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: .88rem; color: #fff; margin-bottom: 3px; }
+.ob-panel-hdr-sub { font-size: .72rem; color: rgba(255,255,255,.55); }
+.ob-panel-body { padding: 14px 16px; }
+.ob-live-item { display: flex; align-items: flex-start; gap: 9px; padding: 8px 10px; border-radius: 8px; margin-bottom: 5px; border: 1px solid transparent; transition: all .2s; }
+.ob-live-item.pending { background: var(--bg); border-color: var(--border); }
+.ob-live-item.added { background: #eff6ff; border-color: #bfdbfe; animation: ob-pop .3s ease; }
+.ob-live-item.uploaded { background: var(--green-lt); border-color: rgba(61,186,126,.3); }
+@keyframes ob-pop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+.ob-live-icon { font-size: .85rem; flex-shrink: 0; margin-top: 1px; }
+.ob-live-label { font-size: .78rem; font-weight: 600; color: var(--navy); }
+.ob-live-sub { font-size: .67rem; color: var(--muted); }
+.ob-panel-empty { text-align: center; padding: 28px 16px; color: var(--muted); font-size: .8rem; }
+.ob-panel-progress { padding: 12px 16px; background: var(--bg); border-top: 1px solid var(--border); }
+.ob-panel-prog-bar-bg { height: 4px; background: var(--border); border-radius: 99px; margin-bottom: 5px; }
+.ob-panel-prog-bar { height: 100%; background: var(--green); border-radius: 99px; transition: width .4s; }
+.ob-panel-prog-label { font-size: .68rem; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -604,6 +638,7 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
      Permanently hidden once step 6 is completed.
      ═══════════════════════════════════════════════════ -->
 <div id="ob-overlay" style="display:none;position:fixed;inset:0;background:rgba(10,22,40,.75);backdrop-filter:blur(5px);z-index:500;align-items:flex-start;justify-content:center;padding:28px 16px;overflow-y:auto;">
+  <div class="ob-layout">
   <div class="ob-card">
     <!-- Header: step dots + skip -->
     <div class="ob-hdr">
@@ -889,7 +924,12 @@ function uploadFiles(files){
     async()=>{
       try {
         const url=await getDownloadURL(task.snapshot.ref);
-        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,clientUid:currentUser.uid,clientEmail:currentUser.email,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted'});
+        // Auto-detect which checklist item this file matches
+        const checklistItemId = window._currentChecklistItem || matchFileToChecklist(file.name);
+        window._currentChecklistItem = null;
+        await addDoc(collection(db,'client_documents'),{uid:currentUser.uid,clientUid:currentUser.uid,clientEmail:currentUser.email,fileName:file.name,fileUrl:url,storagePath:path,taxYear:yr,fileType:file.type,fileSize:file.size,uploadedAt:serverTimestamp(),status:'submitted',checklistItemId:checklistItemId||''});
+        // Update checklist item status in Firestore
+        if (checklistItemId) await updateChecklistItemStatus(checklistItemId, 'uploaded');
         const el=document.getElementById(pid);if(el)el.querySelectorAll('span')[2].textContent='✓';
         setTimeout(()=>{const e=document.getElementById(pid);if(e)e.remove();},2000);
         loadDocuments(currentUser);
@@ -1151,6 +1191,60 @@ function renderOnboardingTab() {
   }
 }
 
+
+/* ══ LIVE ONBOARDING CHECKLIST PANEL ══ */
+
+function updateLivePanel() {
+  const panel = document.getElementById('ob-live-panel');
+  const body = document.getElementById('ob-live-body');
+  const progBar = document.getElementById('ob-panel-prog');
+  const progLabel = document.getElementById('ob-panel-prog-label');
+  if (!panel || !body) return;
+
+  // Only show panel from step 2 onwards
+  if (obCurrentStep < 2) { panel.classList.remove('visible'); return; }
+  panel.classList.add('visible');
+
+  // Generate preview checklist from current answers
+  const preview = obGenerateChecklist(obAnswers);
+  if (!preview.length) {
+    body.innerHTML = '<div class="ob-panel-empty">Select your trading type to see your checklist.</div>';
+    if (progBar) progBar.style.width = '0%';
+    if (progLabel) progLabel.textContent = '0 items identified';
+    return;
+  }
+
+  const req = preview.filter(i=>i.required);
+  const opt = preview.filter(i=>!i.required);
+  const uploaded = Object.values(obUploaded).filter(Boolean).length;
+  const pct = preview.length > 0 ? Math.round((uploaded / req.length) * 100) : 0;
+
+  if (progBar) progBar.style.width = Math.min(pct, 100) + '%';
+  if (progLabel) progLabel.textContent = `${preview.length} items · ${uploaded} uploaded`;
+
+  let html = '';
+  if (req.length) {
+    html += `<div style="font-size:.65rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;">Required (${req.length})</div>`;
+    req.forEach(item => {
+      const isUp = !!obUploaded[item.id];
+      html += `<div class="ob-live-item ${isUp?'uploaded':'added'}">
+        <span class="ob-live-icon">${isUp?'✅':'📄'}</span>
+        <div><div class="ob-live-label">${item.label}</div></div>
+      </div>`;
+    });
+  }
+  if (opt.length) {
+    html += `<div style="font-size:.65rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--muted);margin:10px 0 6px;">Helpful (${opt.length})</div>`;
+    opt.forEach(item => {
+      html += `<div class="ob-live-item pending">
+        <span class="ob-live-icon">○</span>
+        <div><div class="ob-live-label">${item.label}</div></div>
+      </div>`;
+    });
+  }
+  body.innerHTML = html;
+}
+
 function renderChecklistTab() {
   const ob = userData.onboarding || {};
   const checklist = ob.checklist || [];
@@ -1189,15 +1283,20 @@ function renderChecklistTab() {
 
     items.forEach(item => {
       const isReq = item.required;
-      const badge = isReq
-        ? '<span style="background:#fee2e2;color:#dc2626;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Required</span>'
-        : '<span style="background:var(--amber-lt);color:var(--amber);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Optional</span>';
+      const isUploaded = item.status === 'uploaded';
+      const statusIcon = isUploaded ? '✅' : (isReq ? '⚠️' : '○');
+      const badge = isUploaded
+        ? '<span style="background:var(--green-lt);color:var(--green-dk);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">✓ Uploaded</span>'
+        : isReq
+          ? '<span style="background:#fee2e2;color:#dc2626;font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Required — Missing</span>'
+          : '<span style="background:var(--amber-lt);color:var(--amber);font-size:.65rem;font-weight:700;padding:2px 8px;border-radius:99px;flex-shrink:0;">Optional</span>';
       const where = item.where || item.whereToFind || '';
       const note = item.note || item.cpaNote || '';
       const itemId = 'cl-where-' + (item.id || Math.random().toString(36).slice(2));
 
-      html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px;margin-bottom:8px;">
+      html += `<div style="background:${isUploaded?'var(--green-lt)':isReq?'#fef9f9':'var(--surface)'};border:1.5px solid ${isUploaded?'rgba(61,186,126,.3)':isReq?'#fecaca':'var(--border)'};border-radius:11px;padding:14px 16px;margin-bottom:8px;">
         <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;">
+          <span style="font-size:1rem;flex-shrink:0;">${statusIcon}</span>
           <div style="flex:1;font-weight:600;font-size:.86rem;color:var(--navy);">${item.label}</div>
           ${badge}
         </div>
@@ -1399,6 +1498,7 @@ function obGoTo(n) {
     else { nextBtn.textContent = 'Continue →'; nextBtn.onclick = () => obStep(1); }
   }
   if (obCurrentStep === 4) { obChecklist = obGenerateChecklist(obAnswers); renderObChecklist(); }
+  updateLivePanel();
   if (obCurrentStep === 5) { if (!obChecklist.length) obChecklist = obGenerateChecklist(obAnswers); renderObUploads(); }
   if (obCurrentStep === 6) obPopulateComplete();
 }
@@ -1428,6 +1528,7 @@ window.obStep = function obStep(dir) {
 
 window.obToggleChip = function(el) {
   scheduleObSave();
+  setTimeout(updateLivePanel, 50);
   const f = el.dataset.field, v = el.dataset.val;
   if (!Array.isArray(obAnswers[f])) obAnswers[f] = [];
   if (el.classList.contains('sel')) { el.classList.remove('sel'); obAnswers[f] = obAnswers[f].filter(x=>x!==v); }
@@ -1603,11 +1704,96 @@ window.obDismiss = function() {
   showObResumeBanner(obCurrentStep);
 };
 
+
+/* ══ CHECKLIST SYNC HELPERS ══ */
+
+// Match uploaded filename to a checklist item ID
+function matchFileToChecklist(fileName) {
+  if (!userData?.onboarding?.checklist) return null;
+  const name = fileName.toLowerCase();
+  const checklist = userData.onboarding.checklist;
+  // Try exact checklistItemId match patterns
+  if (name.includes('w2') || name.includes('w-2')) return checklist.find(i=>i.id==='w2')?.id || null;
+  if (name.includes('1099-nec') || name.includes('1099nec')) return checklist.find(i=>i.id==='1099_nec')?.id || null;
+  if (name.includes('robinhood')) return checklist.find(i=>i.id?.includes('robinhood'))?.id || null;
+  if (name.includes('webull')) return checklist.find(i=>i.id?.includes('webull'))?.id || null;
+  if (name.includes('fidelity')) return checklist.find(i=>i.id?.includes('fidelity'))?.id || null;
+  if (name.includes('schwab') || name.includes('thinkorswim')) return checklist.find(i=>i.id?.includes('schwab'))?.id || null;
+  if (name.includes('coinbase') || name.includes('kraken') || name.includes('crypto')) return checklist.find(i=>i.id==='crypto_csv')?.id || null;
+  if (name.includes('payout') || name.includes('prop')) return checklist.find(i=>i.id==='propfirm_payouts')?.id || null;
+  if (name.includes('bank') || name.includes('statement')) return checklist.find(i=>i.id==='propfirm_payouts')?.id || null;
+  if (name.includes('1099-b') || name.includes('1099b')) return checklist.find(i=>i.id?.includes('1099b'))?.id || null;
+  return null;
+}
+
+// Update a checklist item status in Firestore
+async function updateChecklistItemStatus(itemId, status) {
+  if (!currentUser || !userData?.onboarding?.checklist) return;
+  try {
+    const cl = userData.onboarding.checklist.map(item =>
+      item.id === itemId ? {...item, status, uploadedAt: new Date().toISOString()} : item
+    );
+    await setDoc(doc(db,'users',currentUser.uid), {
+      onboarding: { ...userData.onboarding, checklist: cl }
+    }, {merge:true});
+    // Update local cache
+    if (userData.onboarding) userData.onboarding.checklist = cl;
+    // Re-render checklist tab if visible
+    const clTab = document.getElementById('section-checklist');
+    if (clTab?.classList.contains('active')) renderChecklistTab();
+  } catch(e) { console.warn('Checklist status update failed:', e); }
+}
+
 window.obComplete = async function obComplete() {
   if (!currentUser) return;
   const cl = obChecklist.length ? obChecklist : obGenerateChecklist(obAnswers);
+  const ans = obAnswers;
+
+  // Build flat snapshot object for CPA visibility
+  const snapshot = {
+    generatedAt: new Date().toISOString(),
+    filingStatus: ans.filingStatus || '—',
+    states: ans.states || (ans.state ? [ans.state] : []),
+    dependents: ans.dependents || 0,
+    // Income
+    hasW2: !!ans.w2Job,
+    has1099: !!ans.income1099,
+    hasBusiness: !!ans.ownsBusiness,
+    hasRental: !!ans.rentalIncome,
+    // Trading
+    traderType: ans.traderTypes?.join(', ') || ans.traderType || '—',
+    tradeTypes: ans.tradeTypes || [],
+    brokers: ans.brokers || [],
+    hasPropFirm: ans.tradeTypes?.includes('propFirm') || false,
+    hasCrypto: ans.tradeTypes?.includes('crypto') || false,
+    hasFutures: ans.tradeTypes?.includes('futures') || false,
+    // Deductions
+    homeOffice: !!ans.homeOffice,
+    equipment: !!ans.equipment,
+    tradingSoftware: !!ans.tradingSoftware,
+    hasEntity: !!ans.hasEntity,
+    // Checklist summary
+    totalItems: cl.length,
+    requiredItems: cl.filter(i=>i.required).length,
+    uploadedCount: Object.values(obUploaded).filter(Boolean).length,
+    // Complexity
+    isMultiState: (ans.states?.length || 0) > 1,
+    isHighVolume: (ans.brokers?.length || 0) > 2,
+  };
+
   try {
     await setDoc(doc(db,'users',currentUser.uid), {
+      // Top-level fields for CPA quick access
+      tradeTypes: ans.tradeTypes || [],
+      brokers: ans.brokers || [],
+      filingStatus: ans.filingStatus || '',
+      hasW2: !!ans.w2Job,
+      has1099: !!ans.income1099,
+      hasBusiness: !!ans.ownsBusiness,
+      hasPropFirm: ans.tradeTypes?.includes('propFirm') || false,
+      hasCrypto: ans.tradeTypes?.includes('crypto') || false,
+      // Structured objects
+      snapshot,
       onboarding: {
         status:'complete', completedAt:new Date().toISOString(),
         currentStep:OB_TOTAL, answers:obAnswers, checklist:cl,
