@@ -541,11 +541,11 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="page-sub">Your account details. Private and never shared.</div>
       <div class="card" style="max-width:540px;">
         <div class="profile-grid">
-          <div class="pf"><label>First Name</label><input type="text" id="pf-first" oninput="autoSaveProfile()"/></div>
-          <div class="pf"><label>Last Name</label><input type="text" id="pf-last" oninput="autoSaveProfile()"/></div>
+          <div class="pf"><label>First Name</label><input type="text" id="pf-first" onblur="autoSaveProfile()"/></div>
+          <div class="pf"><label>Last Name</label><input type="text" id="pf-last" onblur="autoSaveProfile()"/></div>
           <div class="pf" style="grid-column:1/-1"><label>Email</label><input type="email" id="pf-email" disabled/></div>
-          <div class="pf"><label>Phone</label><input type="tel" id="pf-phone" oninput="autoSaveProfile()" placeholder="(555) 000-0000"/></div>
-          <div class="pf"><label>State</label><input type="text" id="pf-state" oninput="autoSaveProfile()" placeholder="e.g. Texas"/></div>
+          <div class="pf"><label>Phone</label><input type="tel" id="pf-phone" onblur="autoSaveProfile()" placeholder="(555) 000-0000"/></div>
+          <div class="pf"><label>State</label><input type="text" id="pf-state" onblur="autoSaveProfile()" placeholder="e.g. Texas"/></div>
         </div>
         <button class="save-btn" onclick="saveProfile()">Save Changes</button>
         <div id="profile-msg" style="font-size:.8rem;margin-top:8px;"></div>
@@ -1743,6 +1743,48 @@ async function updateChecklistItemStatus(itemId, status) {
     if (clTab?.classList.contains('active')) renderChecklistTab();
   } catch(e) { console.warn('Checklist status update failed:', e); }
 }
+
+// ── Profile: save on blur ──
+async function autoSaveProfile() {
+  if (!currentUser) return;
+  try {
+    const map = {'pf-first':'firstName','pf-last':'lastName','pf-phone':'phone','pf-state':'state'};
+    const data = {};
+    Object.entries(map).forEach(([id,key]) => { const el=document.getElementById(id); if(el) data[key]=el.value.trim(); });
+    await setDoc(doc(db,'users',currentUser.uid), {...data, updatedAt:new Date().toISOString()}, {merge:true});
+  } catch(e) {}
+}
+
+// ── Onboarding: mark dirty on chip changes, save every 15 min ──
+let obDirty = false;
+function scheduleObSave() { obDirty = true; }
+setInterval(() => {
+  if (obDirty && typeof saveObAnswers === 'function') { saveObAnswers(); obDirty = false; }
+}, 15 * 60 * 1000);
+
+// ══ IDLE LOGOUT — 30 min no activity ══
+const IDLE_MS = 30 * 60 * 1000;
+const WARN_MS = 25 * 60 * 1000;
+let idleTimer, idleWarnTimer, idleWarnShown = false;
+function resetIdleTimer() {
+  clearTimeout(idleTimer); clearTimeout(idleWarnTimer);
+  if (idleWarnShown) { const w=document.getElementById('tt-idle-warn'); if(w) w.remove(); idleWarnShown=false; }
+  idleWarnTimer = setTimeout(() => {
+    idleWarnShown = true;
+    const w = document.createElement('div');
+    w.id = 'tt-idle-warn';
+    w.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a1628;color:#fff;padding:16px 22px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.35);z-index:9999;display:flex;align-items:center;gap:14px;font-family:"DM Sans",sans-serif;font-size:.85rem;max-width:400px;width:90%;border:1px solid rgba(255,255,255,0.1);';
+    w.innerHTML = '<span style="font-size:1.1rem;flex-shrink:0;">⏱️</span><div style="flex:1;"><div style="font-family:\'Syne\',sans-serif;font-weight:700;margin-bottom:2px;">Still there?</div><div style="color:rgba(255,255,255,0.65);font-size:.8rem;">You\'ll be logged out in 5 minutes due to inactivity.</div></div><button onclick="resetIdleTimer()" style="padding:8px 14px;background:#3dba7e;color:#fff;border:none;border-radius:8px;font-family:\'Syne\',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;flex-shrink:0;">I\'m here</button>';
+    document.body.appendChild(w);
+  }, WARN_MS);
+  idleTimer = setTimeout(async () => {
+    if (obDirty && typeof saveObAnswers === 'function') { try { await saveObAnswers(); } catch(e) {} }
+    try { const {getAuth,signOut} = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"); await signOut(getAuth()); } catch(e) {}
+    window.location.href = 'login.html?reason=idle';
+  }, IDLE_MS);
+}
+['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(e => document.addEventListener(e, resetIdleTimer, {passive:true}));
+resetIdleTimer();
 
 window.obComplete = async function obComplete() {
   if (!currentUser) return;
