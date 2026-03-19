@@ -507,11 +507,11 @@ main{padding:32px 36px;overflow-y:auto;min-width:0;}
       <div class="page-sub">Your account details. Private and never shared.</div>
       <div class="card" style="max-width:540px;">
         <div class="profile-grid">
-          <div class="pf"><label>First Name</label><input type="text" id="pf-first"/></div>
-          <div class="pf"><label>Last Name</label><input type="text" id="pf-last"/></div>
+          <div class="pf"><label>First Name</label><input type="text" id="pf-first" oninput="autoSaveProfile()"/></div>
+          <div class="pf"><label>Last Name</label><input type="text" id="pf-last" oninput="autoSaveProfile()"/></div>
           <div class="pf" style="grid-column:1/-1"><label>Email</label><input type="email" id="pf-email" disabled/></div>
-          <div class="pf"><label>Phone</label><input type="tel" id="pf-phone" placeholder="(555) 000-0000"/></div>
-          <div class="pf"><label>State</label><input type="text" id="pf-state" placeholder="e.g. Texas"/></div>
+          <div class="pf"><label>Phone</label><input type="tel" id="pf-phone" oninput="autoSaveProfile()" placeholder="(555) 000-0000"/></div>
+          <div class="pf"><label>State</label><input type="text" id="pf-state" oninput="autoSaveProfile()" placeholder="e.g. Texas"/></div>
         </div>
         <button class="save-btn" onclick="saveProfile()">Save Changes</button>
         <div id="profile-msg" style="font-size:.8rem;margin-top:8px;"></div>
@@ -793,6 +793,7 @@ onAuthStateChanged(auth,async user=>{
 
     currentUser=user;
     await loadUser(user);
+    setTimeout(()=>{const t=sessionStorage.getItem('tt_dash_tab');if(t&&document.getElementById('tab-'+t))showTab(t);},400);
     checkOnboarding();
     loadDocuments(user);loadReturn(user);loadBilling(user);loadMessages(user);
     setupUserListener(user);
@@ -982,7 +983,7 @@ function renderSnapshots(snapshots){
 window.saveProfile=async function(){const msg=document.getElementById('profile-msg');try{await setDoc(doc(db,'users',currentUser.uid),{...userData,firstName:document.getElementById('pf-first').value.trim(),lastName:document.getElementById('pf-last').value.trim(),phone:document.getElementById('pf-phone').value.trim(),state:document.getElementById('pf-state').value.trim(),updatedAt:new Date().toISOString()},{merge:true});msg.textContent='✓ Saved';msg.style.color='var(--green)';}catch(e){msg.textContent='Error saving.';msg.style.color='#dc2626';}setTimeout(()=>msg.textContent='',3000);};
 window.sendPasswordReset=async function(){try{await sendPasswordResetEmail(auth,currentUser.email);document.getElementById('pw-reset-msg').textContent='✓ Reset email sent';}catch(e){document.getElementById('pw-reset-msg').textContent='Error sending reset email.';}};
 window.handleLogout=async function(){await signOut(auth);window.location.href='index.html';};
-window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');if(tab==='messages')loadCPAMessages();if(tab==='onboarding')renderOnboardingTab();if(tab==='checklist')renderChecklistTab();};
+window.showTab=function(tab){document.querySelectorAll('.content-section').forEach(s=>s.classList.remove('active'));document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));const s=document.getElementById('section-'+tab);const t=document.getElementById('tab-'+tab);if(s)s.classList.add('active');if(t)t.classList.add('active');if(tab==='messages')loadCPAMessages();if(tab==='onboarding')renderOnboardingTab();if(tab==='checklist')renderChecklistTab();sessionStorage.setItem('tt_dash_tab',tab);};
 
 // ── REAL-TIME USER DOC LISTENER (detects instant CPA assignment) ──
 function setupUserListener(user) {
@@ -1426,6 +1427,7 @@ window.obStep = function obStep(dir) {
 }
 
 window.obToggleChip = function(el) {
+  scheduleObSave();
   const f = el.dataset.field, v = el.dataset.val;
   if (!Array.isArray(obAnswers[f])) obAnswers[f] = [];
   if (el.classList.contains('sel')) { el.classList.remove('sel'); obAnswers[f] = obAnswers[f].filter(x=>x!==v); }
