@@ -881,6 +881,29 @@ window.openNotifPanel = function() {
 
 window.handleLogout = function() { auth.signOut(); location.reload(); };
 
+// ══ IDLE LOGOUT — 30 min no activity ══
+(function() {
+  const IDLE_MS = 30*60*1000, WARN_MS = 25*60*1000;
+  let idleT, warnT, warned = false;
+  function reset() {
+    clearTimeout(idleT); clearTimeout(warnT);
+    if (warned) { const w=document.getElementById('tt-idle-warn'); if(w) w.remove(); warned=false; }
+    warnT = setTimeout(() => {
+      warned = true;
+      const w = document.createElement('div');
+      w.id = 'tt-idle-warn';
+      w.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#0a1628;color:#fff;padding:16px 22px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.35);z-index:9999;display:flex;align-items:center;gap:14px;font-family:"DM Sans",sans-serif;font-size:.85rem;max-width:400px;width:90%;border:1px solid rgba(255,255,255,0.1);';
+      w.innerHTML = '<span style="font-size:1.1rem;">⏱️</span><div style="flex:1;"><div style="font-family:\'Syne\',sans-serif;font-weight:700;margin-bottom:2px;">Still working?</div><div style="color:rgba(255,255,255,0.65);font-size:.8rem;">You\'ll be logged out in 5 minutes due to inactivity.</div></div><button onclick="(function(){clearTimeout(window._cpaIdleT);document.getElementById(\'tt-idle-warn\').remove();})()" style="padding:8px 14px;background:#3dba7e;color:#fff;border:none;border-radius:8px;font-family:\'Syne\',sans-serif;font-weight:700;font-size:.78rem;cursor:pointer;flex-shrink:0;">I\'m here</button>';
+      document.body.appendChild(w);
+    }, WARN_MS);
+    window._cpaIdleT = idleT = setTimeout(() => {
+      auth.signOut().then(() => { window.location.href = 'login.html?reason=idle'; });
+    }, IDLE_MS);
+  }
+  ['mousemove','mousedown','keydown','touchstart','scroll','click'].forEach(e => document.addEventListener(e, reset, {passive:true}));
+  reset();
+})();
+
 /* ── CLIENTS ── */
 async function loadClients() {
   try {
