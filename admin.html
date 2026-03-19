@@ -94,7 +94,7 @@ body{background:var(--bg);font-family:'DM Sans',sans-serif;min-height:100vh;colo
 .t-row:hover{background:#f9fafb;}
 .t-row:last-child{border-bottom:none;}
 .leads-grid{grid-template-columns:80px 1fr 140px 110px 100px 120px 130px 90px;}
-.clients-grid{grid-template-columns:1fr 140px 110px 1fr 160px 80px;}
+.clients-grid{grid-template-columns:1fr 140px 110px 120px 1fr 160px 80px;}
 .cpas-grid{grid-template-columns:1fr 160px 80px 100px 80px;}
 .support-grid{grid-template-columns:1fr 140px 100px 100px 80px;}
 .pri{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:99px;font-size:.67rem;font-weight:700;}
@@ -792,7 +792,13 @@ function renderClients() {
     const st=c.returnStatus||'received';
     const cpaName=c.assignedCPA?.name||'—';
     const joined=c.createdAt?new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',year:'numeric'}):'—';
-    return `<div class="t-row clients-grid" style="cursor:pointer;" onclick="openClientProfile('${c.id}')"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div><span class="status-badge ${stCls[st]||'received'}">${stLabels[st]||st}</span></div><div class="cell-muted">${c.taxYear||2025}</div><div class="cell-muted">${cpaName}</div><div><button onclick="event.stopPropagation();openAssignModal('${c.id}','${name.replace(/'/g,'')}')" style="padding:5px 12px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;color:var(--navy);">${c.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button></div><div class="cell-muted">${joined}</div></div>`;
+    // Onboarding status badge
+    const obStatus = c.onboarding?.status || 'not_started';
+    const obLabels = {not_started:'Not Started', in_progress:'In Progress', complete:'Complete'};
+    const obColors = {not_started:'background:#f3f4f6;color:#6b7280', in_progress:'background:#fffbeb;color:#d97706', complete:'background:var(--green-lt);color:var(--green-dk)'};
+    const obStep = c.onboarding?.currentStep || 0;
+    const obLabel = obStatus === 'in_progress' ? `Step ${obStep}/6` : obLabels[obStatus] || 'Not Started';
+    return `<div class="t-row clients-grid" style="cursor:pointer;" onclick="openClientProfile('${c.id}')"><div><div class="cell-name">${name}</div><div class="cell-email">${c.email||'—'}</div></div><div><span class="status-badge ${stCls[st]||'received'}">${stLabels[st]||st}</span></div><div class="cell-muted">${c.taxYear||2025}</div><div><span style="font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:99px;${obColors[obStatus]}">${obLabel}</span></div><div class="cell-muted">${cpaName}</div><div><button onclick="event.stopPropagation();openAssignModal('${c.id}','${name.replace(/'/g,'')}')" style="padding:5px 12px;font-size:.74rem;font-weight:700;border:1.5px solid var(--border);border-radius:7px;background:none;cursor:pointer;color:var(--navy);">${c.assignedCPA?.uid?'Reassign CPA':'Assign CPA'}</button></div><div class="cell-muted">${joined}</div></div>`;
   }).join('');
 }
 
