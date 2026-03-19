@@ -281,6 +281,11 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
 .missing-banner-icon{font-size:1.2rem;flex-shrink:0;}
 .missing-banner-text{font-size:.82rem;color:#991b1b;line-height:1.5;}
 .missing-banner-text strong{display:block;font-weight:700;margin-bottom:2px;}
+
+/* ── WORKSPACE FULLSCREEN ── */
+#workspace.ws-fullscreen{position:fixed;inset:0;z-index:500;background:var(--bg);margin:0;padding:20px 28px;overflow-y:auto;}
+.ws-fs-btn{display:flex;align-items:center;gap:6px;padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:none;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);transition:all .2s;margin-left:auto;}
+.ws-fs-btn:hover{border-color:var(--navy);color:var(--navy);}
 </style>
 </head>
 <body>
@@ -482,8 +487,12 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
       <!-- Client Workspace (embedded below grid) -->
       <div id="workspace">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <button onclick="closeWorkspace()" style="padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:none;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);">← Back to All Clients</button>
+          <button onclick="closeWorkspace()" id="ws-back-btn" style="padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:none;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);">← Back to All Clients</button>
           <div style="font-size:.8rem;color:var(--muted);" id="ws-breadcrumb">Client Workspace</div>
+          <button class="ws-fs-btn" onclick="toggleWorkspaceFullscreen()" id="ws-fs-btn" title="Expand workspace">
+            <span id="ws-fs-icon">⤢</span>
+            <span id="ws-fs-label">Expand</span>
+          </button>
         </div>
         <div class="ws-header">
           <div class="ws-avatar" id="ws-avatar">?</div>
@@ -1388,9 +1397,31 @@ function buildSnapshot(client, docs) {
   `).join('') : '<div style="text-align:center;padding:24px;color:var(--muted);">No checklist items — onboarding not yet complete.</div>';
 }
 
+
+window.toggleWorkspaceFullscreen = function() {
+  const ws = document.getElementById('workspace');
+  const label = document.getElementById('ws-fs-label');
+  const icon = document.getElementById('ws-fs-icon');
+  const backBtn = document.getElementById('ws-back-btn');
+  const isFS = ws.classList.toggle('ws-fullscreen');
+  if (isFS) {
+    label.textContent = 'Exit Fullscreen';
+    icon.textContent = '⤡';
+    backBtn.style.display = 'none';
+    document.body.style.overflow = 'hidden';
+  } else {
+    label.textContent = 'Expand';
+    icon.textContent = '⤢';
+    backBtn.style.display = '';
+    document.body.style.overflow = '';
+  }
+};
+
 window.closeWorkspace = function() {
+  const ws = document.getElementById('workspace');
+  if (ws.classList.contains('ws-fullscreen')) toggleWorkspaceFullscreen();
   activeClientId = null;
-  document.getElementById('workspace').style.display = 'none';
+  ws.style.display = 'none';
   document.querySelectorAll('.client-card').forEach(el => el.classList.remove('selected'));
 };
 
