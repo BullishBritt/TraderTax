@@ -252,34 +252,35 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
 .ob-agree-link{text-align:center;font-size:.72rem;color:var(--muted);margin-bottom:16px;}
 .ob-agree-link a{color:var(--green);text-decoration:underline;}
 
-/* ── WORKSPACE FULLSCREEN ── */
-#workspace.ws-fullscreen {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: var(--bg);
-  margin: 0;
-  padding: 20px 28px;
-  overflow-y: auto;
-}
-#workspace.ws-fullscreen .ws-fs-btn-icon::before { content: '⤡'; }
-#workspace:not(.ws-fullscreen) .ws-fs-btn-icon::before { content: '⤢'; }
-.ws-fs-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
-  border: 1.5px solid var(--border);
-  border-radius: 8px;
-  background: none;
-  font-size: .8rem;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--muted);
-  transition: all .2s;
-  margin-left: auto;
-}
-.ws-fs-btn:hover { border-color: var(--navy); color: var(--navy); }
+/* ── SNAPSHOT + CHECKLIST ── */
+.snap-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px;}
+.snap-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 18px;}
+.snap-card-title{font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;}
+.snap-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.82rem;border-bottom:1px solid var(--bg);}
+.snap-row:last-child{border-bottom:none;}
+.snap-key{color:var(--muted);}
+.snap-val{font-weight:600;color:var(--navy);text-align:right;max-width:55%;}
+.snap-tag{display:inline-block;padding:2px 8px;border-radius:99px;font-size:.65rem;font-weight:700;margin:2px;}
+.snap-tag.red{background:#fef2f2;color:#dc2626;}
+.snap-tag.amber{background:#fffbeb;color:#d97706;}
+.snap-tag.green{background:var(--green-lt);color:var(--green-dk);}
+.snap-tag.blue{background:#eff6ff;color:#2563eb;}
+.cl-list{display:flex;flex-direction:column;gap:6px;}
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:9px;}
+.cl-item.missing{border-color:#fecaca;background:#fef9f9;}
+.cl-item.uploaded{border-color:rgba(61,186,126,.3);background:var(--green-lt);}
+.cl-icon{font-size:.95rem;flex-shrink:0;margin-top:1px;}
+.cl-label{font-size:.83rem;font-weight:600;color:var(--navy);margin-bottom:2px;}
+.cl-sub{font-size:.72rem;color:var(--muted);line-height:1.4;}
+.cl-badge{display:inline-block;font-size:.62rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-top:3px;}
+.cl-badge.missing{background:#fef2f2;color:#dc2626;}
+.cl-badge.uploaded{background:var(--green-lt);color:var(--green-dk);}
+.cl-badge.optional{background:#f3f4f6;color:#6b7280;}
+.snap-section-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;color:var(--navy);margin:16px 0 8px;display:flex;align-items:center;justify-content:space-between;}
+.missing-banner{background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;align-items:center;gap:12px;}
+.missing-banner-icon{font-size:1.2rem;flex-shrink:0;}
+.missing-banner-text{font-size:.82rem;color:#991b1b;line-height:1.5;}
+.missing-banner-text strong{display:block;font-weight:700;margin-bottom:2px;}
 </style>
 </head>
 <body>
@@ -481,12 +482,8 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
       <!-- Client Workspace (embedded below grid) -->
       <div id="workspace">
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
-          <button onclick="closeWorkspace()" id="ws-back-btn" style="padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:none;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);">← Back to All Clients</button>
+          <button onclick="closeWorkspace()" style="padding:7px 14px;border:1.5px solid var(--border);border-radius:8px;background:none;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--muted);">← Back to All Clients</button>
           <div style="font-size:.8rem;color:var(--muted);" id="ws-breadcrumb">Client Workspace</div>
-          <button class="ws-fs-btn" onclick="toggleWorkspaceFullscreen()" id="ws-fs-btn" title="Expand workspace">
-            <span class="ws-fs-btn-icon"></span>
-            <span id="ws-fs-label">Expand</span>
-          </button>
         </div>
         <div class="ws-header">
           <div class="ws-avatar" id="ws-avatar">?</div>
@@ -508,6 +505,7 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
 
         <div class="ws-tabs">
           <div class="ws-tab active" onclick="showWsPanel('overview-panel')" id="wst-overview-panel">Overview</div>
+          <div class="ws-tab" onclick="showWsPanel('snapshot-panel')" id="wst-snapshot-panel">📋 Snapshot</div>
           <div class="ws-tab" onclick="showWsPanel('docs-panel')" id="wst-docs-panel">Documents</div>
           <div class="ws-tab" onclick="showWsPanel('messages-panel');loadClientMessages()" id="wst-messages-panel">💬 Messages <span id="ws-msg-badge" style="display:none;width:8px;height:8px;background:var(--red);border-radius:50%;display:inline-block;vertical-align:middle;margin-left:4px;"></span></div>
           <div class="ws-tab" onclick="showWsPanel('notes-panel')" id="wst-notes-panel">My Notes</div>
@@ -545,6 +543,31 @@ main{padding:28px 32px;overflow-y:auto;min-width:0;}
               <textarea id="ws-msg-input" placeholder="Message this client…" style="flex:1;border:1.5px solid var(--border);border-radius:9px;padding:10px 12px;font-size:.87rem;font-family:'DM Sans',sans-serif;color:var(--navy);outline:none;resize:none;transition:border-color .2s;height:42px;" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendClientMessage();}"></textarea>
               <button onclick="sendClientMessage()" style="padding:10px 16px;background:var(--green);color:#fff;border:none;border-radius:9px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;">Send</button>
             </div>
+          </div>
+        </div>
+
+
+        <!-- Snapshot + Checklist Panel -->
+        <div class="ws-panel" id="ws-snapshot-panel">
+          <div id="ws-missing-banner" style="display:none;" class="missing-banner">
+            <div class="missing-banner-icon">⚠️</div>
+            <div class="missing-banner-text">
+              <strong id="ws-missing-title">Missing Documents</strong>
+              <span id="ws-missing-desc">Some required documents have not been uploaded yet.</span>
+            </div>
+          </div>
+
+          <div class="snap-section-title">Client Overview</div>
+          <div class="snap-grid" id="ws-snap-grid">
+            <div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--muted);font-size:.83rem;">Loading snapshot...</div>
+          </div>
+
+          <div class="snap-section-title">
+            <span>Smart Checklist</span>
+            <span id="ws-cl-summary" style="font-family:'DM Sans',sans-serif;font-size:.75rem;color:var(--muted);font-weight:400;"></span>
+          </div>
+          <div class="cl-list" id="ws-checklist">
+            <div style="text-align:center;padding:24px;color:var(--muted);font-size:.83rem;">Loading checklist...</div>
           </div>
         </div>
 
@@ -1142,6 +1165,16 @@ async function openClient(clientId) {
     }
   } catch(e) {}
 
+  // Build snapshot + checklist (uses docs already loaded above)
+  try {
+    const docsForSnap = await db.collection('client_documents').where('uid','==',clientId).get();
+    const snapDocs = docsForSnap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.uploadedAt?.toMillis?.()||0)-(a.uploadedAt?.toMillis?.()||0));
+    buildSnapshot(client, snapDocs);
+  } catch(e) {
+    console.warn('Snapshot build error:', e);
+    buildSnapshot(client, []);
+  }
+
   // Load notes
   await loadClientNotes(clientId);
 
@@ -1166,29 +1199,199 @@ async function openClient(clientId) {
   document.getElementById('ws-msgs-container').innerHTML = '<div style="text-align:center;color:var(--muted);font-size:.83rem;padding:24px;">Click the Messages tab to load conversation.</div>';
 }
 
-window.closeWorkspace = function() {
-  // Exit fullscreen first if active
-  const ws = document.getElementById('workspace');
-  if (ws.classList.contains('ws-fullscreen')) toggleWorkspaceFullscreen();
-  activeClientId = null;
-  ws.style.display = 'none';
-  document.querySelectorAll('.client-card').forEach(el => el.classList.remove('selected'));
-};
 
-window.toggleWorkspaceFullscreen = function() {
-  const ws = document.getElementById('workspace');
-  const label = document.getElementById('ws-fs-label');
-  const backBtn = document.getElementById('ws-back-btn');
-  const isFullscreen = ws.classList.toggle('ws-fullscreen');
-  if (isFullscreen) {
-    label.textContent = 'Exit Fullscreen';
-    backBtn.style.display = 'none';
-    document.body.style.overflow = 'hidden';
-  } else {
-    label.textContent = 'Expand';
-    backBtn.style.display = '';
-    document.body.style.overflow = '';
+/* ══ CLIENT SNAPSHOT + SMART CHECKLIST ══ */
+
+function buildSnapshot(client, docs) {
+  // ── Broker list from onboarding ──
+  const brokers = client.brokers || client.snapshot?.brokers || [];
+  const traderTypes = client.traderTypes || client.snapshot?.traderTypes || [];
+  const hasPropFirm = client.propFirm || client.snapshot?.propFirm || false;
+  const propFirms = client.propFirms || client.snapshot?.propFirms || [];
+  const hasW2 = client.w2Income || client.snapshot?.w2Income || false;
+  const has1099 = client.otherIncome || client.snapshot?.otherIncome || false;
+  const hasCrypto = (traderTypes.includes('crypto') || (client.traderType||'').toLowerCase().includes('crypto'));
+  const hasBusiness = client.businessOwner || client.snapshot?.businessOwner || false;
+  const states = client.states || client.snapshot?.states || (client.state ? [client.state] : []);
+  const dependents = client.dependents || client.snapshot?.dependents || 0;
+
+  // ── Flags / complexity tags ──
+  const flags = [];
+  if (states.length > 1) flags.push({label:'Multi-State', cls:'amber'});
+  if (hasBusiness) flags.push({label:'Business Owner', cls:'amber'});
+  if (hasPropFirm) flags.push({label:'Prop Firm', cls:'blue'});
+  if (hasCrypto) flags.push({label:'Crypto', cls:'blue'});
+  if (brokers.length > 2) flags.push({label:'High Volume', cls:'amber'});
+
+  // ── Snapshot cards ──
+  const cards = [
+    {
+      title: 'Personal',
+      rows: [
+        ['Filing Status', client.filing || client.filingStatus || '—'],
+        ['State(s)', states.length ? states.join(', ') : (client.state || '—')],
+        ['Dependents', dependents || '0'],
+        ['Tax Year', client.taxYear || 2025],
+      ]
+    },
+    {
+      title: 'Income Sources',
+      rows: [
+        ['W-2 Job', hasW2 ? '✓ Yes' : '—'],
+        ['1099 / Contract', has1099 ? '✓ Yes' : '—'],
+        ['Business Income', hasBusiness ? '✓ Yes' : '—'],
+        ['Prop Firm', hasPropFirm ? '✓ Yes' : '—'],
+      ]
+    },
+    {
+      title: 'Trading Profile',
+      rows: [
+        ['Trader Type', client.traderType || '—'],
+        ['Brokers', brokers.length ? brokers.join(', ') : '—'],
+        ['Prop Firms', propFirms.length ? propFirms.join(', ') : (hasPropFirm ? 'Yes' : '—')],
+        ['Crypto', hasCrypto ? '✓ Yes' : '—'],
+      ]
+    },
+    {
+      title: 'Documents',
+      rows: [
+        ['Total Uploaded', docs.length],
+        ['Missing', '—'],  // updated after checklist build
+        ['Last Upload', docs.length ? (docs[0].uploadedAt?.toDate?.()?.toLocaleDateString('en-US',{month:'short',day:'numeric'}) || '—') : '—'],
+        ['Status', client.returnStatus || 'received'],
+      ]
+    },
+  ];
+
+  document.getElementById('ws-snap-grid').innerHTML = cards.map(card => `
+    <div class="snap-card">
+      <div class="snap-card-title">${card.title}</div>
+      ${card.rows.map(([k,v])=>`<div class="snap-row"><span class="snap-key">${k}</span><span class="snap-val">${v}</span></div>`).join('')}
+    </div>
+  `).join('') + (flags.length ? `
+    <div class="snap-card" style="grid-column:1/-1;">
+      <div class="snap-card-title">Complexity Flags</div>
+      <div style="padding-top:4px;">${flags.map(f=>`<span class="snap-tag ${f.cls}">${f.label}</span>`).join('')}</div>
+    </div>` : '');
+
+  // ── Build checklist ──
+  const items = [];
+  const uploadedNames = docs.map(d => (d.fileName||d.documentType||'').toLowerCase());
+
+  function uploaded(keywords) {
+    return uploadedNames.some(n => keywords.some(k => n.includes(k)));
   }
+
+  // Personal
+  items.push({label:'Personal Info Completed', cat:'profile', required:true,
+    status: client.firstName ? 'uploaded' : 'missing',
+    sub: 'Name, email, filing status, state'});
+
+  // W2
+  if (hasW2) {
+    items.push({label:'W-2 Form', cat:'income', required:true,
+      status: uploaded(['w2','w-2']) ? 'uploaded' : 'missing',
+      sub: 'From your employer — box 1 shows wages. Find in your mail or HR portal.'});
+  }
+
+  // 1099
+  if (has1099) {
+    items.push({label:'1099-NEC / 1099-MISC', cat:'income', required:true,
+      status: uploaded(['1099-nec','1099-misc','1099nec','1099misc']) ? 'uploaded' : 'missing',
+      sub: 'From clients or platforms that paid you $600+.'});
+  }
+
+  // Brokers
+  const brokerDocs = {
+    'Robinhood':         {keywords:['robinhood','1099-b','1099b'], sub:'Download from Robinhood app → Account → Tax documents'},
+    'Webull':            {keywords:['webull','1099-b','1099b'], sub:'Webull app → Account → Tax Center → Download PDF'},
+    'Fidelity':          {keywords:['fidelity','1099-b'], sub:'Fidelity.com → Accounts → Tax Forms'},
+    'Schwab':            {keywords:['schwab','1099-b','thinkorswim'], sub:'Schwab.com → Accounts → History → Tax Documents'},
+    'TD Ameritrade':     {keywords:['td ameritrade','tda','1099-b'], sub:'tdameritrade.com → My Account → Tax Center'},
+    'E*TRADE':           {keywords:['etrade','e*trade','1099-b'], sub:'etrade.com → Tax Center → Tax Documents'},
+    'Interactive Brokers':{keywords:['interactive','ibkr','1099-b'], sub:'IBKR Portal → Reports → Tax Documents'},
+    'Tastytrade':        {keywords:['tastytrade','tasty','1099-b'], sub:'tastytrade.com → Account → Activity → Tax Documents'},
+    'TradeStation':      {keywords:['tradestation','1099-b'], sub:'TradeStation platform → Account → Tax Statements'},
+    'Coinbase':          {keywords:['coinbase','crypto','1099-misc','gain'], sub:'Coinbase.com → Taxes → Download report'},
+    'Kraken':            {keywords:['kraken','crypto'], sub:'Kraken.com → History → Export Ledger'},
+  };
+
+  brokers.forEach(broker => {
+    const info = brokerDocs[broker] || {keywords:[broker.toLowerCase()], sub:`Download tax documents from ${broker}`};
+    items.push({
+      label: `${broker} — 1099-B / Tax Statement`,
+      cat: 'trading', required: true,
+      status: uploaded(info.keywords) ? 'uploaded' : 'missing',
+      sub: info.sub
+    });
+  });
+
+  // Prop firm
+  if (hasPropFirm) {
+    items.push({label:'Prop Firm Payout Summary', cat:'propfirm', required:true,
+      status: uploaded(['payout','prop','1099-misc','1099misc']) ? 'uploaded' : 'missing',
+      sub: 'Download payout history from your prop firm dashboard.'});
+    items.push({label:'Bank Statements (Prop Payouts)', cat:'propfirm', required:false,
+      status: uploaded(['bank','statement']) ? 'uploaded' : 'missing',
+      sub: 'Shows deposits from prop firms — needed if no 1099 was issued.'});
+  }
+
+  // Crypto
+  if (hasCrypto) {
+    items.push({label:'Crypto Gain/Loss Report', cat:'trading', required:true,
+      status: uploaded(['crypto','koinly','coinledger','taxbit','gain','loss']) ? 'uploaded' : 'missing',
+      sub: 'Use Koinly, CoinLedger, or exchange export. All chains/wallets needed.'});
+  }
+
+  // Business
+  if (hasBusiness) {
+    items.push({label:'Business Income Records / P&L', cat:'business', required:true,
+      status: uploaded(['business','profit','loss','p&l','revenue']) ? 'uploaded' : 'missing',
+      sub: 'Profit & loss statement, or all income/expense records for the business.'});
+    items.push({label:'Business Expenses Summary', cat:'business', required:false,
+      status: uploaded(['expense','deduction']) ? 'uploaded' : 'missing',
+      sub: 'Receipts, mileage log, home office measurements, equipment costs.'});
+  }
+
+  // Render
+  const missing = items.filter(i => i.status === 'missing' && i.required);
+  const uploaded_count = items.filter(i => i.status === 'uploaded').length;
+
+  // Update missing banner
+  if (missing.length) {
+    document.getElementById('ws-missing-banner').style.display = 'flex';
+    document.getElementById('ws-missing-title').textContent = `${missing.length} Required Item${missing.length>1?'s':''} Missing`;
+    document.getElementById('ws-missing-desc').textContent = missing.slice(0,3).map(i=>i.label).join(' · ') + (missing.length>3?' · and more':'');
+  } else {
+    document.getElementById('ws-missing-banner').style.display = 'none';
+  }
+
+  // Update doc card in snapshot
+  const docCard = document.querySelector('#ws-snap-grid .snap-card:last-child');
+  if (docCard) {
+    const missingRow = docCard.querySelector('.snap-row:nth-child(3)');
+    if (missingRow) missingRow.querySelector('.snap-val').textContent = missing.length || '0';
+  }
+
+  document.getElementById('ws-cl-summary').textContent = `${uploaded_count} uploaded · ${missing.length} missing`;
+
+  const catIcons = {profile:'👤',income:'💼',trading:'📈',propfirm:'🏢',business:'🏛️',crypto:'₿'};
+  document.getElementById('ws-checklist').innerHTML = items.length ? items.map(item => `
+    <div class="cl-item ${item.status}">
+      <div class="cl-icon">${item.status==='uploaded'?'✅':item.required?'⚠️':'○'}</div>
+      <div style="flex:1;">
+        <div class="cl-label">${catIcons[item.cat]||'📋'} ${item.label}</div>
+        <div class="cl-sub">${item.sub}</div>
+        <span class="cl-badge ${item.status==='uploaded'?'uploaded':item.required?'missing':'optional'}">${item.status==='uploaded'?'Uploaded':item.required?'Required — Missing':'Optional'}</span>
+      </div>
+    </div>
+  `).join('') : '<div style="text-align:center;padding:24px;color:var(--muted);">No checklist items — onboarding not yet complete.</div>';
+}
+
+window.closeWorkspace = function() {
+  activeClientId = null;
+  document.getElementById('workspace').style.display = 'none';
+  document.querySelectorAll('.client-card').forEach(el => el.classList.remove('selected'));
 };
 
 window.showWsPanel = function(panel) {
