@@ -813,20 +813,18 @@ window.handleLogout = function() { auth.signOut(); location.reload(); };
 /* ── CLIENTS ── */
 async function loadClients() {
   try {
-    // Query by BOTH cpas doc ID and auth UID to catch any ID mismatch
-    const ids = [...new Set([myCpasDocId, currentUser.uid].filter(Boolean))];
-    const allSnapshots = await Promise.all(
-      ids.flatMap(id => [
+    // Query by BOTH cpas doc ID and auth UID to catch any assignment ID mismatch
+    const queryIds = [...new Set([myCpasDocId, currentUser.uid].filter(Boolean))];
+    const allQuerySnaps = await Promise.all(
+      queryIds.flatMap(id => [
         db.collection('users').where('assignedCPA.uid','==',id).get().catch(()=>({docs:[]})),
         db.collection('assignments').where('assignedCPA.uid','==',id).get().catch(()=>({docs:[]})),
         db.collection('tax_returns').where('cpaUid','==',id).get().catch(()=>({docs:[]}))
       ])
     );
-    const [usersSnap, assignSnap, retSnap] = [
-      {docs: allSnapshots.filter((_,i)=>i%3===0).flatMap(s=>s.docs)},
-      {docs: allSnapshots.filter((_,i)=>i%3===1).flatMap(s=>s.docs)},
-      {docs: allSnapshots.filter((_,i)=>i%3===2).flatMap(s=>s.docs)}
-    ];
+    const usersSnap = {docs: allQuerySnaps.filter((_,i)=>i%3===0).flatMap(s=>s.docs)};
+    const assignSnap = {docs: allQuerySnaps.filter((_,i)=>i%3===1).flatMap(s=>s.docs)};
+    const retSnap   = {docs: allQuerySnaps.filter((_,i)=>i%3===2).flatMap(s=>s.docs)};
 
     // Build client list — prefer users doc data, supplement with assignments data
     const clientMap = new Map();
@@ -854,9 +852,9 @@ async function loadClients() {
     
     myClients = [...clientMap.values()];
     document.getElementById('sb-client-count').textContent = myClients.length;
-    // Sync clientCount to cpas collection
+    // Keep clientCount in cpas collection in sync
     if (myCpasDocId && myClients.length > 0) {
-      db.collection('cpas').doc(myCpasDocId).update({ clientCount: myClients.length }).catch(() => {});
+      db.collection('cpas').doc(myCpasDocId).update({ clientCount: myClients.length }).catch(()=>{});
     }
 
     // Populate upload-client-select
@@ -1032,7 +1030,6 @@ function checkOnboarding() {
     ob.style.display = 'flex';
     ob.style.alignItems = 'center';
     ob.style.justifyContent = 'center';
-    // Hide all steps first, show step 1
     document.querySelectorAll('[id^="ob-step-"]').forEach(el => el.style.display='none');
     document.getElementById('ob-step-1').style.display = 'block';
   }
@@ -1325,24 +1322,37 @@ function renderAllDocs() {
 
 /* ── ALL NOTES ── */
 async function loadAllNotes() {
+  const listEl = document.getElementById('all-notes-list');
   try {
-    const snap = await db.collection('cpa_notes').where('cpaUid','==',myCpasDocId||currentUser.uid).limit(100).get();
-    allMyNotes = snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
-      const at=a.createdAt?.toMillis?.()||0;
-      const bt=b.createdAt?.toMillis?.()||0;
-      return bt-at;
-    });
+    // Query by both IDs to catch any mismatch
+    const ids = [...new Set([myCpasDocId, currentUser.uid].filter(Boolean))];
+    const snaps = await Promise.all(
+      ids.map(id => db.collection('cpa_notes').where('cpaUid','==',id).limit(100).get().catch(()=>({docs:[]})))
+    );
+    const allDocs = snaps.flatMap(s=>s.docs);
+    const seen = new Set();
+    allMyNotes = allDocs
+      .filter(d=>{ if(seen.has(d.id)) return false; seen.add(d.id); return true; })
+      .map(d=>({id:d.id,...d.data()}))
+      .sort((a,b)=>{
+        const at=a.createdAt?.toMillis?.()||0;
+        const bt=b.createdAt?.toMillis?.()||0;
+        return bt-at;
+      });
     if(!allMyNotes.length){
-      document.getElementById('all-notes-list').innerHTML='<div class="empty"><div class="empty-icon">📝</div><h3>No notes yet</h3><p>Notes you add in client workspaces appear here.</p></div>';
+      listEl.innerHTML='<div class="empty"><div class="empty-icon">📝</div><h3>No notes yet</h3><p>Notes you add in client workspaces appear here.</p></div>';
       return;
     }
-    document.getElementById('all-notes-list').innerHTML=allMyNotes.map(n=>{
+    listEl.innerHTML=allMyNotes.map(n=>{
       const client=myClients.find(c=>c.id===n.clientUid);
       const cName=client?((client.firstName||'')+' '+(client.lastName||'')).trim()||client.email:'Unknown Client';
       const dt=n.createdAt?.toDate?n.createdAt.toDate().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'';
       return `<div class="note-all-card"><div class="note-client-name">${cName}</div><div class="note-date" style="color:var(--muted);font-size:.7rem;margin-bottom:5px;">${dt}</div><div style="font-size:.85rem;color:var(--navy);line-height:1.5;">${n.noteText}</div></div>`;
     }).join('');
-  }catch(e){}
+  } catch(e) {
+    console.error('Notes load error:', e);
+    listEl.innerHTML='<div class="empty"><div class="empty-icon">📝</div><h3>No notes yet</h3><p>Notes you add in client workspaces appear here.</p></div>';
+  }
 }
 
 /* ── UPLOAD RETURN ── */
