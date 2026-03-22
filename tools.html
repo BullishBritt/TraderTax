@@ -240,6 +240,9 @@ footer{background:var(--navy);padding:40px 5% 24px;margin-top:0;}
   </div>
 </section>
 
+<!-- DEADLINE COUNTDOWN BANNER -->
+<div id="deadline-banner" style="padding:14px 5%;background:#fff;"></div>
+
 <!-- PROGRESS BAR (shows after 1+ tools used) -->
 <div class="progress-bar-wrap" id="progress-wrap">
   <div class="pb-inner">
@@ -509,7 +512,73 @@ footer{background:var(--navy);padding:40px 5% 24px;margin-top:0;}
 <div class="toast" id="toast"></div>
 
 <script>
-// ─── LEAD DATA PERSISTENCE ───────────────────────────────────────────────────
+// ─── DEADLINE COUNTDOWN ──────────────────────────────────────────────────────
+// Update ONLY this one variable each year — everything else is automatic
+const TAX_DEADLINE     = new Date('2026-04-15T23:59:59');
+const EXTENSION_DEADLINE = new Date('2026-10-15T23:59:59');
+
+function renderDeadlineBanner() {
+  const banner = document.getElementById('deadline-banner');
+  if (!banner) return;
+  const now = new Date();
+
+  let daysLeft, isExtension, isPast, deadline;
+
+  if (now < TAX_DEADLINE) {
+    daysLeft = Math.ceil((TAX_DEADLINE - now) / 864e5);
+    isExtension = false; isPast = false;
+    deadline = 'April 15';
+  } else if (now < EXTENSION_DEADLINE) {
+    daysLeft = Math.ceil((EXTENSION_DEADLINE - now) / 864e5);
+    isExtension = true; isPast = false;
+    deadline = 'October 15';
+  } else {
+    isPast = true;
+  }
+
+  if (isPast) { banner.style.display = 'none'; return; }
+
+  // Color shifts: green > 30d, yellow 10-30d, red < 10d
+  const urgency = daysLeft <= 10 ? '#ef4444' : daysLeft <= 30 ? '#f59e0b' : '#3dba7e';
+  const bg      = daysLeft <= 10 ? 'rgba(239,68,68,.08)' : daysLeft <= 30 ? 'rgba(245,158,11,.08)' : 'rgba(61,186,126,.08)';
+  const border  = daysLeft <= 10 ? 'rgba(239,68,68,.25)' : daysLeft <= 30 ? 'rgba(245,158,11,.25)' : 'rgba(61,186,126,.25)';
+
+  const label = isExtension
+    ? '⚠️ Extension deadline'
+    : daysLeft <= 10 ? '🚨 Deadline almost here'
+    : daysLeft <= 30 ? '⏰ Deadline approaching'
+    : '📅 Tax deadline';
+
+  const subtext = isExtension
+    ? 'The April 15 deadline has passed. You can still file by October 15 with an extension.'
+    : `You have <strong>${daysLeft} day${daysLeft===1?'':'s'}</strong> to file or request a free extension.`;
+
+  banner.innerHTML = `
+    <div style="max-width:1100px;margin:0 auto;background:#fff;border:1.5px solid ${border};border-radius:12px;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="background:${urgency};color:#fff;font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;padding:10px 16px;border-radius:9px;white-space:nowrap;min-width:64px;text-align:center;">${daysLeft}<div style="font-size:.5rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:1px;">DAYS</div></div>
+        <div>
+          <div style="font-size:.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${urgency};margin-bottom:3px;">${label} — ${deadline}</div>
+          <div style="font-size:.85rem;color:#0a1628;line-height:1.5;">${subtext}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0;">
+        ${!isExtension ? `<a href="snapshot.html" style="background:${urgency};color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;border-radius:8px;text-decoration:none;white-space:nowrap;">File Now →</a>` : ''}
+        <a href="signup.html?extension=true" onclick="tagExtension()" style="background:transparent;color:#0a1628;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;padding:9px 18px;border-radius:8px;border:1.5px solid #d1d5db;text-decoration:none;white-space:nowrap;">${isExtension ? 'File My Extension →' : 'Get Extension'}</a>
+      </div>
+    </div>`;
+}
+
+// Tag in localStorage so it merges to Firestore on signup
+function tagExtension() {
+  mergeLeadData({
+    extensionFiled: true,
+    extensionDeadline: '2026-10-15',
+    extensionRequestedAt: Date.now()
+  });
+}
+
+
 // All tools write to this same localStorage key so data accumulates
 // across tools and merges into Firestore on signup.
 const TT_LEAD_KEY = 'tt_lead_data';
@@ -637,6 +706,7 @@ function highlightUsedTools() {
 
 updateProgress();
 highlightUsedTools();
+renderDeadlineBanner();
 </script>
 
 <script src="affiliate-tracker.js"></script>
