@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Free Trader Tax Tools | TraderTax</title>
+<meta name="description" content="Free tax tools built for active traders. Wash sale calculator, tax estimator, TTS qualifier, MTM analyzer, and more. Get your personalized tax snapshot in minutes."/>
+<link rel="canonical" href="https://www.tradertax.net/tools"/>
+<meta property="og:title" content="Free Trader Tax Tools | TraderTax"/>
+<meta property="og:description" content="Calculate your wash sale impact, estimate your tax bill, qualify for trader tax status, and more — all free."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-7RF9PP8BRN"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-7RF9PP8BRN');</script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script>
+firebase.initializeApp({
+  apiKey:"AIzaSyAB3E31uTrCqp5_9Kct451m0GLrkHCQI5c",
+  authDomain:"taxtrader.firebaseapp.com",
+  projectId:"taxtrader",
+  storageBucket:"taxtrader.firebasestorage.app",
+  messagingSenderId:"887085050235",
+  appId:"1:887085050235:web:a7b8c6e6b416e413e975de"
+});
+</script>
+<style>
+:root{
+  --navy:#0a1628;--navy2:#1a2e5a;
+  --green:#3dba7e;--green-dk:#2ea86c;--green-lt:#f0fdf4;
+  --bg:#f7f8fb;--surface:#fff;
+  --border:#e5e8ef;--border2:#d1d5db;
+  --body:#374151;--muted:#6b7280;
+  --sh:0 4px 16px rgba(10,22,40,.08),0 1px 4px rgba(10,22,40,.04);
+  --sh-lg:0 12px 40px rgba(10,22,40,.12),0 4px 12px rgba(10,22,40,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--navy);-webkit-font-smoothing:antialiased;}
+a{color:inherit;text-decoration:none;}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;height:64px;background:rgba(255,255,255,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 5%;}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;}
+.logo-txt{font-family:'Syne',sans-serif;font-weight:800;font-size:1.15rem;letter-spacing:-.4px;}
+.logo-txt .nv{color:var(--navy);}.logo-txt .gr{color:var(--green);}
+.nav-links{display:flex;align-items:center;gap:22px;list-style:none;}
+.nav-links a{font-size:.875rem;font-weight:500;color:var(--body);transition:color .2s;}
+.nav-links a:hover{color:var(--navy);}
+.nav-login{font-weight:600!important;color:var(--navy)!important;border:1.5px solid var(--border2)!important;padding:7px 14px!important;border-radius:8px!important;}
+.nav-login:hover{background:var(--navy)!important;color:#fff!important;border-color:var(--navy)!important;}
+.nav-cta{background:var(--green)!important;color:#fff!important;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem!important;padding:9px 16px!important;border-radius:8px!important;}
+.nav-cta:hover{background:var(--green-dk)!important;}
+.ham{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.ham span{display:block;width:22px;height:2px;background:var(--navy);border-radius:2px;}
+.mob-menu{display:none;position:fixed;top:64px;left:0;right:0;background:#fff;border-bottom:1px solid var(--border);padding:16px 5%;flex-direction:column;gap:4px;z-index:199;}
+.mob-menu.open{display:flex;}
+.mob-menu a{font-size:.95rem;font-weight:500;color:var(--body);padding:.4rem 0;border-bottom:1px solid var(--border);}
+.mob-menu a:last-child{border-bottom:none;text-align:center;margin-top:.5rem;}
+@media(max-width:860px){.nav-links{display:none;}.ham{display:flex;}}
+
+/* HERO */
+.hero{padding:108px 5% 64px;background:var(--navy);position:relative;overflow:hidden;}
+.hero::before{content:'';position:absolute;top:-100px;right:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(61,186,126,.12) 0%,transparent 70%);pointer-events:none;}
+.hero::after{content:'';position:absolute;bottom:-80px;left:10%;width:400px;height:400px;background:radial-gradient(circle,rgba(61,186,126,.07) 0%,transparent 70%);pointer-events:none;}
+.hero-inner{max-width:800px;margin:0 auto;text-align:center;position:relative;z-index:1;}
+.hero-eyebrow{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:24px;height:1px;background:var(--green);opacity:.5;}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2rem,4.5vw,3.2rem);color:#fff;line-height:1.12;margin-bottom:16px;letter-spacing:-.5px;}
+.hero h1 span{color:var(--green);}
+.hero-sub{font-size:.97rem;color:rgba(255,255,255,.6);line-height:1.8;max-width:560px;margin:0 auto 32px;}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px;}
+.btn-g{display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;padding:13px 26px;border-radius:10px;border:none;cursor:pointer;transition:all .2s;}
+.btn-g:hover{background:var(--green-dk);transform:translateY(-1px);box-shadow:0 6px 20px rgba(61,186,126,.3);}
+.btn-outline{display:inline-flex;align-items:center;gap:6px;background:transparent;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;padding:12px 24px;border-radius:10px;border:1.5px solid rgba(255,255,255,.25);cursor:pointer;transition:all .2s;}
+.btn-outline:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.5);}
+
+/* STATS ROW */
+.stats-row{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat-num{font-family:'Syne',sans-serif;font-weight:800;font-size:1.4rem;color:var(--green);}
+.stat-lbl{font-size:.72rem;color:rgba(255,255,255,.4);margin-top:2px;}
+
+/* PROGRESS BAR */
+.progress-bar-wrap{background:var(--surface);border-bottom:2px solid var(--border);padding:14px 5%;position:sticky;top:64px;z-index:100;display:none;}
+.progress-bar-wrap.show{display:block;}
+.pb-inner{max-width:900px;margin:0 auto;display:flex;align-items:center;gap:14px;}
+.pb-label{font-size:.75rem;font-weight:600;color:var(--navy);white-space:nowrap;}
+.pb-track{flex:1;height:6px;background:var(--border);border-radius:99px;overflow:hidden;}
+.pb-fill{height:100%;background:var(--green);border-radius:99px;transition:width .5s ease;width:0%;}
+.pb-count{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:var(--green);white-space:nowrap;}
+.pb-cta{background:var(--navy);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.75rem;padding:6px 14px;border-radius:7px;white-space:nowrap;border:none;cursor:pointer;transition:all .2s;}
+.pb-cta:hover{background:var(--navy2);}
+
+/* MAIN CONTENT */
+main{max-width:1100px;margin:0 auto;padding:64px 5% 80px;}
+
+/* SECTION LABEL */
+.sec-label{display:flex;align-items:center;gap:10px;margin-bottom:24px;margin-top:56px;}
+.sec-label:first-child{margin-top:0;}
+.sec-label-line{flex:1;height:1px;background:var(--border);}
+.sec-label-txt{font-size:.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+
+/* FEATURED TOOL (snapshot) */
+.featured-tool{background:var(--navy);border-radius:20px;padding:36px;display:grid;grid-template-columns:1fr auto;gap:32px;align-items:center;margin-bottom:20px;position:relative;overflow:hidden;}
+.featured-tool::before{content:'';position:absolute;top:-60px;right:-60px;width:280px;height:280px;background:radial-gradient(circle,rgba(61,186,126,.15) 0%,transparent 70%);pointer-events:none;}
+.ft-badge{font-size:.62rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:6px;}
+.ft-badge::before{content:'★';font-size:.7rem;}
+.ft-title{font-family:'Syne',sans-serif;font-weight:800;font-size:1.5rem;color:#fff;margin-bottom:8px;line-height:1.2;}
+.ft-desc{font-size:.88rem;color:rgba(255,255,255,.6);line-height:1.75;margin-bottom:20px;max-width:480px;}
+.ft-tags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.ft-tag{font-size:.68rem;font-weight:600;color:rgba(255,255,255,.5);background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);padding:4px 10px;border-radius:6px;}
+.ft-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.ft-visual{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:20px;min-width:220px;}
+.ft-v-lbl{font-size:.6rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:1px;margin-bottom:12px;}
+.ft-v-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.ft-v-item:last-child{border-bottom:none;}
+.ft-v-key{font-size:.75rem;color:rgba(255,255,255,.5);}
+.ft-v-val{font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;color:#fff;}
+.ft-v-val.g{color:var(--green);}
+.ft-v-val.r{color:#f87171;}
+@media(max-width:760px){.featured-tool{grid-template-columns:1fr;}.ft-visual{display:none;}}
+
+/* TOOL GRID */
+.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+@media(max-width:900px){.tool-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:540px){.tool-grid{grid-template-columns:1fr;}}
+
+/* TOOL CARD */
+.tool-card{background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:24px;transition:all .22s;position:relative;cursor:pointer;display:flex;flex-direction:column;}
+.tool-card:hover{box-shadow:var(--sh);border-color:var(--border2);transform:translateY(-2px);}
+.tool-card.live:hover{border-color:var(--green);}
+.tool-card.coming-soon{opacity:.75;}
+.tool-card.coming-soon:hover{transform:none;box-shadow:none;border-color:var(--border);}
+.tc-status{position:absolute;top:16px;right:16px;font-size:.6rem;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:3px 9px;border-radius:99px;}
+.tc-status.live{background:rgba(61,186,126,.12);color:var(--green);border:1px solid rgba(61,186,126,.25);}
+.tc-status.soon{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+.tc-status.hot{background:rgba(239,68,68,.1);color:#dc2626;border:1px solid rgba(239,68,68,.2);}
+.tc-icon{font-size:1.8rem;margin-bottom:12px;}
+.tc-cat{font-size:.62rem;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.tc-name{font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--navy);margin-bottom:8px;line-height:1.25;padding-right:56px;}
+.tc-desc{font-size:.82rem;color:var(--body);line-height:1.7;margin-bottom:16px;flex:1;}
+.tc-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.tc-tag{font-size:.62rem;font-weight:600;color:var(--navy);background:var(--bg);border:1px solid var(--border);padding:3px 8px;border-radius:5px;}
+.tc-cta{display:flex;align-items:center;justify-content:space-between;}
+.tc-btn{font-family:'Syne',sans-serif;font-weight:700;font-size:.78rem;color:var(--green);display:flex;align-items:center;gap:4px;transition:gap .2s;}
+.tool-card.live:hover .tc-btn{gap:8px;}
+.tc-btn-soon{font-size:.75rem;color:var(--muted);font-weight:500;}
+.tc-users{font-size:.68rem;color:var(--muted);display:flex;align-items:center;gap:4px;}
+
+/* DATA BANNER */
+.data-banner{background:var(--green-lt);border:1.5px solid rgba(61,186,126,.3);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;margin-top:20px;flex-wrap:wrap;}
+.db-icon{font-size:1.4rem;flex-shrink:0;}
+.db-text{}
+.db-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.92rem;color:var(--navy);margin-bottom:3px;}
+.db-sub{font-size:.78rem;color:var(--body);line-height:1.6;}
+.db-sub span{font-weight:600;color:var(--green);}
+
+/* BOTTOM CTA */
+.bottom-cta{background:var(--navy);border-radius:20px;padding:52px 48px;text-align:center;margin-top:64px;position:relative;overflow:hidden;}
+.bottom-cta::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:400px;background:radial-gradient(circle,rgba(61,186,126,.12) 0%,transparent 70%);pointer-events:none;}
+.bc-eyebrow{font-size:.63rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-bottom:12px;}
+.bc-title{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(1.5rem,3vw,2.1rem);color:#fff;margin-bottom:11px;line-height:1.2;position:relative;z-index:1;}
+.bc-title span{color:var(--green);}
+.bc-sub{font-size:.9rem;color:rgba(255,255,255,.55);line-height:1.75;max-width:480px;margin:0 auto 28px;position:relative;z-index:1;}
+.bc-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;position:relative;z-index:1;}
+.bc-note{font-size:.72rem;color:rgba(255,255,255,.3);margin-top:14px;position:relative;z-index:1;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;font-size:.82rem;font-weight:600;padding:11px 20px;border-radius:10px;border-left:3px solid var(--green);box-shadow:var(--sh-lg);z-index:999;transition:transform .3s ease;white-space:nowrap;}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+/* FOOTER */
+footer{background:var(--navy);padding:40px 5% 24px;margin-top:0;}
+.ft-bot{max-width:1100px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;border-top:1px solid rgba(255,255,255,.07);padding-top:20px;}
+.ft-copy{font-size:.72rem;color:rgba(255,255,255,.25);}
+.ft-links{display:flex;gap:16px;}
+.ft-links a{font-size:.72rem;color:rgba(255,255,255,.25);transition:color .2s;}
+.ft-links a:hover{color:rgba(255,255,255,.6);}
+
+/* ANIMATIONS */
+.fade-up{opacity:0;transform:translateY(16px);transition:opacity .5s ease,transform .5s ease;}
+.fade-up.vis{opacity:1;transform:translateY(0);}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <path d="M2 4 L30 4 L30 10 L20 10 L20 28 L12 28 L12 10 L2 10 Z" fill="#3dba7e"/>
+      <line x1="7" y1="29" x2="28" y2="3" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M24 3 L28 3 L28 7" stroke="#ffffff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span class="logo-txt"><span class="nv">Trader</span><span class="gr">Tax</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="services.html">Services</a></li>
+    <li><a href="pricing.html">Pricing</a></li>
+    <li><a href="tools.html" style="color:var(--green);font-weight:600;">🧰 Tools</a></li>
+    <li><a href="blog.html">Blog</a></li>
+    <li><a href="contact.html">Contact</a></li>
+    <li><a href="login.html" class="nav-login">Log In</a></li>
+    <li><a href="signup.html" class="nav-cta">Start Free →</a></li>
+  </ul>
+  <button class="ham" onclick="document.querySelector('.mob-menu').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="mob-menu">
+  <a href="services.html">Services</a>
+  <a href="pricing.html">Pricing</a>
+  <a href="tools.html" style="color:var(--green);font-weight:600;">🧰 Tools</a>
+  <a href="blog.html">Blog</a>
+  <a href="contact.html">Contact</a>
+  <a href="login.html">Log In</a>
+  <a href="signup.html" style="background:var(--green);color:#fff;font-family:'Syne',sans-serif;font-weight:700;padding:10px;border-radius:8px;text-align:center;border-bottom:none;">Start Free →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Free Trader Tax Tools</div>
+    <h1>Know Exactly Where You Stand <span>Before You File</span></h1>
+    <p class="hero-sub">Use any tool below — no signup required. Your results are saved automatically so nothing is lost when you're ready to get matched with a CPA.</p>
+    <div class="hero-btns">
+      <a href="snapshot.html" class="btn-g">Start Free — Get My Snapshot →</a>
+      <a href="pricing.html" class="btn-outline">Secure Your Filing Spot</a>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-num">8</div><div class="stat-lbl">Free tools</div></div>
+      <div class="stat"><div class="stat-num">2 min</div><div class="stat-lbl">Average time</div></div>
+      <div class="stat"><div class="stat-num">$0</div><div class="stat-lbl">No signup needed</div></div>
+      <div class="stat"><div class="stat-num">100%</div><div class="stat-lbl">Trader-specific</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRESS BAR (shows after 1+ tools used) -->
+<div class="progress-bar-wrap" id="progress-wrap">
+  <div class="pb-inner">
+    <span class="pb-label">Your progress</span>
+    <div class="pb-track"><div class="pb-fill" id="pb-fill"></div></div>
+    <span class="pb-count" id="pb-count">0 of 8 tools used</span>
+    <button class="pb-cta" onclick="window.location.href='signup.html?source=tools'">Save My Results →</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- FEATURED: TAX SNAPSHOT -->
+  <div class="sec-label fade-up">
+    <span class="sec-label-txt">Start here — most popular</span>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="featured-tool fade-up">
+    <div>
+      <div class="ft-badge">Most Popular Tool</div>
+      <div class="ft-title">Tax Snapshot<br/>— Your Complete Picture</div>
+      <p class="ft-desc">Answer 8 questions about your trading. Get a personalized summary of your tax exposure, missed deductions, likely forms needed, and your biggest risk areas — all in under 2 minutes.</p>
+      <div class="ft-tags">
+        <span class="ft-tag">All trader types</span>
+        <span class="ft-tag">Prop firm</span>
+        <span class="ft-tag">Futures</span>
+        <span class="ft-tag">Crypto</span>
+        <span class="ft-tag">Options</span>
+        <span class="ft-tag">W-2 combo</span>
+      </div>
+      <div class="ft-btns">
+        <a href="snapshot.html" class="btn-g" onclick="trackToolUse('snapshot')">Take My Snapshot →</a>
+        <a href="signup.html" class="btn-outline" style="font-size:.82rem;">Create Free Account</a>
+      </div>
+    </div>
+    <div class="ft-visual">
+      <div class="ft-v-lbl">Sample Results</div>
+      <div class="ft-v-item"><span class="ft-v-key">Tax Exposure</span><span class="ft-v-val r">$12,400</span></div>
+      <div class="ft-v-item"><span class="ft-v-key">Missed Deductions</span><span class="ft-v-val r">7 found</span></div>
+      <div class="ft-v-item"><span class="ft-v-key">Recommended Forms</span><span class="ft-v-val">4 forms</span></div>
+      <div class="ft-v-item"><span class="ft-v-key">MTM Eligible?</span><span class="ft-v-val g">Likely Yes</span></div>
+      <div class="ft-v-item"><span class="ft-v-key">Potential Savings</span><span class="ft-v-val g">$4,800+</span></div>
+    </div>
+  </div>
+
+  <!-- CORE CALCULATORS -->
+  <div class="sec-label fade-up" style="margin-top:44px;">
+    <span class="sec-label-txt">Core calculators</span>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <!-- Tax Estimator -->
+    <div class="tool-card live fade-up" onclick="goTool('calculator.html','estimator')">
+      <span class="tc-status live">Live</span>
+      <div class="tc-icon">🧮</div>
+      <div class="tc-cat">Calculator</div>
+      <div class="tc-name">Trader Tax Estimator</div>
+      <p class="tc-desc">Enter your income, state, and trading type. Get a federal + self-employment + state tax breakdown in 60 seconds. W-2 income included.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">All traders</span>
+        <span class="tc-tag">W-2 combo</span>
+        <span class="tc-tag">State tax</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Use Calculator →</span>
+        <span class="tc-users">⚡ Most used</span>
+      </div>
+    </div>
+
+    <!-- Wash Sale Calculator -->
+    <div class="tool-card live fade-up" onclick="goTool('wash-sale-calculator.html','wash-sale')">
+      <span class="tc-status hot">🔥 High Impact</span>
+      <div class="tc-icon">🚫</div>
+      <div class="tc-cat">Wash Sale</div>
+      <div class="tc-name">Wash Sale Impact Calculator</div>
+      <p class="tc-desc">See exactly how much wash sales are costing you. Enter your disallowed losses and find out the real tax hit — and how to avoid it going forward.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">Stock traders</span>
+        <span class="tc-tag">Options</span>
+        <span class="tc-tag">High impact</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Calculate Impact →</span>
+      </div>
+    </div>
+
+    <!-- Capital Gains -->
+    <div class="tool-card live fade-up" onclick="goTool('capital-gains-calculator.html','capital-gains')">
+      <span class="tc-status live">Live</span>
+      <div class="tc-icon">📈</div>
+      <div class="tc-cat">Calculator</div>
+      <div class="tc-name">Capital Gains Estimator</div>
+      <p class="tc-desc">Short-term vs long-term gains, net investment income tax, and how your trading gains stack on top of other income. Built for active traders.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">Stocks</span>
+        <span class="tc-tag">Options</span>
+        <span class="tc-tag">Crypto</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Estimate Gains →</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- TRADER-SPECIFIC TOOLS -->
+  <div class="sec-label fade-up" style="margin-top:44px;">
+    <span class="sec-label-txt">Trader-specific qualifiers</span>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <!-- TTS Qualifier -->
+    <div class="tool-card live fade-up" onclick="goTool('tts-qualifier.html','tts')">
+      <span class="tc-status live">Live</span>
+      <div class="tc-icon">🏆</div>
+      <div class="tc-cat">Qualifier</div>
+      <div class="tc-name">Trader Tax Status Qualifier</div>
+      <p class="tc-desc">Find out if you qualify for Trader Tax Status (TTS) — one of the most powerful tax designations available to active traders. Unlocks business expense deductions.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">Day traders</span>
+        <span class="tc-tag">Active traders</span>
+        <span class="tc-tag">High value</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Check Qualification →</span>
+      </div>
+    </div>
+
+    <!-- MTM Estimator -->
+    <div class="tool-card live fade-up" onclick="goTool('mtm-estimator.html','mtm')">
+      <span class="tc-status hot">💰 Big Savings</span>
+      <div class="tc-icon">📊</div>
+      <div class="tc-cat">Strategy</div>
+      <div class="tc-name">Mark-to-Market Savings Estimator</div>
+      <p class="tc-desc">See the tax difference with vs without the MTM election (IRC §475). This single election can save some traders tens of thousands per year.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">Active traders</span>
+        <span class="tc-tag">High income</span>
+        <span class="tc-tag">IRC §475</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Estimate Savings →</span>
+      </div>
+    </div>
+
+    <!-- Are You Overpaying Quiz -->
+    <div class="tool-card live fade-up" onclick="goTool('overpaying-quiz.html','overpaying')">
+      <span class="tc-status hot">🔥 Popular</span>
+      <div class="tc-icon">💸</div>
+      <div class="tc-cat">Quiz</div>
+      <div class="tc-name">"Are You Overpaying?" Quiz</div>
+      <p class="tc-desc">7 quick questions. Find out if you're overpaying the IRS and get an estimated dollar amount you could be saving with the right tax setup.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">All traders</span>
+        <span class="tc-tag">Quick — 2 min</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Take the Quiz →</span>
+        <span class="tc-users">⚡ New</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DEDUCTION TOOLS -->
+  <div class="sec-label fade-up" style="margin-top:44px;">
+    <span class="sec-label-txt">Find money you're leaving on the table</span>
+    <div class="sec-label-line"></div>
+  </div>
+
+  <div class="tool-grid">
+
+    <!-- Missed Deductions -->
+    <div class="tool-card live fade-up" onclick="goTool('missed-deductions.html','deductions')">
+      <span class="tc-status live">Live</span>
+      <div class="tc-icon">🔍</div>
+      <div class="tc-cat">Deductions</div>
+      <div class="tc-name">Missed Deductions Finder</div>
+      <p class="tc-desc">A checklist-style tool covering home office, software, education, equipment, data feeds, and more. Most traders miss 5–10 deductions every year.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">All traders</span>
+        <span class="tc-tag">Business expenses</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">Find My Deductions →</span>
+      </div>
+    </div>
+
+    <!-- Tax Savings Estimator -->
+    <div class="tool-card live fade-up" onclick="goTool('tax-savings-estimator.html','savings')">
+      <span class="tc-status live">Live</span>
+      <div class="tc-icon">💰</div>
+      <div class="tc-cat">Master Tool</div>
+      <div class="tc-name">Tax Savings Estimator</div>
+      <p class="tc-desc">The big picture tool. Combines income, trading volume, entity structure, and deductions to show your total potential savings with proper setup.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">All traders</span>
+        <span class="tc-tag">Full picture</span>
+        <span class="tc-tag">Entity analysis</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn">See My Savings →</span>
+      </div>
+    </div>
+
+    <!-- CPA Readiness Score -->
+    <div class="tool-card live fade-up" onclick="goTool('cpa-readiness.html','readiness')">
+      <span class="tc-status soon">Coming Soon</span>
+      <div class="tc-icon">📋</div>
+      <div class="tc-cat">Readiness</div>
+      <div class="tc-name">CPA Readiness Score</div>
+      <p class="tc-desc">Find out how ready you are to hand off to a CPA. Get scored and see exactly what's missing from your document package before you start.</p>
+      <div class="tc-tags">
+        <span class="tc-tag">Pre-filing</span>
+        <span class="tc-tag">Document check</span>
+      </div>
+      <div class="tc-cta">
+        <span class="tc-btn-soon">Notify me when live</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- DATA PERSISTENCE BANNER -->
+  <div class="data-banner fade-up" id="data-banner" style="display:none;">
+    <div class="db-icon">💾</div>
+    <div class="db-text">
+      <div class="db-title">Your results are being saved automatically</div>
+      <div class="db-sub">You've used <span id="tools-used-count">1</span> tool so far. Everything you've entered is stored locally and will merge into your profile when you create a free account — no data lost.</div>
+    </div>
+    <a href="signup.html?source=tools" class="btn-g" style="flex-shrink:0;white-space:nowrap;">Save My Profile →</a>
+  </div>
+
+  <!-- BOTTOM CTA -->
+  <div class="bottom-cta fade-up">
+    <div class="bc-eyebrow">Ready to file?</div>
+    <div class="bc-title">Your results are worth <span>real money.</span><br/>Let's put them to work.</div>
+    <p class="bc-sub">Every tool you've used builds your tax profile. A TraderTax CPA will use it to file your return, find every deduction, and save you the most possible.</p>
+    <div class="bc-btns">
+      <a href="signup.html?source=tools-cta" class="btn-g">Start Free → Create Account</a>
+      <a href="pricing.html" class="btn-outline">Secure Your Filing Spot</a>
+    </div>
+    <div class="bc-note">No credit card needed to start. Used tools? Your data carries over automatically.</div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="ft-bot">
+    <span class="ft-copy">© 2025 TraderTax. All rights reserved. TraderTax is a technology platform, not a CPA firm.</span>
+    <div class="ft-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="contact.html">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── LEAD DATA PERSISTENCE ───────────────────────────────────────────────────
+// All tools write to this same localStorage key so data accumulates
+// across tools and merges into Firestore on signup.
+const TT_LEAD_KEY = 'tt_lead_data';
+
+function getLeadData() {
+  try { return JSON.parse(localStorage.getItem(TT_LEAD_KEY)) || {}; } 
+  catch(e) { return {}; }
+}
+
+function mergeLeadData(newData) {
+  const existing = getLeadData();
+  const merged = { ...existing, ...newData, lastUpdated: Date.now() };
+  localStorage.setItem(TT_LEAD_KEY, JSON.stringify(merged));
+  return merged;
+}
+
+// Track which tools have been used
+function trackToolUse(toolId) {
+  const data = getLeadData();
+  const toolsUsed = data.toolsUsed || [];
+  if (!toolsUsed.includes(toolId)) {
+    toolsUsed.push(toolId);
+    mergeLeadData({ toolsUsed, lastTool: toolId, source: 'tools-page' });
+  }
+  updateProgress();
+}
+
+function goTool(url, toolId) {
+  // Mark coming soon tools
+  if (url.includes('cpa-readiness')) {
+    showToast('CPA Readiness Score coming soon — get notified at signup!');
+    return;
+  }
+  trackToolUse(toolId);
+  window.location.href = url;
+}
+
+// ─── PROGRESS BAR ────────────────────────────────────────────────────────────
+const TOTAL_LIVE_TOOLS = 8;
+
+function updateProgress() {
+  const data = getLeadData();
+  const toolsUsed = data.toolsUsed || [];
+  const count = toolsUsed.length;
+
+  if (count > 0) {
+    // Show progress bar
+    document.getElementById('progress-wrap').classList.add('show');
+    document.getElementById('pb-fill').style.width = Math.min((count / TOTAL_LIVE_TOOLS) * 100, 100) + '%';
+    document.getElementById('pb-count').textContent = count + ' of ' + TOTAL_LIVE_TOOLS + ' tools used';
+
+    // Show data banner
+    const banner = document.getElementById('data-banner');
+    banner.style.display = 'flex';
+    document.getElementById('tools-used-count').textContent = count;
+  }
+}
+
+// ─── FIREBASE: merge on signup ───────────────────────────────────────────────
+// Called from signup.html after account creation — sweeps localStorage into Firestore
+window.mergeToolDataToProfile = async function(uid, email) {
+  const data = getLeadData();
+  if (!Object.keys(data).length) return;
+  try {
+    const db = firebase.firestore();
+    // Write to user profile
+    await db.collection('users').doc(uid).set({ toolData: data, email }, { merge: true });
+    // Write to leads collection for admin visibility
+    await db.collection('leads').add({
+      uid, email,
+      ...data,
+      source: 'tools-page',
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // Clear localStorage after successful merge
+    localStorage.removeItem(TT_LEAD_KEY);
+    console.log('Tool data merged to profile successfully');
+  } catch(e) {
+    console.error('Tool data merge failed:', e);
+    // Keep localStorage data — don't lose it on error
+  }
+};
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+// ─── ANIMATIONS ───────────────────────────────────────────────────────────────
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('vis'), i * 60);
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+// Check URL params — if returning from a tool, track it
+const urlParams = new URLSearchParams(window.location.search);
+const completedTool = urlParams.get('completed');
+if (completedTool) {
+  trackToolUse(completedTool);
+  showToast('✓ Results saved! Use another tool or save your profile.');
+}
+
+// Highlight cards for tools already used
+function highlightUsedTools() {
+  const data = getLeadData();
+  const toolsUsed = data.toolsUsed || [];
+  const toolMap = {
+    'snapshot': 0, 'estimator': 0, 'wash-sale': 1,
+    'capital-gains': 2, 'tts': 3, 'mtm': 4,
+    'overpaying': 5, 'deductions': 6, 'savings': 7
+  };
+  toolsUsed.forEach(tool => {
+    // Could add a "used" badge to cards here in future
+  });
+}
+
+updateProgress();
+highlightUsedTools();
+</script>
+
+<script src="affiliate-tracker.js"></script>
+</body>
+</html>
